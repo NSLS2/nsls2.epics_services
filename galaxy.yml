@@ -1,0 +1,19 @@
+---
+
+namespace: nsls2
+name: epics_services
+version: 1.0.1
+readme: README.md
+authors:
+  - Kunal Shroff <shroffk@bnl.gov>
+description: Collection of ansible roles to perform deployments of epics middle layer services
+license:
+  - BSD-3-Clause
+license_file: "LICENSE"
+tags: [infrastructure]
+dependencies: {}
+repository: http://github.com/nsls2/nsls2.epics_services
+documentation: http://github.com/nsls2/nsls2.epics_services
+homepage: http://www.bnl.gov/nsls2
+issues: https://github.com/NSLS2/nsls2.epics_services/issues
+build_ignore: []
