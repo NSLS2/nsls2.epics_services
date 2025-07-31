@@ -1,0 +1,32 @@
+---
+
+collections:
+  - name: community.general
+    source: https://github.com/ansible-collections/community.general.git
+    type: git
+    version: 8.1.0
+  - name: ansible.posix
+    source: https://github.com/ansible-collections/ansible.posix.git
+    type: git
+    version: 1.5.1
+  - name: containers.podman
+    source: https://github.com/containers/ansible-podman-collections.git
+    type: git
+    version: 1.10.1
+  - name: theforeman.foreman
+    source: https://github.com/theforeman/foreman-ansible-modules.git,v3.8.0
+    type: git
+  - name: community.vmware
+    source: https://github.com/ansible-collections/community.vmware.git
+    type: git
+    version: 3.3.0
+  - name: vmware.vmware_rest
+    source: https://github.com/ansible-collections/vmware.vmware_rest.git
+    type: git
+  - name: community.mysql
+    source: https://github.com/ansible-collections/community.mysql.git
+    type: git
+  - name: community.mongodb
+    source: https://github.com/ansible-collections/community.mongodb.git
+    type: git
+    version: 1.6.1
