@@ -1,0 +1,24 @@
+[Unit]
+Description={{beamline_name}} Archiver Appliance Server
+After=syslog.target network.target nsls2-data-{{beamline_name}}.mount
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=forking
+
+User={{ epics_services_account }}
+Group={{ epics_services_account }}
+
+Restart=on-failure
+RestartSec=5s
+
+Environment=JAVA_HOME="{{ aa_java_home }}"
+
+ExecStart={{ aa_deploy_location}}/{{ beamline_name }}_startup.sh start
+ExecStop={{ aa_deploy_location }}/{{ beamline_name}}_startup.sh stop
+TimeoutSec=180
+
+[Install]
+WantedBy=multi-user.target

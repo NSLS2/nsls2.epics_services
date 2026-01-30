@@ -1,0 +1,96 @@
+---
+# defaults file for epics_tools_services_aa
+# Configured for cluster mode with SSL enabled
+
+beamline_name: tst
+beamline_id: "31"
+
+epics_services_account: "epics-services-{{ beamline_name }}"
+
+# JDK and Tomcat configuration (using system RPM installation)
+default_jdk_version: "17"
+aa_tomcat_home: "/usr/share/tomcat"
+aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-native RPM
+
+aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
+aa_build_loc: /tmp/aa_{{ beamline_name }}_build
+aa_version: 2.0.8
+
+# Installation and deployment locations
+aa_install_location: "/opt/epics-tools/services/{{ beamline_name }}/aa/install"
+aa_deploy_location: "/opt/epics-tools/services/{{ beamline_name }}/aa/deploy"
+
+# Archiver Appliance MySQL info (each node has its own database)
+aa_mysql_server: "localhost"
+aa_mysql_database: "{{ beamline_name }}_archappl"
+aa_mysql_user: "{{ beamline_name }}_archappl"
+aa_mysql_password: "{{ beamline_name }}_archappl"
+
+# Archiver Identity - MUST be unique per node (appliance0, appliance1, appliance2)
+aa_identity: appliance0
+
+# Cluster communication port (same on all nodes)
+cluster_inetport: "1{{ beamline_id }}70"
+
+# SSL Ports for each component
+aa_ssl_port_mgmt: "1{{ beamline_id }}75"
+aa_ssl_port_engine: "1{{ beamline_id }}76"
+aa_ssl_port_etl: "1{{ beamline_id }}77"
+aa_ssl_port_retrieval: "1{{ beamline_id }}78"
+
+mgmt_port: "{{ aa_ssl_port_mgmt }}"
+engine_port: "{{ aa_ssl_port_engine }}"
+etl_port: "{{ aa_ssl_port_etl }}"
+data_retrieval_port: "{{ aa_ssl_port_retrieval }}"
+
+# SSL Certificate paths (from acme_certificates role)
+aa_ssl_cert_file: "/etc/nsls2/certs/server.crt"
+aa_ssl_key_file: "/etc/nsls2/certs/server.key"
+aa_ssl_chain_file: "/etc/nsls2/certs/server_chain.pem"
+
+# Trusted reverse proxies for RemoteIpValve (X-Forwarded-* headers)
+aa_trusted_proxies:
+  - "0:0:0:0:0:0:0:1"    # IPv6 localhost
+  - "127.0.0.1"          # IPv4 localhost
+  - "198.125.209.51"     # Proxy IPs
+  - "198.125.209.52"
+  - "198.125.209.54"
+  - "198.125.209.55"
+
+# Archiver channel access options (should be 10.69.59.255 for testing cluster setup)
+aa_epics_ca_addr_list: "10.69.59.255"
+
+# Archiver Java Options
+# java_home_rpm is set by dependencies.yml task
+aa_java_home: "{{ java_home_rpm | default('/usr/lib/jvm/java-' ~ default_jdk_version ~ '-openjdk') }}"
+aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+aa_java_opts_mgmt: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+
+# AA Data Storage Locations 
+# aa_sts: "/dev/shm/archappl/{{ beamline_name }}/sts/ArchiverStore"
+# aa_mts: "/nsls2/data/{{ beamline_name }}/mts/ArchiverStore"
+# aa_lts: "/nsls2/data/{{ beamline_name }}/lts/ArchiverStore"
+
+# Archiver Data Locations (testing on local disk)
+aa_sts: "{{ aa_deploy_location }}/data/sts/ArchiverStore"
+aa_mts: "{{ aa_deploy_location }}/data/mts/ArchiverStore"
+aa_lts: "{{ aa_deploy_location }}/data/lts/ArchiverStore"
+
+# Archiver Log Locations
+aa_logs_base_dir: "/var/log/archiver-appliance"
+aa_configure_custom_logs: true
+
+# Cluster appliances configuration
+# This list MUST be identical on all nodes in the cluster
+aa_cluster_appliances:
+  - identity: appliance0
+    hostname: arcapp1-dev.nsls2.bnl.gov
+    cluster_inetport: "{{ cluster_inetport }}"
+  - identity: appliance1
+    hostname: arcapp2-dev.nsls2.bnl.gov
+    cluster_inetport: "{{ cluster_inetport }}"
+  - identity: appliance2
+    hostname: arcapp3-dev.nsls2.bnl.gov
+    cluster_inetport: "{{ cluster_inetport }}"

@@ -1,0 +1,18 @@
+---
+# defaults file for epics_tools_services_phoebus_web_runtime
+beamline_name: "tst"
+beamline_id: "31"
+
+epics_services_account: csstudio
+
+java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
+
+epics_ca_addr_list: localhost
+epics_ca_max_array_bytes: 1000000
+
+tomcat_dest: /opt/epics-tools/services/tomcat
+tomcat_service_name: tomcat
+
+pvws_version: nsls2_deploy
+dbwr_version: nsls2_deploy
