@@ -1,0 +1,4 @@
+---
+- hosts: all
+  roles:
+    - epics_tools_libs
