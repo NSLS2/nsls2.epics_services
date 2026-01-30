@@ -1,0 +1,83 @@
+---
+- name: Ensure correct ownership and permissions for directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ cs_studio_phoebus_owner }}"
+    group: "{{ cs_studio_phoebus_owner }}"
+    mode: "u=rwX,g=rX,o=rX"
+    state: directory
+    recurse: "{{ item.recurse | default(false) }}"
+  loop:
+    - { path: "/opt/css", recurse: false }
+    - { path: "/opt/css/nsls2-phoebus", recurse: true }
+
+# tasks file for cs_studio_phoebus
+- name: Clone and/or update the phoebus repo
+  ansible.builtin.git:
+    repo: 'https://github.com/ControlSystemStudio/phoebus.git'
+    dest: /opt/css/lib/phoebus
+    version: "{{ cs_studio_phoebus_version }}"
+    force: true
+    update: true
+    single_branch: false
+    depth: 0
+
+- name: Clone and/or update the nsls2 phoebus repo
+  become: true
+  become_user: "{{ cs_studio_phoebus_owner }}"
+  ansible.builtin.git:
+    repo: 'https://github.com/NSLS2/nsls2-phoebus.git'
+    dest: /opt/css/nsls2-phoebus
+    version: "{{ cs_studio_phoebus_nsls2_version }}"
+    force: true
+    update: true
+    single_branch: false
+    depth: 0
+
+# Override the default settings.xml maven file if `cs_studio_phoebus_override_mvn_settings` is set.
+- name: Override the default maven settings.xml
+  ansible.builtin.template:
+    src: settings.xml.j2
+    dest: /opt/css/nsls2-phoebus/settings.xml
+    owner: "{{ cs_studio_phoebus_owner }}"
+    group: "{{ cs_studio_phoebus_owner }}"
+    mode: "u=rw,g=r,o=r"
+  when: cs_studio_phoebus_override_mvn_settings
+
+- name: Build the documentation and help
+  ansible.builtin.shell: >-
+    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+    mvn clean verify --settings=/opt/css/nsls2-phoebus/settings.xml -P sphinx -N
+  args:
+    chdir: /opt/css/lib/phoebus/
+  changed_when: true
+
+- name: Build the common phoebus binaries
+  ansible.builtin.shell: >-
+    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+    mvn clean install --settings=/opt/css/nsls2-phoebus/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true
+  args:
+    chdir: /opt/css/lib/phoebus/
+  changed_when: true
+
+- name: Build NSLS-II Phoebus products
+  ansible.builtin.shell: >-
+    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+    mvn clean install --settings=/opt/css/nsls2-phoebus/settings.xml -DskipTests=true -Ddocs=/opt/css/lib/phoebus/docs
+  args:
+    chdir: /opt/css/nsls2-phoebus/products
+  changed_when: true
+
+- name: Create run-phoebus
+  ansible.builtin.template:
+    src: run-phoebus.sh.j2
+    dest: /usr/local/bin/run-phoebus
+    owner: "{{ cs_studio_phoebus_owner }}"
+    group: "{{ cs_studio_phoebus_owner }}"
+    mode: "u=rwx,g=rx,o=rx"

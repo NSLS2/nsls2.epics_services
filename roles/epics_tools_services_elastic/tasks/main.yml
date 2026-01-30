@@ -1,0 +1,47 @@
+---
+# tasks file for epics_tools_services_elastic
+
+- name: ensure servicecs directory exists
+  file:
+    path: /opt/epics-tools/services/{{ beamline_name }}/elastic
+    state: directory
+    owner:  "{{ epics_services_account }}"
+    group:  "{{ epics_services_account }}"
+
+- name: install elastic search
+  ansible.builtin.unarchive:
+    creates: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3
+    src: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.2.3-linux-x86_64.tar.gz
+    dest: /opt/epics-tools/services/{{ beamline_name }}/elastic/
+    remote_src: yes
+    owner:  "{{ epics_services_account }}"
+    group:  "{{ epics_services_account }}"
+
+- name: install the elastic configuration
+  become: true
+  template:
+    src: elasticsearch.yml.j2
+    dest: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3/config/elasticsearch.yml
+    force: true
+    mode: 0755
+    owner:  "{{ epics_services_account }}"
+    group:  "{{ epics_services_account }}"
+
+- name: install the systemd startup scripts
+  become: true
+  template:
+    src: elastic.service.j2
+    dest: /etc/systemd/system/{{ beamline_name }}_elastic.service
+    force: true
+    mode: 0755
+    owner:  "{{ epics_services_account }}"
+    group:  "{{ epics_services_account }}"
+    
+- name: build nsls2-phoebus
+  become: true
+  command: "systemctl daemon-reload"
+  
+- name: build nsls2-phoebus
+  become: true
+  command: "systemctl restart {{ beamline_name }}_elastic"
+  
