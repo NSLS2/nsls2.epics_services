@@ -16,7 +16,7 @@
 
 - name: Clone and/or update the cs-studio preferences repo
   ansible.builtin.git:
-    repo: 'https://code.nsls2.bnl.gov/cs-studio-nsls2/preferences.git'
+    repo: 'https://github.com/NSLS2/cs-studio-preferences.git'
     dest: "{{ cs_studio_preferences_config.basedir }}"
     version: "master"
     force: true

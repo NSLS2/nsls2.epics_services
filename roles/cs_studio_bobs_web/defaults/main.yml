@@ -1,7 +1,7 @@
 ---
 
 cs_studio_bobs:
-  base_repo: https://code.nsls2.bnl.gov/cs-studio-nsls2
+  base_repo: https://github.com/NSLS2
   basedir: /opt/css/bobs
   version:
     - production
