@@ -2,12 +2,12 @@
 
 - name: Check for repo dir
   ansible.builtin.stat:
-    path: "{{ cs_studio_opis_config.basedir + '/' + _repo.1 + '/' + _repo.0 }}"
+    path: "{{ cs_studio_bobs.basedir + '/production/' + _repo.0 }}"
   register: _stat
 
 - name: Recursively change permissions
   ansible.builtin.file:
-    dest: "{{ cs_studio_opis_config.basedir + '/' + _repo.1 + '/' + _repo.0 }}"
+    dest: "{{ cs_studio_bobs.basedir + '/production/' + _repo.0 }}"
     owner: root
     group: root
     mode: "u=rwX,g=rX,o=rX"
@@ -16,7 +16,7 @@
 
 - name: Ensure proxy is unset
   community.general.git_config:
-    repo: "{{ cs_studio_opis_config.basedir + '/' + _repo.1 + '/' + _repo.0 }}"
+    repo: "{{ cs_studio_bobs.basedir + '/production/' + _repo.0 }}"
     name: "{{ item }}.proxy"
     state: absent
     scope: local
@@ -26,9 +26,9 @@
     - https
   failed_when: false
 
-- name: Clone opi repo
+- name: Clone bob repo
   ansible.builtin.git:
-    repo: "{{ cs_studio_opis_config.base_repo + '/' + _repo.0 + '.git' }}"
-    dest: "{{ cs_studio_opis_config.basedir + '/' + _repo.1 + '/' + _repo.0 }}"
+    repo: "{{ cs_studio_bobs.base_repo + '/' + _repo.0 + '.git' }}"
+    dest: "{{ cs_studio_bobs.basedir + '/production/' + _repo.0 }}"
     version: "{{ _repo.1 }}"
     force: true

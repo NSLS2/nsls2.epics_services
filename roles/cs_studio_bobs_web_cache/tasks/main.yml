@@ -1,6 +1,6 @@
 ---
-- name: flush the dbwr cache
-  uri:
+- name: Flush the dbwr cache
+  ansible.builtin.uri:
     url: "{{ item }}/cache"
     method: DELETE
   loop: "{{ phoebus_dbwr_urls }}"

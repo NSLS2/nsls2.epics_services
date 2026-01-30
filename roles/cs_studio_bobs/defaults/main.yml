@@ -1,9 +1,10 @@
 ---
 
-cs_studio_opis:
+cs_studio_bobs_config:
   base_repo: https://code.nsls2.bnl.gov/cs-studio-nsls2
-  basedir: /opt/css/opi
+  basedir: /opt/css/bobs
   version:
     - production
   repos:
-    - "cs-studio-web"
+    - "cs-studio-xf"
+    - "cs-studio-accl"

@@ -8,11 +8,11 @@
     mode: '0755'
     state: directory
   loop:
-    - "{{ cs_studio_opis_config.basedir | dirname }}"
-    - "{{ cs_studio_opis_config.basedir }}"
+    - "{{ cs_studio_bobs_config.basedir | dirname }}"
+    - "{{ cs_studio_bobs_config.basedir }}"
 
 - name: Install all cs-studio-repos
-  ansible.builtin.include_tasks: opis.yml
-  loop: "{{ cs_studio_opis_config.repos | product(cs_studio_opis_config.version) | list }}"
+  ansible.builtin.include_tasks: bobs.yml
+  loop: "{{ cs_studio_bobs_config.repos | product(cs_studio_bobs_config.version) | list }}"
   loop_control:
     loop_var: _repo
