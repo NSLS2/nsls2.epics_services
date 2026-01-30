@@ -1,0 +1,24 @@
+---
+# defaults file for epics_tools_services_elastic
+
+beamline_name: tst
+beamline_id: "31"
+
+epics_services_account: csstudio
+
+mongod_port: 2{{ beamline_id }}17
+mongod_user: "mongod"
+mongod_group: "mongod"
+mongod_service: "mongod"
+mongod_name: "{{ beamline_name }}_mongod"
+bind_ip: 0.0.0.0
+bind_ip_all: false
+repl_set_name: rs0
+mongod_package: "mongodb-org-server"
+replicaset: false
+
+mongod_home: "/opt/epics-tools/services/{{ beamline_name }}/mongodb"
+mongod_data_path: "{{ mongod_home }}/data"
+
+mongod_config_template: "mongod.conf.j2"
+mongod_systemd_template: "mongod.service.j2"

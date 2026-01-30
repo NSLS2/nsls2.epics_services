@@ -1,0 +1,39 @@
+# File /etc/systemd/system/{{ beamline_name }}-kafka.service
+#
+# Start/status/stop
+#   sudo systemctl start {{ beamline_name }}-kafka.service
+#   sudo systemctl status {{ beamline_name }}-kafka.service
+#   sudo systemctl stop {{ beamline_name }}-kafka.service
+#
+# Start when computer boots:
+#   sudo systemctl enable {{ beamline_name }}-kafka.service
+#
+# When running, it should listen on localhost:{{ kafka_port }}
+#   netstat -an | fgrep {{ kafka_port }}
+
+
+[Unit]
+Description={{ beamline_name }} Apache Kafka server (broker)
+Documentation=http://kafka.apache.org/documentation.html
+Requires=network.target remote-fs.target
+After=network.target remote-fs.target {{ beamline_name }}-zookeeper.service
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User={{ epics_services_account }}
+Group={{ epics_services_account }}
+
+Restart=on-failure
+RestartSec=5s
+
+Environment=JAVA_HOME=/opt/epics-tools/lib/jvm/jdk-11
+Environment=PATH=/opt/epics-tools/lib/jvm/jdk-11/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+ExecStart=/opt/epics-tools/services/{{ beamline_name }}/kafka/bin/kafka-server-start.sh /opt/epics-tools/services/{{ beamline_name }}/kafka/config/server.properties
+ExecStop=/opt/epics-tools/services/{{ beamline_name }}/kafka/bin/kafka-server-stop.sh
+
+[Install]
+WantedBy=multi-user.target
