@@ -1,0 +1,50 @@
+---
+# tasks file for epics_tools_libs
+
+- name: Ensure jvm directory exists
+  ansible.builtin.file:
+    path: /opt/epics-tools/lib/jvm
+    state: directory
+    owner: "{{ epics_tools_libs_epics_services_account }}"
+    group: "{{ epics_tools_libs_epics_services_account }}"
+    mode: "u=rwX,g=rwX,o=rX"
+
+- name: Install JDKs
+  block:
+    - name: Ensure JDK directories exist
+      ansible.builtin.file:
+        path: "/opt/epics-tools/lib/jvm/jdk-{{ item.version }}"
+        state: directory
+        owner: "{{ epics_tools_libs_epics_services_account }}"
+        group: "{{ epics_tools_libs_epics_services_account }}"
+        mode: "u=rwX,g=rwX,o=rX"
+      loop: "{{ jdk_versions }}"
+
+    - name: Install JDKs
+      ansible.builtin.unarchive:
+        src: "{{ item.url }}"
+        dest: "/opt/epics-tools/lib/jvm/jdk-{{ item.version }}"
+        remote_src: true
+        owner: "{{ epics_tools_libs_epics_services_account }}"
+        group: "{{ epics_tools_libs_epics_services_account }}"
+        extra_opts:
+          - --strip-components=1
+      loop: "{{ jdk_versions }}"
+
+- name: Ensure Maven directory exists
+  ansible.builtin.file:
+    path: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+    state: directory
+    owner: "{{ epics_tools_libs_epics_services_account }}"
+    group: "{{ epics_tools_libs_epics_services_account }}"
+    mode: "u=rwX,g=rwX,o=rX"
+
+- name: Install Maven
+  ansible.builtin.unarchive:
+    src: "{{ maven_url }}"
+    dest: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+    remote_src: true
+    owner: "{{ epics_tools_libs_epics_services_account }}"
+    group: "{{ epics_tools_libs_epics_services_account }}"
+    extra_opts:
+      - --strip-components=1

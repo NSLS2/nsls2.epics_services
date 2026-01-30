@@ -1,0 +1,5 @@
+# .ansible-lint
+skip_list:
+  - var-naming
+exclude_paths:
+  - .github/workflows/super-linter.yml
