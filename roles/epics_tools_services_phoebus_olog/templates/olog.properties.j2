@@ -28,15 +28,15 @@ server.ssl.key-alias=cf
 security.require-ssl=true
 
 ############## AD - External ##############
-ad.enabled = true
-ad.url = ldap://dc2.bnl.gov
-ad.domain = bnl.gov
+ad.enabled = {{ ad_enabled | lower }}
+ad.url = {{ ad_url }}
+ad.domain = {{ ad_domain }}
 
 ############## LDAP - External ##############
-ldap.enabled = false
+ldap.enabled = {{ ldap_enabled | lower }}
 
-ldap.urls = ldaps://controlns02.nsls2.bnl.gov/dc=nsls2,dc=bnl,dc=gov
-ldap.base.dn = dc=nsls2,dc=bnl,dc=gov
+ldap.urls = {{ ldap_urls }}
+ldap.base.dn = {{ ldap_base_dn }}
 ldap.user.search.base=
 # User search pattern, e.g. uid={0},ou=People. No default value as LDAP environment may not
 # support user search by pattern.

@@ -1,5 +1,5 @@
 ---
-# defaults file for epics_tools_services_phoebus_alarm
+# defaults file for epics_tools_services_cf
 beamline_name: "tst"
 beamline_id: "31"
 
@@ -12,6 +12,9 @@ cf_version: ChannelFinder-4.7.3
 
 cf_java_home: "/opt/epics-tools/lib/jvm/jdk-17"
 cf_mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
+
+# Path to logback configuration
+phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
 
 es_host: "localhost"
 es_port: "4{{ beamline_id }}92"

@@ -1,5 +1,10 @@
 ---
 # defaults file for epics_tools_services_phoebus_web_runtime
+#
+# Override organization-specific values in your inventory:
+#   pvws_repo: "https://github.com/your-org/pvws.git"
+#   dbwr_repo: "https://github.com/your-org/dbwr.git"
+
 beamline_name: "tst"
 beamline_id: "31"
 
@@ -14,5 +19,12 @@ epics_ca_max_array_bytes: 1000000
 tomcat_dest: /opt/epics-tools/services/tomcat
 tomcat_service_name: tomcat
 
-pvws_version: nsls2_deploy
-dbwr_version: nsls2_deploy
+# PVWS (PV Web Socket) configuration
+pvws_repo: "https://github.com/ControlSystemStudio/pvws.git"
+pvws_version: main
+pvws_dest: /opt/css/pvws
+
+# DBWR (Display Builder Web Runtime) configuration
+dbwr_repo: "https://github.com/ControlSystemStudio/dbwr.git"
+dbwr_version: main
+dbwr_dest: /opt/css/dbwr

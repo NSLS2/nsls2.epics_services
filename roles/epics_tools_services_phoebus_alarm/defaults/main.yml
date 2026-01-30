@@ -1,9 +1,18 @@
 ---
 # defaults file for epics_tools_services_phoebus_alarm
+#
+# Override organization-specific values in your inventory:
+#   alarm_config: "YOUR_ALARM_CONFIG"
+#   alarm_mail_server: "smtp.your-org.com"
+#   alarm_mail_server_from: "alarms@your-org.com"
+
 beamline_name: "tst"
 beamline_id: "31"
 
 java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+
+# Path to logback configuration (typically from phoebus products repo)
+phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
 
 # Alarm Server channel access options
 alarm_epics_ca_addr_list: localhost
@@ -19,11 +28,13 @@ kafka_port: 4{{ beamline_id }}94
 es_host: "localhost"
 es_port: 4{{ beamline_id }}92
 
-alarm_config: "NSLS2_OPR"
+# Alarm configuration name (organization-specific)
+alarm_config: ""
 
-alarm_mail_server: "smtpgw.bnl.gov"
+# Mail server configuration (organization-specific)
+alarm_mail_server: ""
 alarm_mail_server_port: 25
-alarm_mail_server_from: "{{ beamline_name }}_phoebus@bnl.gov"
+alarm_mail_server_from: ""
 
 phoebus_alarm_server_version: 5.0.0
 phoebus_alarm_server_jar: "service-alarm-server-{{ phoebus_alarm_server_version }}.jar"

@@ -1,6 +1,6 @@
 [Unit]
 Description={{beamline_name}} Archiver Appliance Server
-After=syslog.target network.target nsls2-data-{{beamline_name}}.mount
+After=syslog.target network.target{% if aa_data_mount_name %} {{ aa_data_mount_name }}{% endif %}
 
 StartLimitIntervalSec=500
 StartLimitBurst=5

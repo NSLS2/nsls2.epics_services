@@ -37,9 +37,9 @@ logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=INFO
 spring.mvc.static-path-pattern=/**
 
 ############## AD - External ##############
-ad.enabled = true
-ad.url = ldap://dc2.bnl.gov
-ad.domain = bnl.gov
+ad.enabled = {{ ad_enabled | lower }}
+ad.url = {{ ad_url }}
+ad.domain = {{ ad_domain }}
 
 ############## LDAP - External ##############
 # If uncommenting in this section, make sure

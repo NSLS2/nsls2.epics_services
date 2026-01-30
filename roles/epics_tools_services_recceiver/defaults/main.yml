@@ -1,8 +1,15 @@
 ---
 # defaults file for epics_tools_services_recceiver
-recsync_addr_list: "255.255.255.255:5049,10.4.0.255:5049,127.255.255.255:5049"
+#
+# Override organization-specific values in your inventory:
+#   recsync_addr_list: "your-broadcast:5049,another-broadcast:5049"
+#   cf_url: "http://your-channelfinder:8080/ChannelFinder"
 
-cf_url: http://es01.cs.nsls2.local:8080/ChannelFinder
+# RecSync broadcast addresses (organization-specific)
+recsync_addr_list: ""
+
+# ChannelFinder URL (organization-specific)
+cf_url: ""
 cf_user: cfstore
 cf_password: password
 
