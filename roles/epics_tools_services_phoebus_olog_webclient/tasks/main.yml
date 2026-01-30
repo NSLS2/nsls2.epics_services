@@ -1,0 +1,66 @@
+---
+# tasks file for epics_tools_services_phoebus_olog_webclient
+
+# create the installation location for the Olog Webclient server
+- name: Ensure services folder exists
+  ansible.builtin.file:
+    path: "{{ phoebus_olog_webclient_installation_dir }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    recurse: true
+
+# Olog
+- name: Clone and/or update the Olog service repo
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.git:
+    repo: 'https://github.com/Olog/phoebus-olog-web-client.git'
+    dest: "{{ phoebus_olog_webclient_project_path }}"
+    force: true
+    version: "{{ phoebus_olog_webclient_version }}"
+    update: true
+
+- name: Copy .env template file to the project folder
+  become: true
+  ansible.builtin.template:
+    src: .env.j2
+    dest: "{{ phoebus_olog_webclient_project_path }}/.env"
+    mode: "0644"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Download NodeSource setup script for Node.js 21
+  ansible.builtin.get_url:
+    url: https://rpm.nodesource.com/setup_21.x
+    dest: /tmp/nodesource_setup.sh
+    mode: '0755'
+
+- name: Run Node.js setup script
+  ansible.builtin.command: bash /tmp/nodesource_setup.sh
+  change_when: true
+
+- name: Install Node.js
+  ansible.builtin.package:
+    name: nodejs
+    state: present
+
+- name: Install project dependencies with npm
+  community.general.npm:
+    path: "{{ phoebus_olog_webclient_project_path }}"
+    production: false
+
+- name: Run npm build script
+  ansible.builtin.command: npm run build
+  args:
+    chdir: "{{ phoebus_olog_webclient_project_path }}"
+  change_when: true
+
+- name: Install 'serve' globally with npm
+  community.general.npm:
+    name: serve
+    global: true
+
+# Setup and configure the Olog Webclient systemd services
+- name: Include tasks to configure Olog Webclient systemd services
+  ansible.builtin.include_tasks: configure_services.yml

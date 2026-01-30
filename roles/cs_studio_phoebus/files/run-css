@@ -1,0 +1,153 @@
+#!/bin/bash
+
+# Mizuki 12/5/16:
+# v1.0: 
+#  - added -l to list versions
+#set -x
+
+CSSREV=stable
+OPIPREFIX=/opt/css/opi
+HOSTNAME=`hostname`
+IGNORE=no
+VM_CFG="" # default VM_CFG goes in here
+#LOCKFILE="$WS/.run-css.lock.host"
+
+die() {
+        echo "Error: $1" >&2
+        exit 1
+}
+
+if [ -z "$DISPLAY" ]; then
+    echo "Could not start CSS because DISPLAY is not set, turn on the X-Forward for SSH, 
+i.e. ssh -Y box64-1,  or X11 option for PuTTY"
+    exit 1
+fi 
+
+# Passing arguments
+while getopts hilvo:r:w:p:j: opt; do
+  case $opt in
+     i) IGNORE=yes ;;
+     l) action='list' ;; 
+     v) set -x ;;
+     o)
+        OPEN[0]='--launcher.openFile'
+        [ "${OPEN[1]}" ] && OPEN[1]="${OPEN[1]}:"
+        OPEN[1]="${OPEN[1]}${OPIPREFIX}$(echo "$OPTARG" | sed -e 's|:|\[\\58\]|g')"
+        ;;
+     r) CSSREV="$OPTARG" ;;
+     w) WS="$OPTARG" ;; 
+     p) PREFFILE="$OPTARG";;
+     j) VMARGS[$((NVMARG++))]="$OPTARG" ;;
+     h) cat << EOF
+Usage: run-css -h -i -l -v -o FILE -r revision -w WORKSPACE -p PREFERENCE -j JAVA_VM_ARGS
+
+CSS launcher script v1.0
+
+-h help
+-i = ignore lockfile
+     use existing css instance if there is instead of launching a new one
+     Usually used with "-o" together
+-j STR = Java VM arguments. May be given more than once
+-l = list versions available on the system
+-o FILE = Open a single file (use relative path, DO NOT add "--launcher.openFile")
+          To open multiple files, use this:
+          run-css -o "relative-path/f1.opi macro1=m1,macro2=m2" -o "r*-p*/f2.opi"
+-p preference file (default to /opt/css/pref/pref-${CSSREV}.ini)
+-r CSS version (default to stable version /opt/css/css-$CSSREV).
+-v = Verbose
+-w DIR = Workspace directory (defaults to $HOME/css-workspace)
+EOF
+     exit 1   
+     ;;
+  esac
+done
+shift $(($OPTIND-1))     
+      
+if [ "$action" == 'list' ]; then 
+  versions=$(ls -a /opt/css | grep 'css-[0-9]\.[0-9]\.[0-9]')
+  for i in $versions; do
+    echo $i
+  done
+  exit 0
+fi
+[ -d /opt/css/css-${CSSREV} ] && EXEC="/opt/css/css-${CSSREV}/cs-studio" || die "Verson ${CSSREV} does not exist"
+
+# Setting Pref
+[ $PREFFILE ] || PREFFILE="/opt/css/pref/pref-${CSSREV}.ini"
+[ -f $PREFFILE ] || die "pref file doesn't exist"
+
+# Setting default workspace then create the dir
+if [ ! ${WS} ]; then
+  if [[ "${HOSTNAME}" == xf* ]]; then
+    BEAMLINE=${HOSTNAME:0:6}
+    WS="${HOME}/css-workspace-${BEAMLINE}"
+  else
+    WS="${HOME}/css-workspace"
+  fi
+fi
+[ -d "$WS" ] || install -d "$WS"
+LOCKFILE="$WS/.run-css.lock"
+
+# Setting VM_CFG
+FIND_VMARGS=""
+while read line
+do 
+  if [ "${FIND_VMARGS}" == "1" ]; then
+    VM_CFG+=" `echo $line | sed 's/\r//'`"
+  fi
+  if [[ "$line" == -vmargs* ]]; then
+    FIND_VMARGS="1"
+  fi
+done < /opt/css/css-${CSSREV}/cs-studio.ini
+
+# Start CSS
+startcss(){
+    hostname -f > "${LOCKFILE}".host
+    "$EXEC" -data "${WS}" \
+    -pluginCustomization "${PREFFILE}" \
+    "${OPEN[@]}" "$@" \
+    -vmargs $VM_CFG "${VMARGS[@]}" -Dosgi.locking=none 
+    "${OPEN[@]}" "$@"
+}
+
+(
+  # Wait 1 sec to acquire lock file on FD #9 (opened around this block, see below)
+  if [ "$IGNORE" = "yes" ] || flock -w 1 9; then
+    #echo "ignore is $IGNORE"
+    startcss
+  #elif ! [ -f "${LOCKFILE}".host ]; then
+  #  xmessage -nearmouse "This should not happen. Call Yong H. or Michael D."
+  #  exit 1
+  else
+    H="$(cat "$LOCKFILE".host)"
+    if [ "`hostname -f`" == "$H" ]; then
+        xmessage -buttons Ok:0,Cancel:1 -nearmouse "CSS is already running on the local machine ($H).
+Click Ok to start over. Otherwise click Cancel"
+        if [ "$?" -eq 0 ]; then
+        echo "return is $?"
+        user=`whoami`
+        pid=`ps -ef | grep cs-studio | grep $user | grep -v grep | awk '{print $2}'`
+        kill $pid 2> /dev/null
+        flock -u 9
+        startcss
+        fi
+    elif [[ "$H" == cdesk*  ]]; then
+        xmessage -nearmouse "CSS is running on the Control Room computer ($H),
+which is not accessible through remote ssh.
+You have to be in the CR and log on $H to restart CSS."
+        exit 1
+    else
+        xmessage -buttons Ok:0,Cancel:1 -nearmouse "CSS is already running on the computer ($H).
+Click Ok to start over. Otherwise click Cancel"
+        #handle no-terminal case, i.e. Alt + F2
+        export SSH_ASKPASS=/usr/lib/openssh/gnome-ssh-askpass
+        #use setsid to handle "run-css &"
+        setsid ssh $H killall cs-studio 2> /dev/null
+        sleep 2
+        flock -w 1 9
+        #startcss
+    fi
+
+  fi
+
+) 9>${LOCKFILE}

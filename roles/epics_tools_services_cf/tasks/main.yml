@@ -1,0 +1,50 @@
+---
+# Build and Deploy Channel Finder server
+
+# Create the installation location for the cf server
+- name: Ensure services folder exists
+  ansible.builtin.file:
+    path: /opt/epics-tools/services/{{ beamline_name }}/cf
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    recurse: true
+
+# ChannelFinder
+- name: Clone and/or update the ChannelFinder service repo
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.git:
+    repo: 'https://github.com/ChannelFinder/ChannelFinderService.git'
+    dest: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService
+    force: true
+    version: "{{ cf_version }}"
+
+# Build the ChannelFinder library
+- name: Build the ChannelFinder binaries
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.command: mvn clean install
+  args:
+    chdir: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService
+  environment:
+    JAVA_HOME: "{{ cf_java_home }}"
+    MVN_HOME: "{{ cf_mvn_home }}"
+    PATH: "{{ cf_java_home }}/bin:{{ cf_mvn_home }}/bin:{{ ansible_env.PATH }}"
+  changed_when: true
+
+# Copy binaries from /opt/epics-tools/services/{{beamline_name}}/cf/ChannelFinderService/target/ChannelFinder-*.3.jar
+- name: Copy alarm ChannelFinder service jar
+  become: true
+  ansible.builtin.copy:
+    src: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService/target/{{ cf_version }}.jar
+    dest: /opt/epics-tools/services/{{ beamline_name }}/cf/{{ cf_version }}.jar
+    force: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    remote_src: true
+    mode: "0755"
+
+# Set up and configure the ChannelFinder systemd services
+- name: Include tasks to configure ChannelFinder services
+  ansible.builtin.include_tasks: configure_services.yml

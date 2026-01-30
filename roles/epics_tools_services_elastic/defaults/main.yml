@@ -1,0 +1,11 @@
+---
+# defaults file for epics_tools_services_elastic
+
+beamline_name: tst
+beamline_id: "31"
+
+epics_services_account: csstudio
+
+elastic_port: 4{{beamline_id}}92
+elastic_data: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3/data
+elastic_logs: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3/logs

@@ -1,0 +1,9 @@
+---
+
+cs_studio_opis:
+  base_repo: https://code.nsls2.bnl.gov/cs-studio-nsls2
+  basedir: /opt/css/opi
+  version:
+    - production
+  repos:
+    - "cs-studio-web"

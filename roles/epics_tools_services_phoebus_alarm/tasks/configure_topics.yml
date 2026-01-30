@@ -1,0 +1,23 @@
+---
+# configure the systemd services for the alarm services
+
+
+# setup create_alarm_topics.sh
+- name: Create systemd script for creating alarm topics
+  become: true
+  ansible.builtin.template:
+    src: create_alarm_topics.sh.j2
+    dest: /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/create_alarm_topics.sh
+    mode: "0755"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Create alarm topics
+  become: true
+  ansible.builtin.shell: >
+    "/opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/create_alarm_topics.sh
+    {{ alarm_config }}
+    > /tmp/phoebus-create-topics.log 2>&1"
+  args:
+    executable: /bin/bash
+  change_when: true

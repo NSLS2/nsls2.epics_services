@@ -1,0 +1,37 @@
+
+# Channel Access
+org.phoebus.pv.ca/addr_list={{ alarm_epics_ca_addr_list }}
+org.phoebus.pv.ca/auto_addr_list=false
+
+# PVAccess
+org.epics.pva/epics_pva_addr_list={{ alarm_epics_ca_addr_list }}
+org.phoebus.pv.pva/epics_pva_auto_addr_list=false
+
+# email
+# smtp host
+org.phoebus.email/mailhost={{ alarm_mail_server }}
+# smtp port
+org.phoebus.email/mailport={{ alarm_mail_server_port }}
+# Default address to be used for From:
+org.phoebus.email/from={{ alarm_mail_server_from }}
+
+# Alarm server# Phoebus Alarm
+org.phoebus.applications.alarm/server= {{ kafka_server }}:{{ kafka_port }}
+org.phoebus.applications.alarm/config_name={{ alarm_config }}
+org.phoebus.applications.alarm/config_names={{ alarm_config }}
+org.phoebus.applications.alarm/automated_email_sender={{ alarm_mail_server_from }}
+
+# Alarm logger configuration 
+# location of elastic node/s
+org.phoebus.applications.alarm.logging.ui/es_host={{ es_host }}
+org.phoebus.applications.alarm.logging.ui/es_port={{ es_port }}
+org.phoebus.applications.alarm.logging.ui/es_index={{ alarm_config }}
+org.phoebus.applications.alarm.logging.ui/es_max_size=1000
+
+# Alarm config server configuration
+#bootstrap.servers={{ kafka_server }}:{{ kafka_port }}
+#alarm_topics={{ alarm_config }}
+#kafka_properties=
+
+# Location of the git repo
+#local.location={{ phoebus_alarm_config_local_repo }}

@@ -1,0 +1,7 @@
+---
+- name: flush the dbwr cache
+  uri:
+    url: "{{ item }}/cache"
+    method: DELETE
+  loop: "{{ phoebus_dbwr_urls }}"
+  failed_when: false
