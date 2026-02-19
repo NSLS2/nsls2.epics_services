@@ -9,8 +9,7 @@
 
 # Alarm Server
 
-# setup run-phoebus-alarm.sh
-- name: Create systemd service files
+- name: Create alarm server run script
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm.sh.j2
@@ -18,28 +17,24 @@
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart alarm server
 
-# setup systemd service file
-- name: Create systemd alarm server service files
+- name: Create alarm server systemd service
   become: true
   ansible.builtin.template:
     src: phoebus_alarm.service.j2
     dest: /etc/systemd/system/{{ beamline_name }}_phoebus_alarm.service
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-
-# start phoebus alarm server
-- name: Restart alarm server
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: true
-    name: "{{ beamline_name }}_phoebus_alarm"
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart alarm server
 
 # Alarm Logger
 
-# setup run-phoebus-alarm-logger.sh
-- name: Create systemd service files
+- name: Create alarm logger run script
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm-logger.sh.j2
@@ -47,50 +42,43 @@
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart alarm logger
 
-# setup systemd service file
-- name: Create systemd alarm logger service files
+- name: Create alarm logger systemd service
   become: true
   ansible.builtin.template:
     src: phoebus_alarm_logger.service.j2
     dest: /etc/systemd/system/{{ beamline_name }}_phoebus_alarm_logger.service
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-
-# start phoebus alarm logger
-- name: Restart alarm server
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: true
-    name: "{{ beamline_name }}_phoebus_alarm_logger"
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart alarm logger
 
 # Alarm Config Logger
 
-# setup run-phoebus-alarm-config-logger.sh
-- name: Create systemd service files
+- name: Create alarm config logger run script
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm-config-logger.sh.j2
-    dest: >
+    dest: >-
       /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_config_logger/run-phoebus-alarm-config-logger.sh
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart alarm config logger
 
-# setup systemd service file
-- name: Create systemd alarm config logger service files
+- name: Create alarm config logger systemd service
   become: true
   ansible.builtin.template:
     src: phoebus_alarm_config_logger.service.j2
     dest: /etc/systemd/system/{{ beamline_name }}_phoebus_alarm_config_logger.service
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-
-# start phoebus alarm logger
-- name: Restart alarm config server
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: true
-    name: "{{ beamline_name }}_phoebus_alarm_config_logger"
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart alarm config logger

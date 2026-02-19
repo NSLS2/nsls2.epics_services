@@ -4,7 +4,7 @@
 # Alarm Server
 
 # create the installation location for the alarm server
-- name: Ensure services folder exists
+- name: Ensure alarm server directory exists
   ansible.builtin.file:
     path: /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_server
     state: directory
@@ -24,7 +24,7 @@
       - --strip-components=1
 
 # create the installation location for the alarm logging server
-- name: Ensure services folder exists
+- name: Ensure alarm logger directory exists
   ansible.builtin.file:
     path: /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_logger
     state: directory
@@ -43,7 +43,7 @@
     group: "{{ epics_services_account }}"
 
 # create the installation location for the alarm config logger server
-- name: Ensure services folder exists
+- name: Ensure alarm config logger directory exists
   ansible.builtin.file:
     path: /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_config_logger
     state: directory
@@ -55,7 +55,8 @@
 - name: Copy alarm config logger server jar
   ansible.builtin.copy:
     src: "/opt/css/lib/phoebus/services/alarm-config-logger/target/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
-    dest: "/opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_config_logger/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
+    dest: >-
+      /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_config_logger/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar
     remote_src: true
     mode: "0755"
     owner: "{{ epics_services_account }}"
