@@ -8,6 +8,7 @@
     state: present
 
 - name: Ensure JVM symlink directory exists
+  become: true
   ansible.builtin.file:
     path: "{{ jdk_symlink_base }}"
     state: directory
@@ -16,6 +17,7 @@
     mode: "u=rwX,g=rwX,o=rX"
 
 - name: Create compatibility symlinks for JDK paths
+  become: true
   ansible.builtin.file:
     src: "{{ item.rpm_path }}"
     dest: "{{ jdk_symlink_base }}/jdk-{{ item.version }}"
@@ -24,6 +26,7 @@
   loop: "{{ jdk_packages }}"
 
 - name: Ensure Maven directory exists
+  become: true
   ansible.builtin.file:
     path: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
     state: directory
@@ -32,6 +35,7 @@
     mode: "u=rwX,g=rwX,o=rX"
 
 - name: Install Maven
+  become: true
   ansible.builtin.unarchive:
     src: "{{ maven_url }}"
     dest: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
