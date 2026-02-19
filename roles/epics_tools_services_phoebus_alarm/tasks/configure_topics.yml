@@ -11,7 +11,7 @@
     group: "{{ epics_services_account }}"
   register: _alarm_topics_script
 
-- name: Create alarm topics
+- name: Create alarm topics  # noqa: no-handler
   become: true
   ansible.builtin.shell: >
     /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/create_alarm_topics.sh
