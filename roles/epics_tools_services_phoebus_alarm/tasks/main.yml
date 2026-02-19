@@ -1,16 +1,6 @@
 ---
 # tasks file for epics_tools_services_phoebus_alarm
 
-- name: Validate required alarm configuration variables
-  ansible.builtin.assert:
-    that:
-      - alarm_config | length > 0
-      - alarm_mail_server | length > 0
-      - alarm_mail_server_from | length > 0
-    fail_msg: >-
-      Required variables not set. Please provide alarm_config, alarm_mail_server,
-      and alarm_mail_server_from in your playbook or inventory.
-
 # Alarm Server
 
 # create the installation location for the alarm server
