@@ -16,8 +16,8 @@
 Description=phoebus olog service
 Documentation=https://olog.readthedocs.io/en/latest/
 Wants=network-online.target
-After={{ beamline_name }}_elastic.service {{ beamline_name }}_mongod.service
-Requires={{ beamline_name }}_elastic.service {{ beamline_name }}_mongod.service
+After=elasticsearch.service {{ beamline_name }}_mongod.service
+Requires=elasticsearch.service {{ beamline_name }}_mongod.service
 
 StartLimitIntervalSec=500
 StartLimitBurst=5
