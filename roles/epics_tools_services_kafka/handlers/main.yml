@@ -1,0 +1,20 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart zookeeper
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_zookeeper"
+    state: restarted
+    enabled: true
+
+- name: Restart kafka
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_kafka"
+    state: restarted
+    enabled: true

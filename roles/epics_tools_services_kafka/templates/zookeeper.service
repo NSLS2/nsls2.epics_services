@@ -1,12 +1,12 @@
-# /etc/systemd/system/{{ beamline_name }}-zookeeper.service
+# /etc/systemd/system/{{ beamline_name }}_zookeeper.service
 #
 # Start/status/stop
-#   sudo systemctl start {{ beamline_name }}-zookeeper.service
-#   sudo systemctl status {{ beamline_name }}-zookeeper.service
-#   sudo systemctl stop {{ beamline_name }}-zookeeper.service
+#   sudo systemctl start {{ beamline_name }}_zookeeper.service
+#   sudo systemctl status {{ beamline_name }}_zookeeper.service
+#   sudo systemctl stop {{ beamline_name }}_zookeeper.service
 #
 # Start when computer boots:
-#   sudo systemctl enable {{ beamline_name }}-zookeeper.service
+#   sudo systemctl enable {{ beamline_name }}_zookeeper.service
 #
 # When running, it should listen on localhost:{{ zookeeper_port }}
 #   netstat -an | fgrep {{ zookeeper_port }}
@@ -29,8 +29,8 @@ Group={{ epics_services_account }}
 Restart=on-failure
 RestartSec=5s
 
-Environment=JAVA_HOME=/opt/epics-tools/lib/jvm/jdk-11
-Environment=PATH=/opt/epics-tools/lib/jvm/jdk-11/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=JAVA_HOME={{ kafka_java_home }}
+Environment=PATH={{ kafka_java_home }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ExecStart=/opt/epics-tools/services/{{ beamline_name }}/kafka/bin/zookeeper-server-start.sh /opt/epics-tools/services/{{ beamline_name }}/kafka/config/zookeeper.properties
 ExecStop=/opt/epics-tools/services/{{ beamline_name }}/kafka/bin/zookeeper-server-stop.sh
