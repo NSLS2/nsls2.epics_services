@@ -13,6 +13,6 @@ elastic_version: "8.17.0"
 elastic_heap_size: "4g"
 
 # Port and data paths
-elastic_port: 4{{ beamline_id }}92
+elastic_port: 4{{beamline_id}}92
 elastic_data: /var/lib/elasticsearch/{{ beamline_name }}
 elastic_logs: /var/log/elasticsearch/{{ beamline_name }}
