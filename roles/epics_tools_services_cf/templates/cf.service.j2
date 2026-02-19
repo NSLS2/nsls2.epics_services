@@ -16,7 +16,7 @@
 Description=alarm service
 Documentation=https://github.com/ChannelFinder/ChannelFinderService
 Wants=network-online.target
-After={{ beamline_name }}_elastic.service
+After=elasticsearch.service
 
 StartLimitIntervalSec=500
 StartLimitBurst=5

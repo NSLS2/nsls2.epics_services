@@ -1,47 +1,72 @@
 ---
 # tasks file for epics_tools_services_elastic
 
-- name: ensure servicecs directory exists
-  file:
-    path: /opt/epics-tools/services/{{ beamline_name }}/elastic
+- name: Import Elasticsearch GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Add Elasticsearch yum repository
+  become: true
+  ansible.builtin.template:
+    src: elasticsearch.repo.j2
+    dest: /etc/yum.repos.d/elasticsearch.repo
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Install Elasticsearch
+  become: true
+  ansible.builtin.yum:
+    name: "elasticsearch-{{ elastic_version }}"
+    state: present
+  notify:
+    - Restart elasticsearch
+
+- name: Ensure data directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ elastic_data }}"
     state: directory
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: elasticsearch
+    group: elasticsearch
+    mode: "0750"
 
-- name: install elastic search
-  ansible.builtin.unarchive:
-    creates: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3
-    src: https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.2.3-linux-x86_64.tar.gz
-    dest: /opt/epics-tools/services/{{ beamline_name }}/elastic/
-    remote_src: yes
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
-
-- name: install the elastic configuration
+- name: Ensure log directory exists
   become: true
-  template:
+  ansible.builtin.file:
+    path: "{{ elastic_logs }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: "0750"
+
+- name: Install the elasticsearch configuration
+  become: true
+  ansible.builtin.template:
     src: elasticsearch.yml.j2
-    dest: /opt/epics-tools/services/{{ beamline_name }}/elastic/elasticsearch-8.2.3/config/elasticsearch.yml
-    force: true
-    mode: 0755
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: /etc/elasticsearch/elasticsearch.yml
+    mode: "0660"
+    owner: root
+    group: elasticsearch
+  notify:
+    - Restart elasticsearch
 
-- name: install the systemd startup scripts
+- name: Configure Elasticsearch JVM heap size
   become: true
-  template:
-    src: elastic.service.j2
-    dest: /etc/systemd/system/{{ beamline_name }}_elastic.service
-    force: true
-    mode: 0755
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
-    
-- name: build nsls2-phoebus
+  ansible.builtin.template:
+    src: jvm_heap.options.j2
+    dest: /etc/elasticsearch/jvm.options.d/heap.options
+    mode: "0644"
+    owner: root
+    group: elasticsearch
+  notify:
+    - Restart elasticsearch
+
+- name: Enable elasticsearch service
   become: true
-  command: "systemctl daemon-reload"
-  
-- name: build nsls2-phoebus
-  become: true
-  command: "systemctl restart {{ beamline_name }}_elastic"
-  
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: true
+    daemon_reload: true

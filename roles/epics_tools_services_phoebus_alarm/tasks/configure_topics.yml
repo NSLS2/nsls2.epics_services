@@ -1,9 +1,7 @@
 ---
-# configure the systemd services for the alarm services
+# configure the Kafka topics for the alarm services
 
-
-# setup create_alarm_topics.sh
-- name: Create systemd script for creating alarm topics
+- name: Create alarm topics script
   become: true
   ansible.builtin.template:
     src: create_alarm_topics.sh.j2
@@ -11,13 +9,15 @@
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  register: _alarm_topics_script
 
-- name: Create alarm topics
+- name: Create alarm topics  # noqa: no-handler
   become: true
   ansible.builtin.shell: >
-    "/opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/create_alarm_topics.sh
+    /opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/create_alarm_topics.sh
     {{ alarm_config }}
-    > /tmp/phoebus-create-topics.log 2>&1"
+    > /tmp/phoebus-create-topics.log 2>&1
   args:
     executable: /bin/bash
-  change_when: true
+  when: _alarm_topics_script.changed
+  changed_when: true

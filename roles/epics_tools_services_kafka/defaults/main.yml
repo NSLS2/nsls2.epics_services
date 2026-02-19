@@ -6,8 +6,10 @@ beamline_id: "31"
 
 epics_services_account: csstudio
 
-zookeeper_port: 4{{beamline_id}}93
+kafka_java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+
+zookeeper_port: 4{{ beamline_id }}93
 zookeeper_data: /opt/epics-tools/services/{{ beamline_name }}/kafka/data/zookeeper
 
-kafka_port: 4{{beamline_id}}94
+kafka_port: 4{{ beamline_id }}94
 kafka_logs: /opt/epics-tools/services/{{ beamline_name }}/kafka/kafka-logs
