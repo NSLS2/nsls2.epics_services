@@ -1,6 +1,9 @@
 ---
 
-# JDK versions to install via RHEL OpenJDK RPM packages
+# JDK versions to install via RHEL OpenJDK RPM packages.
+# rpm_path uses the unversioned symlinks provided by the RPM (e.g.,
+# /usr/lib/jvm/java-17-openjdk -> java-17-openjdk-17.x.x-x.el9.x86_64).
+# These are stable across architectures and minor version updates.
 jdk_packages:
   - { version: "8", package: "java-1.8.0-openjdk-devel", rpm_path: "/usr/lib/jvm/java-1.8.0-openjdk" }
   - { version: "11", package: "java-11-openjdk-devel", rpm_path: "/usr/lib/jvm/java-11-openjdk" }
