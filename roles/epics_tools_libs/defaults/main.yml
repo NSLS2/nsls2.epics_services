@@ -1,10 +1,15 @@
 ---
 
-jdk_versions:
-  - { version: "8", url: "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u442-b06/OpenJDK8U-jdk_x64_linux_hotspot_8u442b06.tar.gz" }
-  - { version: "11", url: "https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.27%2B6/OpenJDK11U-jdk_x64_linux_hotspot_11.0.27_6.tar.gz" }
-  - { version: "17", url: "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.15%2B6/OpenJDK17U-jdk_x64_linux_hotspot_17.0.15_6.tar.gz" }
+# JDK versions to install via RHEL OpenJDK RPM packages
+jdk_packages:
+  - { version: "8", package: "java-1.8.0-openjdk-devel", rpm_path: "/usr/lib/jvm/java-1.8.0-openjdk" }
+  - { version: "11", package: "java-11-openjdk-devel", rpm_path: "/usr/lib/jvm/java-11-openjdk" }
+  - { version: "17", package: "java-17-openjdk-devel", rpm_path: "/usr/lib/jvm/java-17-openjdk" }
 
+# Symlink base path — other roles reference /opt/epics-tools/lib/jvm/jdk-{version}
+jdk_symlink_base: "/opt/epics-tools/lib/jvm"
+
+# Maven (no good RPM available, keep tarball install)
 maven_version: "3.9.9"
 maven_url: "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz"
 

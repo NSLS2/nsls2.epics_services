@@ -81,3 +81,4 @@
     owner: "{{ cs_studio_phoebus_owner }}"
     group: "{{ cs_studio_phoebus_owner }}"
     mode: "u=rwx,g=rx,o=rx"
+  when: cs_studio_phoebus_jar | length > 0
