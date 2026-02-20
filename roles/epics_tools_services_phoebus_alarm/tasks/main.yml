@@ -72,6 +72,10 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
 
+# Flush pending handlers so Kafka/ZK/ES are restarted before topic creation
+- name: Ensure services are restarted before creating topics
+  ansible.builtin.meta: flush_handlers
+
 # Configure alarm topics
 - name: Include tasks to configure alarm topics
   ansible.builtin.include_tasks: configure_topics.yml
