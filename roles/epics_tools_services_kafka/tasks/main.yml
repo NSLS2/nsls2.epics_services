@@ -23,6 +23,15 @@
     - Restart zookeeper
     - Restart kafka
 
+- name: Ensure kafka logs directory has correct ownership
+  become: true
+  ansible.builtin.file:
+    path: /opt/epics-tools/services/{{ beamline_name }}/kafka/logs
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    recurse: true
+
 - name: Install the zookeeper configuration
   become: true
   ansible.builtin.template:

@@ -16,7 +16,7 @@ org.phoebus.email/mailport={{ alarm_mail_server_port }}
 org.phoebus.email/from={{ alarm_mail_server_from }}
 
 # Alarm server# Phoebus Alarm
-org.phoebus.applications.alarm/server= {{ kafka_server }}:{{ kafka_port }}
+org.phoebus.applications.alarm/server={{ kafka_server }}:{{ kafka_port }}
 org.phoebus.applications.alarm/config_name={{ alarm_config }}
 org.phoebus.applications.alarm/config_names={{ alarm_config }}
 org.phoebus.applications.alarm/automated_email_sender={{ alarm_mail_server_from }}
