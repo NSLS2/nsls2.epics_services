@@ -1,25 +1,58 @@
-Role Name
-=========
+epics_tools_services_kafka
+==========================
 
-A simple single node installation for kafka 2.11-2.1.0
+[Apache Kafka](https://kafka.apache.org/) is a distributed event streaming platform.
+In the Phoebus alarm stack, Kafka is the message broker that carries alarm state,
+commands, and annunciation messages between the alarm server, alarm clients, and
+alarm loggers.
 
+[Zookeeper](https://zookeeper.apache.org/) is a coordination service required by
+Kafka for broker metadata management.
 
-**Installation location:**
-`/opt/epics-services/{{ beamline_name }}/kafka`
+This role installs a single-node Kafka broker with a co-located Zookeeper instance.
 
-**Startup scripts:**
-`systemctl start {{beamline_name}}_kafka`
+**Service names:**
+- `{{ beamline_name }}_zookeeper`
+- `{{ beamline_name }}_kafka`
+
+Zookeeper must be started before Kafka (the systemd unit enforces this ordering).
+
+What it does
+------------
+- Downloads and extracts Kafka 3.9.0 to `/opt/epics-tools/services/{{ beamline_name }}/kafka`
+- Configures Zookeeper and Kafka broker properties (ports, data directories)
+- Installs systemd services for both Zookeeper and Kafka
+- Ensures correct file ownership on the Kafka logs directory
 
 Dependencies
 ------------
-OpenJDK 11
-role: epics_services_libs_jvm
+- `epics_tools_libs` (OpenJDK 17)
 
-| Variable                     | Type   | Description                                                                                      |
-|------------------------------|--------|--------------------------------------------------------------------------------------------------|
-| `beamline_name`              | string | The unique name of the beamline which will be used to determine the installation location of the |
-|                              |        | service.                                                                                         |
-| `beamline_id`                | int    | The unique 2 digit id used to identify the beamline, this is used to determing the ports         |
-| **Elastic port (optional)** 
-| `zookeeper_port`             | int    | The zookeeper port, the default is calculated using the bemaline id: 4{{beamline_id}}93          |
-| `kafka_port`                 | int    | The kafka port, the default is calculated using the bemaline id: 4{{beamline_id}}94              |
+Depended on by
+--------------
+- `epics_tools_services_phoebus_alarm` (alarm server, logger, and config logger all connect to Kafka)
+
+Role Variables
+--------------
+
+| Variable | Type | Default | Description |
+|----------|------|---------|-------------|
+| `beamline_name` | string | `tst` | Used in installation path and service names. |
+| `epics_services_account` | string | `csstudio` | OS user that owns the Kafka installation. |
+| `kafka_java_home` | string | `/opt/epics-tools/lib/jvm/jdk-17` | JAVA_HOME for Kafka and Zookeeper. |
+| `zookeeper_port` | int | `2181` | Zookeeper client port. |
+| `zookeeper_data` | string | `.../kafka/data/zookeeper` | Zookeeper data directory. |
+| `kafka_port` | int | `9092` | Kafka broker port. |
+| `kafka_logs` | string | `.../kafka/kafka-logs` | Kafka log directory (message storage). |
+
+Example Playbook
+----------------
+
+```yaml
+- hosts: all
+  vars:
+    beamline_name: mybeamline
+  roles:
+    - nsls2.epics_services.epics_tools_libs
+    - nsls2.epics_services.epics_tools_services_kafka
+```

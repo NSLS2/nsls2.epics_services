@@ -1,7 +1,0 @@
----
-- name: Restart mongod
-  listen: Restart mongod service
-  service:
-    name: "{{ mongod_name }}"
-    state: restarted
-
