@@ -26,15 +26,15 @@
 
 - name: Reset Elasticsearch keystore to remove auto-generated security entries
   become: true
-  ansible.builtin.shell: >
-    echo "y" | /usr/share/elasticsearch/bin/elasticsearch-keystore create
-  args:
+  ansible.builtin.command:
+    cmd: /usr/share/elasticsearch/bin/elasticsearch-keystore create
     creates: /etc/elasticsearch/.keystore_reset
+    stdin: "y"
   register: _es_keystore_reset
   notify:
     - Restart elasticsearch
 
-- name: Mark keystore as reset
+- name: Mark keystore as reset  # noqa: no-handler
   become: true
   ansible.builtin.file:
     path: /etc/elasticsearch/.keystore_reset
