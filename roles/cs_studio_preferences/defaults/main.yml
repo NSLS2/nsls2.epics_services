@@ -1,6 +1,0 @@
----
-
-cs_studio_preferences_config:
-  basedir: /opt/css/preferences
-  configdir: /opt/css/configuration
-  user: csstudio
