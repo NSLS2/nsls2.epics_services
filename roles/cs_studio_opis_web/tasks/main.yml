@@ -1,7 +1,0 @@
----
-
-- name: Install all cs-studio-repos
-  include_tasks: opis.yml
-  loop: "{{ cs_studio_opis.repos | product(cs_studio_opis.version) | list }}"
-  loop_control:
-    loop_var: _repo

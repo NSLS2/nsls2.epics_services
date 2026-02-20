@@ -16,6 +16,23 @@
     group: "{{ epics_tools_libs_epics_services_account }}"
     mode: "u=rwX,g=rwX,o=rX"
 
+- name: Check for existing JDK directories (from previous tarball installs)
+  become: true
+  ansible.builtin.stat:
+    path: "{{ jdk_symlink_base }}/jdk-{{ item.version }}"
+  register: _jdk_paths
+  loop: "{{ jdk_packages }}"
+
+- name: Remove old JDK directories to allow symlink creation
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  loop: "{{ _jdk_paths.results }}"
+  when: item.stat.exists and item.stat.isdir
+  loop_control:
+    label: "{{ item.stat.path }}"
+
 - name: Create compatibility symlinks for JDK paths
   become: true
   ansible.builtin.file:

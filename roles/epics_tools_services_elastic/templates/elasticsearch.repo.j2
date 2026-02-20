@@ -1,6 +1,6 @@
 [elasticsearch]
-name=Elasticsearch repository for {{ elastic_version | regex_replace('\.\d+$', '.x') }} packages
-baseurl=https://artifacts.elastic.co/packages/{{ elastic_version | regex_replace('\.\d+$', '.x') }}/yum
+name=Elasticsearch repository for {{ elastic_version.split('.')[0] }}.x packages
+baseurl=https://artifacts.elastic.co/packages/{{ elastic_version.split('.')[0] }}.x/yum
 gpgcheck=1
 gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
 enabled=1

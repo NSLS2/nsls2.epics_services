@@ -1,7 +1,6 @@
 ---
 # defaults file for epics_tools_services_phoebus_alarm
 beamline_name: "tst"
-beamline_id: "31"
 
 java_home: "/opt/epics-tools/lib/jvm/jdk-17"
 
@@ -10,20 +9,20 @@ alarm_epics_ca_addr_list: localhost
 
 epics_services_account: csstudio
 
-zookeeper_port: 4{{ beamline_id }}93
+zookeeper_port: 2181
 
 kafka_installation: "/opt/epics-tools/services/{{ beamline_name }}/kafka"
 kafka_server: "localhost"
-kafka_port: 4{{ beamline_id }}94
+kafka_port: 9092
 
 es_host: "localhost"
-es_port: 4{{ beamline_id }}92
+es_port: 9200
 
-alarm_config: "NSLS2_OPR"
+alarm_config: "Accelerator"
 
-alarm_mail_server: "smtpgw.bnl.gov"
+alarm_mail_server: "localhost"
 alarm_mail_server_port: 25
-alarm_mail_server_from: "{{ beamline_name }}_phoebus@bnl.gov"
+alarm_mail_server_from: "{{ beamline_name }}_phoebus@localhost"
 
 phoebus_alarm_server_version: 5.0.0
 phoebus_alarm_server_jar: "service-alarm-server-{{ phoebus_alarm_server_version }}.jar"
