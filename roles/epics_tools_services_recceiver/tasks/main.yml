@@ -39,7 +39,7 @@
     chdir: /opt/epics-tools/services/recsync
     target: install
   become: yes
-  
+
 # recsync conf
 - name: copy recsync configuration
   become: true

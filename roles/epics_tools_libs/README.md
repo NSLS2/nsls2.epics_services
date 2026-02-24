@@ -32,7 +32,7 @@ Role Variables
 --------------
 
 | Variable | Type | Default | Description |
-|----------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `jdk_packages` | list | See below | List of JDK versions to install. Each entry has `version`, `package`, and `rpm_path`. |
 | `jdk_symlink_base` | string | `/opt/epics-tools/lib/jvm` | Directory where JDK symlinks are created. |
 | `maven_version` | string | `3.9.9` | Apache Maven version to install. |

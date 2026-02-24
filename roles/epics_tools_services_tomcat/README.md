@@ -2,8 +2,8 @@ Role Name
 =========
 
 Install a general tomcat services
-Based on role 
-https://github.com/jmutai/tomcat-ansible
+Based on role
+<https://github.com/jmutai/tomcat-ansible>
 
 Requirements
 ------------

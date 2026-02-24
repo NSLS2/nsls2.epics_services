@@ -4,4 +4,3 @@
   service:
     name: "{{ mongod_name }}"
     state: restarted
-

@@ -1,7 +1,7 @@
 Phoebus Web Runtime
 ===================
 
-Install the Phoebus Web Runtime services. 
+Install the Phoebus Web Runtime services.
 
 **Installation location:**
 `/opt/epics-tools/services/tomcat`
@@ -20,4 +20,3 @@ role: cs_studio_phoebus
 
 tomcat
 role: epics_tools_services_tomcat
-

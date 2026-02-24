@@ -6,9 +6,13 @@ beamline_id: "31"
 
 epics_services_account: csstudio
 
+# JDK and Tomcat configuration (using system RPM installation)
+default_jdk_version: "17"
+aa_tomcat_home: "/usr/share/tomcat"
+aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-native RPM
+
 # Dependency locations and versions
 aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
-aa_dependencies_tomcat_version: "9.0.109"
 aa_build_loc: /tmp/aa_{{ beamline_name }}_build
 aa_version: 2.2.1
 
@@ -25,8 +29,6 @@ aa_mysql_server: "localhost"
 aa_mysql_database: "{{ beamline_name }}_archappl"
 aa_mysql_user: "{{ beamline_name }}_archappl"
 aa_mysql_password: "{{ beamline_name }}_archappl"
-# jdbc_root_user: "create_password"
-
 # Archiver Identity and Ports
 aa_identity: appliance0
 cluster_inetport: "1{{ beamline_id }}70"
@@ -39,7 +41,8 @@ data_retrieval_port: "1{{ beamline_id }}68"
 aa_epics_ca_addr_list: localhost
 
 # Archiver Java Options
-aa_java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+# java_home_rpm is set by dependencies.yml task
+aa_java_home: "{{ java_home_rpm | default('/usr/lib/jvm/java-' ~ default_jdk_version ~ '-openjdk') }}"
 aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"

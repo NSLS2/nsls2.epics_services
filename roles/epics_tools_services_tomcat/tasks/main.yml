@@ -73,7 +73,7 @@
 
 - name: Allow access to Manager and Host Manager apps from any IP
   template:
-    src: context.xml.j2 
+    src: context.xml.j2
     dest: "{{ item }}"
   with_items:
     - "{{ tomcat_dest }}/webapps/host-manager/META-INF/context.xml"

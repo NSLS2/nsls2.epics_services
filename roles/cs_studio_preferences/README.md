@@ -7,7 +7,7 @@ Role Variables
 --------------
 
 | Variable | Description | Default |
-|----------|-------------|---------|
+| --- | --- | --- |
 | `cs_studio_preferences_config.repo` | Git repository URL for preferences | `""` (required) |
 | `cs_studio_preferences_config.version` | Git branch/tag to checkout | `main` |
 | `cs_studio_preferences_config.basedir` | Local directory for preferences | `/opt/css/preferences` |

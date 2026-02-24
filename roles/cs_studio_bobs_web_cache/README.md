@@ -7,7 +7,7 @@ Role Variables
 --------------
 
 | Variable | Description | Default |
-|----------|-------------|---------|
+| --- | --- | --- |
 | `phoebus_dbwr_urls` | List of DBWR URLs to flush cache | `[]` (required) |
 
 Example Playbook

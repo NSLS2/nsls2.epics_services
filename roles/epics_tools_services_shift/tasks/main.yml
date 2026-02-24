@@ -62,7 +62,7 @@
 - name: create systemd service files
   become: true
   template:
-    src: glassfish.service 
+    src: glassfish.service
     dest: /etc/systemd/system/{{beamline_name}}_glassfish.service
     mode: 0755
     owner:  "{{ epics_services_account }}"

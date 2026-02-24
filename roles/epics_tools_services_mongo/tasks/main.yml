@@ -21,7 +21,7 @@
     owner: "{{ mongod_user }}"
     group: "{{ mongod_group }}"
     mode: 0755
-    
+
 - name: Make data directory
   file:
     path: "{{ mongod_data_path }}"

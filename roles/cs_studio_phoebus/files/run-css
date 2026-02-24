@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Mizuki 12/5/16:
-# v1.0: 
+# v1.0:
 #  - added -l to list versions
 #set -x
 
@@ -18,16 +18,16 @@ die() {
 }
 
 if [ -z "$DISPLAY" ]; then
-    echo "Could not start CSS because DISPLAY is not set, turn on the X-Forward for SSH, 
+    echo "Could not start CSS because DISPLAY is not set, turn on the X-Forward for SSH,
 i.e. ssh -Y box64-1,  or X11 option for PuTTY"
     exit 1
-fi 
+fi
 
 # Passing arguments
 while getopts hilvo:r:w:p:j: opt; do
   case $opt in
      i) IGNORE=yes ;;
-     l) action='list' ;; 
+     l) action='list' ;;
      v) set -x ;;
      o)
         OPEN[0]='--launcher.openFile'
@@ -35,7 +35,7 @@ while getopts hilvo:r:w:p:j: opt; do
         OPEN[1]="${OPEN[1]}${OPIPREFIX}$(echo "$OPTARG" | sed -e 's|:|\[\\58\]|g')"
         ;;
      r) CSSREV="$OPTARG" ;;
-     w) WS="$OPTARG" ;; 
+     w) WS="$OPTARG" ;;
      p) PREFFILE="$OPTARG";;
      j) VMARGS[$((NVMARG++))]="$OPTARG" ;;
      h) cat << EOF
@@ -57,13 +57,13 @@ CSS launcher script v1.0
 -v = Verbose
 -w DIR = Workspace directory (defaults to $HOME/css-workspace)
 EOF
-     exit 1   
+     exit 1
      ;;
   esac
 done
-shift $(($OPTIND-1))     
-      
-if [ "$action" == 'list' ]; then 
+shift $(($OPTIND-1))
+
+if [ "$action" == 'list' ]; then
   versions=$(ls -a /opt/css | grep 'css-[0-9]\.[0-9]\.[0-9]')
   for i in $versions; do
     echo $i
@@ -91,7 +91,7 @@ LOCKFILE="$WS/.run-css.lock"
 # Setting VM_CFG
 FIND_VMARGS=""
 while read line
-do 
+do
   if [ "${FIND_VMARGS}" == "1" ]; then
     VM_CFG+=" `echo $line | sed 's/\r//'`"
   fi
@@ -106,7 +106,7 @@ startcss(){
     "$EXEC" -data "${WS}" \
     -pluginCustomization "${PREFFILE}" \
     "${OPEN[@]}" "$@" \
-    -vmargs $VM_CFG "${VMARGS[@]}" -Dosgi.locking=none 
+    -vmargs $VM_CFG "${VMARGS[@]}" -Dosgi.locking=none
     "${OPEN[@]}" "$@"
 }
 

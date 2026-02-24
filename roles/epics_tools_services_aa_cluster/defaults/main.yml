@@ -7,6 +7,9 @@ beamline_id: "31"
 
 epics_services_account: "epics-services-{{ beamline_name }}"
 
+# Enable SSL for cluster deployments
+aa_enable_ssl: true
+
 # JDK and Tomcat configuration (using system RPM installation)
 default_jdk_version: "17"
 aa_tomcat_home: "/usr/share/tomcat"
@@ -65,7 +68,7 @@ aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
 aa_java_opts_mgmt: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
 
-# AA Data Storage Locations 
+# AA Data Storage Locations
 # aa_sts: "/dev/shm/archappl/{{ beamline_name }}/sts/ArchiverStore"
 # aa_mts: "/nsls2/data/{{ beamline_name }}/mts/ArchiverStore"
 # aa_lts: "/nsls2/data/{{ beamline_name }}/lts/ArchiverStore"

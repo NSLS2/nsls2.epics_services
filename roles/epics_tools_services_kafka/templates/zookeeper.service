@@ -10,7 +10,7 @@
 #
 # When running, it should listen on localhost:{{ zookeeper_port }}
 #   netstat -an | fgrep {{ zookeeper_port }}
-# 
+#
 
 [Unit]
 Description={{ beamline_name }} Apache Zookeeper server (Kafka)
