@@ -1,5 +1,0 @@
----
-- hosts: all
-  roles:
-    - nsls2.epics_services.jdk_dependency
-    - nsls2.epics_services.maven_dependency
