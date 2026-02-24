@@ -56,5 +56,5 @@ aa_logs_base_dir: "/var/log/archiver-appliance"
 aa_configure_custom_logs: false
 
 # Systemd mount dependency
-# Example: "nsls2-data-beamline.mount" - leave empty if no mount dependency needed
+# Example: "data-beamline.mount" - leave empty if no mount dependency needed
 aa_data_mount_name: ""

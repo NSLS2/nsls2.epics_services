@@ -32,12 +32,15 @@ Role Variables
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
 | `cs_studio_phoebus_version` | string | `master` | Git branch/tag for the upstream Phoebus repo. |
-| `cs_studio_phoebus_nsls2_version` | string | `nsls2-ansible-deploy` | Git branch/tag for the products repo. |
+| `cs_studio_phoebus_products_repo` | string | `""` | Git URL for the site-specific products repo (must be set per deployment). |
+| `cs_studio_phoebus_products_version` | string | `main` | Git branch/tag for the products repo. |
+| `cs_studio_phoebus_products_dest` | string | `/opt/css/phoebus-products` | Local clone path for the products repo. |
 | `cs_studio_phoebus_java_home` | string | `/usr/lib/jvm/java-17-openjdk` | JAVA_HOME for Maven builds. |
 | `cs_studio_phoebus_mvn_home` | string | `/opt/epics-tools/lib/apache-maven-3.9.9` | Maven installation path. |
-| `cs_studio_phoebus_jar` | string | See defaults | Path to the built product JAR (used by `run-phoebus`). |
-| `cs_studio_phoebus_pref` | string | See defaults | Path to the preferences file (used by `run-phoebus`). |
+| `cs_studio_phoebus_jar` | string | `""` | Path to the built product JAR (used by `run-phoebus`). |
+| `cs_studio_phoebus_pref` | string | `""` | Path to the preferences file (used by `run-phoebus`). |
 | `cs_studio_phoebus_logging` | string | See defaults | Path to the logging configuration file. |
+| `cs_studio_phoebus_logback` | string | See defaults | Path to the logback configuration file. |
 | `cs_studio_phoebus_owner` | string | `csstudio` | OS user that owns the Phoebus installation. |
 | `cs_studio_phoebus_override_mvn_settings` | bool | `false` | Whether to deploy a custom Maven `settings.xml`. |
 | `cs_studio_phoebus_force_gpu` | bool | `false` | Force GPU rendering in the `run-phoebus` script. |

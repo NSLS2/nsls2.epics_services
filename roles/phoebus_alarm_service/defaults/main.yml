@@ -4,6 +4,9 @@ beamline_name: "tst"
 
 java_home: "/usr/lib/jvm/java-17-openjdk"
 
+# Path to logback configuration
+phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
+
 # Alarm Server channel access options
 alarm_epics_ca_addr_list: localhost
 

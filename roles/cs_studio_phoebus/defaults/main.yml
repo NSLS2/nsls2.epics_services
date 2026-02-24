@@ -1,14 +1,20 @@
 ---
 
 cs_studio_phoebus_version: "master"
-cs_studio_phoebus_nsls2_version: "nsls2-ansible-deploy"
+
+# Site-specific products repository (must be overridden per deployment)
+cs_studio_phoebus_products_repo: ""
+cs_studio_phoebus_products_version: "main"
+cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
 
 cs_studio_phoebus_java_home: "/usr/lib/jvm/java-17-openjdk"
 cs_studio_phoebus_mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
 
-cs_studio_phoebus_jar: "/opt/css/nsls2-phoebus/products/nsls2-accl/target/nsls2-accl-product-4.7.4-SNAPSHOT.jar"
-cs_studio_phoebus_pref: "/opt/css/preferences/accl/pref-4.6.ini"
-cs_studio_phoebus_logging: "/opt/css/nsls2-phoebus/config/logging.properties"
+# Paths to built artifacts (must be overridden to match your products build)
+cs_studio_phoebus_jar: ""
+cs_studio_phoebus_pref: ""
+cs_studio_phoebus_logging: "{{ cs_studio_phoebus_products_dest }}/config/logging.properties"
+cs_studio_phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
 cs_studio_phoebus_owner: "csstudio"
 cs_studio_phoebus_override_mvn_settings: false
 cs_studio_phoebus_force_gpu: false

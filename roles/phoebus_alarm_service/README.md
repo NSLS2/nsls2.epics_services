@@ -50,13 +50,14 @@ Role Variables
 | Variable | Type | Description |
 | --- | --- | --- |
 | `beamline_name` | string | Beamline identifier, used in paths and service names. |
-| `alarm_config` | string | Alarm configuration name (e.g. `TST_OPR`, `XF06BM_OPR`). Must match the client preferences `config_name`. |
+| `alarm_config` | string | Alarm configuration name (e.g. `Accelerator`). Must match the client preferences `config_name`. |
 
 **Optional** (have defaults that work for standard single-host deployments):
 
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
 | `java_home` | string | `/usr/lib/jvm/java-17-openjdk` | JAVA_HOME for alarm services. |
+| `phoebus_logback` | string | `/opt/css/phoebus-products/config/logback.xml` | Path to logback configuration file. |
 | `alarm_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
 | `epics_services_account` | string | `csstudio` | OS user that owns service files. |
 | `kafka_server` | string | `localhost` | Kafka broker hostname. |
