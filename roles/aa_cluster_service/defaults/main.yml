@@ -49,10 +49,10 @@ aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
 aa_java_opts_mgmt: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
 
-# AA Data Storage Locations
+# AA Data Storage Locations (organization-specific examples)
 # aa_sts: "/dev/shm/archappl/{{ beamline_name }}/sts/ArchiverStore"
-# aa_mts: "/nsls2/data/{{ beamline_name }}/mts/ArchiverStore"
-# aa_lts: "/nsls2/data/{{ beamline_name }}/lts/ArchiverStore"
+# aa_mts: "/data/{{ beamline_name }}/mts/ArchiverStore"
+# aa_lts: "/data/{{ beamline_name }}/lts/ArchiverStore"
 
 # Archiver Data Locations (testing on local disk)
 aa_sts: "{{ aa_deploy_location }}/data/sts/ArchiverStore"
