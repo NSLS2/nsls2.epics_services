@@ -13,19 +13,6 @@
   ansible.builtin.set_fact:
     java_home_rpm: "/usr/lib/jvm/java-17-openjdk"
 
-- name: Install APR and SSL libraries for Tomcat Native
-  become: true
-  ansible.builtin.package:
-    name:
-      - apr
-      - apr-util
-      - apr-devel
-      - apr-util-devel
-      - openssl-devel  # Headers for SSL support (openssl runtime already in base system)
-      - gcc
-      - make
-    state: present
-
 - name: Install Tomcat and Tomcat Native via RPM
   become: true
   ansible.builtin.package:

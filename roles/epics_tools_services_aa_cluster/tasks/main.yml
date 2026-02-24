@@ -10,10 +10,6 @@
   ansible.builtin.include_role:
     name: nsls2.epics_services.aa_mysql
 
-- name: Configure SSL certificates
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_ssl
-
 - name: Build Archiver Appliance
   ansible.builtin.include_role:
     name: nsls2.epics_services.aa_build
@@ -21,3 +17,7 @@
 - name: Deploy Archiver Appliance
   ansible.builtin.include_role:
     name: nsls2.epics_services.aa_deploy
+
+- name: Configure Caddy reverse proxy
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_caddy

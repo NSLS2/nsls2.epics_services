@@ -1,19 +1,14 @@
 ---
-# defaults file for epics_tools_services_aa
-# Configured for cluster mode with SSL enabled
+# defaults file for epics_tools_services_aa_cluster
 
 beamline_name: tst
 beamline_id: "31"
 
 epics_services_account: "epics-services-{{ beamline_name }}"
 
-# Enable SSL for cluster deployments
-aa_enable_ssl: true
-
 # JDK and Tomcat configuration (using system RPM installation)
 default_jdk_version: "17"
 aa_tomcat_home: "/usr/share/tomcat"
-aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-native RPM
 
 aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
 aa_build_loc: /tmp/aa_{{ beamline_name }}_build
@@ -35,27 +30,15 @@ aa_identity: appliance0
 # Cluster communication port (same on all nodes)
 cluster_inetport: "1{{ beamline_id }}70"
 
-# SSL Ports for each component
-aa_ssl_port_mgmt: "1{{ beamline_id }}75"
-aa_ssl_port_engine: "1{{ beamline_id }}76"
-aa_ssl_port_etl: "1{{ beamline_id }}77"
-aa_ssl_port_retrieval: "1{{ beamline_id }}78"
+# HTTP ports for each component (Caddy handles TLS on port 443)
+mgmt_port: "1{{ beamline_id }}65"
+engine_port: "1{{ beamline_id }}66"
+etl_port: "1{{ beamline_id }}67"
+data_retrieval_port: "1{{ beamline_id }}68"
 
-mgmt_port: "{{ aa_ssl_port_mgmt }}"
-engine_port: "{{ aa_ssl_port_engine }}"
-etl_port: "{{ aa_ssl_port_etl }}"
-data_retrieval_port: "{{ aa_ssl_port_retrieval }}"
-
-# SSL Certificate paths (organization-specific)
-aa_ssl_cert_file: ""
-aa_ssl_key_file: ""
-aa_ssl_chain_file: ""
-
-# Trusted reverse proxies for RemoteIpValve (X-Forwarded-* headers)
-# Add your organization's proxy IPs
-aa_trusted_proxies:
-  - "0:0:0:0:0:0:0:1"    # IPv6 localhost
-  - "127.0.0.1"          # IPv4 localhost
+# Caddy TLS certificate paths (must be provided per-deployment)
+aa_caddy_tls_cert: ""
+aa_caddy_tls_key: ""
 
 # Archiver channel access options (organization-specific broadcast address)
 aa_epics_ca_addr_list: ""

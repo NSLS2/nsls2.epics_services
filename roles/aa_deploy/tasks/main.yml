@@ -153,15 +153,6 @@
     SITE_SPECIFIC_POLICIES_FILE: "{{ aa_install_location }}/conf/policies.py"
     ARCHAPPL_MYIDENTITY: "{{ aa_identity }}"
     ARCHAPPL_APPLIANCES: "{{ aa_deploy_location ~ '/appliances.xml' if (aa_cluster_appliances is defined and aa_cluster_appliances | length > 0) else '' }}"
-    ENABLE_SSL: "{{ 'true' if aa_enable_ssl else 'false' }}"
-    SSL_CERT_FILE: "{{ aa_ssl_cert_file | default('') }}"
-    SSL_KEY_FILE: "{{ aa_ssl_key_file | default('') }}"
-    SSL_CHAIN_FILE: "{{ aa_ssl_chain_file | default('') }}"
-    SSL_PORT_MGMT: "{{ aa_ssl_port_mgmt | default('') }}"
-    SSL_PORT_ENGINE: "{{ aa_ssl_port_engine | default('') }}"
-    SSL_PORT_ETL: "{{ aa_ssl_port_etl | default('') }}"
-    SSL_PORT_RETRIEVAL: "{{ aa_ssl_port_retrieval | default('') }}"
-    TRUSTED_PROXIES: "{{ aa_trusted_proxies | default([]) | map('regex_replace', '\\.', '\\\\.') | join('|') }}"
   changed_when: true
 
 - name: Deploy facility template changes
