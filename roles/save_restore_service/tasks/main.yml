@@ -1,0 +1,86 @@
+---
+# tasks file for save_restore_service
+
+- name: Ensure services folder for save restore exists
+  ansible.builtin.file:
+    path: /opt/epics-tools/services/{{beamline_name}}/save_restore
+    state: directory
+    mode: '0755'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+# copy binaries from /opt/css/lib/phoebus/services/save-and-restore/target/service-save-and-restore-*.jar
+- name: Find the save/restore JAR file
+  ansible.builtin.find:
+    paths: /opt/css/lib/phoebus/services/save-and-restore/target
+    patterns: "service-save-and-restore-{{ save_restore_version }}*.jar"
+    recurse: false
+  register: save_restore_jars
+
+- name: Fail if no matching save/restore JAR found
+  ansible.builtin.fail:
+    msg: "No JAR file matching version {{ save_restore_version }} found."
+  when: save_restore_jars.matched == 0
+
+- name: Set the JAR file path (use the first match)
+  ansible.builtin.set_fact:
+    save_restore_jar_path: "{{ save_restore_jars.files[0].path }}"
+
+- name: Copy the save/restore JAR to destination
+  ansible.builtin.copy:
+    src: "{{ save_restore_jar_path }}"
+    dest: "{{ save_restore_jar }}"
+    mode: '0755'
+    remote_src: true
+
+- name: Install procServ
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.procserv_dependency
+
+# setup save_restore.properties
+- name: Create save restore properties file
+  become: true
+  ansible.builtin.template:
+    src: save_restore.properties.j2
+    dest: /opt/epics-tools/services/{{beamline_name}}/save_restore/save_restore.properties
+    mode: '0744'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+# setup run-save-restore.sh
+- name: Create systemd service files
+  become: true
+  ansible.builtin.template:
+    src: run-save-restore.sh.j2
+    dest: /opt/epics-tools/services/{{beamline_name}}/save_restore/run-save-restore.sh
+    mode: '0755'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Check if Service Exists
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/{{ beamline_name }}_save_restore.service"
+  register: service_status
+
+- name: Stop service save-restore, if running
+  ansible.builtin.systemd:
+    name: "{{beamline_name}}_save_restore"
+    state: stopped
+  when: service_status.stat.exists
+
+# setup systemd service file
+- name: Create systemd service files
+  become: true
+  ansible.builtin.template:
+    src: save_restore.service.j2
+    dest: /etc/systemd/system/{{beamline_name}}_save_restore.service
+    mode: '0755'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+# start save restore
+- name: Restart save restore
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: true
+    name: "{{beamline_name}}_save_restore"

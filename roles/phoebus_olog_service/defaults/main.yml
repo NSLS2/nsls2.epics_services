@@ -1,0 +1,49 @@
+---
+# defaults file for phoebus_olog_service
+#
+# Override organization-specific values in your inventory:
+#   ad_url: "ldap://your-ad-server.example.com"
+#   ad_domain: "example.com"
+#   ldap_urls: "ldaps://your-ldap-server.example.com/dc=example,dc=com"
+#   ldap_base_dn: "dc=example,dc=com"
+
+beamline_name: "tst"
+beamline_id: "31"
+
+java_home: "/usr/lib/jvm/java-17-openjdk"
+mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
+
+# Path to logback configuration
+phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
+
+phoebus_olog_version: "v5.0.4"
+phoebus_olog_jar: "service-olog-5.0.4.jar"
+
+# Alarm Server channel access options
+alarm_epics_ca_addr_list: localhost
+epics_services_account: csstudio
+
+# Olog REST service parameters
+olog_http_port: "4{{ beamline_id }}80"
+olog_https_port: "4{{ beamline_id }}81"
+
+cors_allowed_origins: "http://localhost:3000"
+
+es_host: "localhost"
+es_port: 4{{ beamline_id }}92
+
+mongod_host: "localhost"
+mongod_port: 2{{ beamline_id }}17
+
+## procServ port
+olog_procServ_port: "4{{ beamline_id }}46"
+
+# Active Directory configuration (organization-specific)
+ad_enabled: true
+ad_url: ""
+ad_domain: ""
+
+# LDAP configuration (organization-specific)
+ldap_enabled: false
+ldap_urls: ""
+ldap_base_dn: ""

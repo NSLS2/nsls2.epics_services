@@ -1,18 +1,6 @@
 ---
 # Install dependencies via RPM and download MySQL connector
 
-- name: Install JDK via RPM
-  become: true
-  ansible.builtin.package:
-    name:
-      - java-17-openjdk
-      - java-17-openjdk-devel  # Required for JNI headers (jni_md.h)
-    state: present
-
-- name: Set JDK home fact from RPM installation
-  ansible.builtin.set_fact:
-    java_home_rpm: "/usr/lib/jvm/java-17-openjdk"
-
 - name: Install Tomcat and Tomcat Native via RPM
   become: true
   ansible.builtin.package:
