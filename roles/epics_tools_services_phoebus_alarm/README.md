@@ -48,14 +48,14 @@ Role Variables
 **Required** (no sensible default -- must be set per deployment):
 
 | Variable | Type | Description |
-|----------|------|-------------|
+| --- | --- | --- |
 | `beamline_name` | string | Beamline identifier, used in paths and service names. |
 | `alarm_config` | string | Alarm configuration name (e.g. `TST_OPR`, `XF06BM_OPR`). Must match the client preferences `config_name`. |
 
 **Optional** (have defaults that work for standard single-host deployments):
 
 | Variable | Type | Default | Description |
-|----------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `java_home` | string | `/opt/epics-tools/lib/jvm/jdk-17` | JAVA_HOME for alarm services. |
 | `alarm_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
 | `epics_services_account` | string | `csstudio` | OS user that owns service files. |

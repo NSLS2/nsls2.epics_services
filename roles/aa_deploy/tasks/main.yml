@@ -1,0 +1,283 @@
+---
+# Unified AA deployment with per-instance services
+
+# The installation location is used to prepare the various aa services needed in a deployment
+- name: Ensure installation directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ aa_install_location }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0755'
+
+# The deploy location is the final location consisting of the configured and runnable instances of the aa services
+- name: Ensure deploy directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ aa_deploy_location }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0755'
+
+# Stop old monolithic service if it exists (migration from legacy single-service setup)
+- name: Check if old monolithic AA service unit file exists
+  ansible.builtin.stat:
+    path: /etc/systemd/system/{{ beamline_name }}_aa.service
+  register: legacy_service_status
+
+- name: Stop old monolithic AA service if running
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_aa.service"
+    state: stopped
+    daemon_reload: true
+  when: legacy_service_status.stat.exists
+
+# Stop existing per-instance services if they exist
+- name: Check if AA instance services exist
+  ansible.builtin.stat:
+    path: "/etc/systemd/system/{{ beamline_name }}_{{ item }}_aa.service"
+  loop:
+    - mgmt
+    - engine
+    - etl
+    - retrieval
+  register: aa_instance_services
+
+- name: Stop AA instance services if they exist
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_{{ item.item }}_aa.service"
+    state: stopped
+    daemon_reload: true
+  loop: "{{ aa_instance_services.results }}"
+  when: item.stat.exists
+
+# Prepare the Archiver binaries for installation
+- name: Find service package
+  become: true
+  ansible.builtin.find:
+    paths: "{{ aa_build_loc }}"
+    patterns: "archappl*tar.gz"
+    recurse: true
+  register: find_result
+
+- name: Unpack service on remote host
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ find_result.files[0].path }}"
+    dest: "{{ aa_install_location }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+- name: Set owner and group on install location
+  become: true
+  ansible.builtin.file:
+    path: "{{ aa_install_location }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    recurse: true
+
+- name: Unpack the mysql connector
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ aa_dependencies_loc }}/mysql-connector-java-5.1.34.tar.gz"
+    dest: "{{ aa_install_location }}"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+
+# Deploy installation and configuration scripts
+- name: Deploy single installation script
+  become: true
+  ansible.builtin.template:
+    src: single_machine_install.sh
+    dest: "{{ aa_install_location }}/install_scripts/"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0755'
+
+- name: Deploy mysql config script
+  become: true
+  ansible.builtin.template:
+    src: addMysqlConnPool.py
+    dest: "{{ aa_install_location }}/install_scripts/"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0755'
+
+- name: Deploy tomcat installation script
+  become: true
+  ansible.builtin.template:
+    src: deployMultipleTomcats.py
+    dest: "{{ aa_install_location }}/install_scripts/"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0755'
+
+- name: Deploy policies configuration
+  become: true
+  ansible.builtin.template:
+    src: policies.py
+    dest: "{{ aa_install_location }}/conf/"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0644'
+
+# Deploy appliances.xml for cluster configuration (only when cluster appliances are defined)
+- name: Deploy appliances.xml configuration
+  become: true
+  ansible.builtin.template:
+    src: appliances.xml.j2
+    dest: "{{ aa_deploy_location }}/appliances.xml"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0644'
+  when: aa_cluster_appliances is defined and aa_cluster_appliances | length > 0
+
+# Run the Install script with unified environment variables
+- name: Install AA
+  become: true
+  ansible.builtin.command:
+    chdir: "{{ aa_install_location }}/install_scripts"
+    cmd: "{{ aa_install_location }}/install_scripts/single_machine_install.sh"
+  environment:
+    DEPLOY_DIR: "{{ aa_deploy_location }}"
+    JAVA_HOME: "{{ aa_java_home }}"
+    TOMCAT_HOME: "{{ aa_tomcat_home }}"
+    MYSQL_CLIENT_JAR: "{{ aa_install_location }}/mysql-connector-java-5.1.34/mysql-connector-java-5.1.34-bin.jar"
+    MYSQL_CONNECTION_STRING: "--host={{ aa_mysql_server }} --user={{ aa_mysql_user }} --password={{ aa_mysql_password }} --database={{ aa_mysql_database }}"
+    SITE_SPECIFIC_POLICIES_FILE: "{{ aa_install_location }}/conf/policies.py"
+    ARCHAPPL_MYIDENTITY: "{{ aa_identity }}"
+    ARCHAPPL_APPLIANCES: "{{ aa_deploy_location ~ '/appliances.xml' if (aa_cluster_appliances is defined and aa_cluster_appliances | length > 0) else '' }}"
+    ENABLE_SSL: "{{ 'true' if aa_enable_ssl else 'false' }}"
+    SSL_CERT_FILE: "{{ aa_ssl_cert_file | default('') }}"
+    SSL_KEY_FILE: "{{ aa_ssl_key_file | default('') }}"
+    SSL_CHAIN_FILE: "{{ aa_ssl_chain_file | default('') }}"
+    SSL_PORT_MGMT: "{{ aa_ssl_port_mgmt | default('') }}"
+    SSL_PORT_ENGINE: "{{ aa_ssl_port_engine | default('') }}"
+    SSL_PORT_ETL: "{{ aa_ssl_port_etl | default('') }}"
+    SSL_PORT_RETRIEVAL: "{{ aa_ssl_port_retrieval | default('') }}"
+    TRUSTED_PROXIES: "{{ aa_trusted_proxies | default([]) | map('regex_replace', '\\.', '\\\\.') | join('|') }}"
+  changed_when: true
+
+- name: Deploy facility template changes
+  become: true
+  ansible.builtin.template:
+    src: facility_template_changes.html
+    dest: "/tmp/facility_template_changes.html"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0644'
+
+# Configure site specific content
+- name: Configure static AA content
+  become: true
+  ansible.builtin.command:
+    chdir: "{{ aa_install_location }}/install_scripts"
+    cmd: >-
+      java -cp ${DEPLOY_DIR}/mgmt/webapps/mgmt/WEB-INF/classes:${DEPLOY_DIR}/mgmt/webapps/mgmt/WEB-INF/lib/log4j-1.2-api-*.jar
+      org.epics.archiverappliance.mgmt.bpl.SyncStaticContentHeadersFooters
+      /tmp/facility_template_changes.html ${DEPLOY_DIR}/mgmt/webapps/mgmt/ui
+  environment:
+    DEPLOY_DIR: "{{ aa_deploy_location }}"
+    PATH: "{{ aa_java_home }}/bin:${PATH}"
+  changed_when: true
+
+# A temporary fix for the mysql connection host
+- name: Replace mysql host string
+  become: true
+  ansible.builtin.replace:
+    path: "{{ aa_deploy_location }}/mgmt/conf/context.xml"
+    regexp: 'jdbc:mysql://localhost:3306'
+    replace: "jdbc:mysql://{{ aa_mysql_server }}:3306"
+
+# Deploy per-instance startup scripts
+- name: Deploy startup script for each instance
+  become: true
+  ansible.builtin.template:
+    src: instance_startup.sh.j2
+    dest: "{{ aa_deploy_location }}/{{ beamline_name }}_{{ item.name }}_startup.sh"
+    mode: '0755'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  loop:
+    - { name: 'mgmt', java_opts: '{{ aa_java_opts_mgmt }}' }
+    - { name: 'engine', java_opts: '{{ aa_java_opts_engine }}' }
+    - { name: 'etl', java_opts: '{{ aa_java_opts_etl }}' }
+    - { name: 'retrieval', java_opts: '{{ aa_java_opts_retrieval }}' }
+  vars:
+    aa_instance_name: "{{ item.name }}"
+    aa_java_opts: "{{ item.java_opts }}"
+
+# Fix permissions for deploy
+- name: Set owner and group on deploy location
+  become: true
+  ansible.builtin.file:
+    path: "{{ aa_deploy_location }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    recurse: true
+
+- name: Include custom log configuration
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_logging
+  when: aa_configure_custom_logs | bool
+
+# Deploy per-instance systemd service files
+- name: Deploy systemd service file for each instance
+  become: true
+  ansible.builtin.template:
+    src: aa_instance.service.j2
+    dest: "/etc/systemd/system/{{ beamline_name }}_{{ item }}_aa.service"
+    mode: '0644'
+    owner: root
+    group: root
+  loop:
+    - mgmt
+    - engine
+    - etl
+    - retrieval
+  vars:
+    aa_instance_name: "{{ item }}"
+
+# Start AA instances in proper order: mgmt -> engine -> etl -> retrieval
+- name: Restart and enable instance services
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    enabled: true
+    daemon_reload: true
+    name: "{{ beamline_name }}_{{ item }}_aa.service"
+  loop:
+    - mgmt
+    - engine
+    - etl
+    - retrieval
+
+# Optional: clean up old monolithic service (opt-in)
+- name: Disable and stop old monolithic AA service
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_aa.service"
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  when: aa_cleanup_legacy_service | bool and legacy_service_status.stat.exists
+
+- name: Remove old monolithic AA service unit file
+  become: true
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ beamline_name }}_aa.service"
+    state: absent
+  when: aa_cleanup_legacy_service | bool and legacy_service_status.stat.exists
+
+- name: Remove old monolithic startup script
+  become: true
+  ansible.builtin.file:
+    path: "{{ aa_deploy_location }}/{{ beamline_name }}_startup.sh"
+    state: absent
+  when: aa_cleanup_legacy_service | bool

@@ -7,7 +7,7 @@ Role Variables
 --------------
 
 | Variable | Description | Default |
-|----------|-------------|---------|
+| --- | --- | --- |
 | `cs_studio_bobs.base_repo` | Base URL for git repositories | `""` (required) |
 | `cs_studio_bobs.basedir` | Local directory for BOB files | `/opt/css/bobs` |
 | `cs_studio_bobs.version` | Git branch/tag to checkout | `["main"]` |

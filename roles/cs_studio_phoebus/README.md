@@ -30,7 +30,7 @@ Role Variables
 --------------
 
 | Variable | Type | Default | Description |
-|----------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `cs_studio_phoebus_version` | string | `master` | Git branch/tag for the upstream Phoebus repo. |
 | `cs_studio_phoebus_nsls2_version` | string | `nsls2-ansible-deploy` | Git branch/tag for the products repo. |
 | `cs_studio_phoebus_java_home` | string | `/opt/epics-tools/lib/jvm/jdk-17` | JAVA_HOME for Maven builds. |

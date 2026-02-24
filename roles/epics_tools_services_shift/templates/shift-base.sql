@@ -23,5 +23,3 @@ CREATE TABLE `shift` (
    PRIMARY KEY  (`id`),
    CONSTRAINT `type_id_fk` FOREIGN KEY (`type_id`) REFERENCES `type` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-

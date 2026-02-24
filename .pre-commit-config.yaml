@@ -1,0 +1,49 @@
+---
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: ansible-lint
+        files: \.(yaml|yml)$
+        exclude: "^."
+        name: ansible lint
+        language: system
+        entry: ansible-lint -c .ansible-lint --offline
+        types: [yaml]
+        description: Perform ansible linting
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.46.0
+    hooks:
+      - id: markdownlint
+        types: [markdown]
+        entry: markdownlint --config .markdown-lint.yml --fix
+        description: Run markdownlint linter with repair
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.6
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+        types: [python]
+        description: Run ruff linter
+      - id: ruff-format
+        types: [python]
+        description: Run ruff formatter
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        exclude: templates/
+        types: [shell]
+        description: Run shellcheck linter

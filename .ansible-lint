@@ -3,3 +3,5 @@ skip_list:
   - var-naming
 exclude_paths:
   - .github/workflows/super-linter.yml
+  - .markdown-lint.yml
+  - .pre-commit-config.yaml

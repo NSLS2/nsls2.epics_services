@@ -1,16 +1,23 @@
 ---
-# tasks file for epics_tools_services_aa
+# tasks file for epics_tools_services_aa_cluster
+# Thin orchestrator - delegates to composable sub-roles
 
-# download build and install dependencies
-- include: dependencies.yml
-- include: configure_mysql.yml
+- name: Install dependencies (JDK, Tomcat, MySQL connector)
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_dependencies
 
-# configure SSL certificates if enabled
-- include: configure_ssl.yml
+- name: Configure local MariaDB
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_mysql
 
-# build aa
-# TODO: replace with the use of prebuilt binaries
-- include: build_aa.yml
+- name: Configure SSL certificates
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_ssl
 
-# install and deploy aa
-- include: install_aa.yml
+- name: Build Archiver Appliance
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_build
+
+- name: Deploy Archiver Appliance
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.aa_deploy

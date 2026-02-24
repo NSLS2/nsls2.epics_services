@@ -31,7 +31,7 @@ Role Variables
 --------------
 
 | Variable | Type | Default | Description |
-|----------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `beamline_name` | string | `tst` | Used in cluster name and data/log paths. |
 | `epics_services_account` | string | `csstudio` | OS user for file ownership. |
 | `elastic_version` | string | `8.12.0` | Elasticsearch version to install (major.minor.patch). |

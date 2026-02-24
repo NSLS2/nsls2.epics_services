@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck source=/dev/null
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -6,7 +7,7 @@ export NVM_DIR="$HOME/.nvm"
 export PORT=3000
 
 id
-echo ${HOME}
+echo "${HOME}"
 
 npm -v
 npm install

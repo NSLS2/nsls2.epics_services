@@ -36,7 +36,7 @@ Role Variables
 --------------
 
 | Variable | Type | Default | Description |
-|----------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `beamline_name` | string | `tst` | Used in installation path and service names. |
 | `epics_services_account` | string | `csstudio` | OS user that owns the Kafka installation. |
 | `kafka_java_home` | string | `/opt/epics-tools/lib/jvm/jdk-17` | JAVA_HOME for Kafka and Zookeeper. |
