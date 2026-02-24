@@ -1,0 +1,9 @@
+---
+# Configuration for flushing Phoebus web runtime cache
+#
+# Override this value in your inventory or playbook:
+#   phoebus_dbwr_urls:
+#     - "https://your-webview-server/dbwr"
+
+# List of Phoebus DBWR (Display Builder Web Runtime) URLs to flush cache
+phoebus_dbwr_urls: []
