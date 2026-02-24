@@ -1,0 +1,22 @@
+---
+# Configuration for deploying Phoebus web BOB display files
+#
+# Override these values in your inventory or playbook:
+#   cs_studio_bobs:
+#     base_repo: "https://github.com/your-org"
+#     repos:
+#       - "your-web-bobs-repo"
+
+cs_studio_bobs:
+  # Base URL for git repositories (without trailing slash)
+  base_repo: ""
+
+  # Local directory where BOB files will be deployed
+  basedir: /opt/css/bobs
+
+  # Git branch/tag to checkout
+  version:
+    - main
+
+  # List of repository names to clone from base_repo
+  repos: []

@@ -1,0 +1,22 @@
+---
+# Configuration for deploying CS-Studio/Phoebus preferences
+#
+# Override these values in your inventory or playbook:
+#   cs_studio_preferences_config:
+#     repo: "https://github.com/your-org/your-preferences-repo.git"
+
+cs_studio_preferences_config:
+  # Git repository URL for preferences
+  repo: ""
+
+  # Git branch/tag to checkout
+  version: main
+
+  # Local directory where preferences will be deployed
+  basedir: /opt/css/preferences
+
+  # Local directory for CS-Studio configuration files
+  configdir: /opt/css/configuration
+
+  # User that will own the preferences files
+  user: csstudio

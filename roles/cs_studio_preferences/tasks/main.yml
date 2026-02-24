@@ -1,0 +1,34 @@
+---
+
+- name: Check for repo dir
+  ansible.builtin.stat:
+    path: "{{ cs_studio_preferences_config.basedir }}"
+  register: _stat
+
+- name: Recursively change permissions
+  ansible.builtin.file:
+    dest: "{{ cs_studio_preferences_config.basedir }}"
+    owner: root
+    group: root
+    mode: "u=rwX,g=rX,o=rX"
+    recurse: true
+  when: _stat.stat.exists
+
+- name: Clone and/or update the cs-studio preferences repo
+  ansible.builtin.git:
+    repo: "{{ cs_studio_preferences_config.repo }}"
+    dest: "{{ cs_studio_preferences_config.basedir }}"
+    version: "{{ cs_studio_preferences_config.version }}"
+    force: true
+
+- name: Create folder for cs-studio perspectives
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+    force: true
+  loop:
+    - "{{ cs_studio_preferences_config.configdir }}"
+    - "{{ cs_studio_preferences_config.configdir + '/perspectives' }}"

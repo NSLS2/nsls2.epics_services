@@ -1,0 +1,7 @@
+---
+
+- name: Install all cs-studio-repos
+  ansible.builtin.include_tasks: bobs.yml
+  loop: "{{ cs_studio_bobs.repos | product(cs_studio_bobs.version) | list }}"
+  loop_control:
+    loop_var: _repo

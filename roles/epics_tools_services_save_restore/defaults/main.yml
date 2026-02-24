@@ -1,0 +1,34 @@
+---
+# defaults file for epics_tools_services_save_restore
+#
+# Override organization-specific values in your inventory:
+#   ad_url: "ldap://your-ad-server.example.com"
+#   ad_domain: "example.com"
+
+beamline_name: "tst"
+beamline_id: "31"
+
+epics_services_account: epics-services-{{beamline_name}}
+
+save_restore_http_port: 2{{ beamline_id }}80
+save_restore_https_port: 2{{ beamline_id }}81
+
+save_restore_version: "4.7.4"
+save_restore_jar: /opt/epics-tools/services/{{beamline_name}}/save_restore/service-save-and-restore-{{ save_restore_version }}.jar
+
+save_restore_java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+
+# Path to logback configuration
+phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
+
+# elastic info
+es_host: "localhost"
+es_port: 4{{beamline_id}}92
+
+## procServ port
+save_restore_procServ_port: "2{{ beamline_id }}46"
+
+# Active Directory configuration (organization-specific)
+ad_enabled: true
+ad_url: ""
+ad_domain: ""
