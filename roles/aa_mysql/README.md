@@ -23,8 +23,8 @@ None.
 
 Depended on by
 --------------
-- `epics_tools_services_aa` (single-instance orchestrator)
-- `epics_tools_services_aa_cluster` (cluster orchestrator)
+- `aa_service` (single-instance orchestrator)
+- `aa_cluster_service` (cluster orchestrator)
 
 Role Variables
 --------------

@@ -1,0 +1,6 @@
+---
+- name: Install procServ
+  become: true
+  ansible.builtin.package:
+    name: procServ
+    state: present

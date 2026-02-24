@@ -1,0 +1,24 @@
+[Unit]
+Description={{beamline_name}} GlassFish Server
+After=syslog.target network.target
+
+StartLimitIntervalSec=500
+StartLimitBurst=5
+
+[Service]
+Type=forking
+
+#User={{ epics_services_account }}
+#Group={{ epics_services_account }}
+
+Restart=on-failure
+RestartSec=5s
+
+Environment=JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+
+ExecStart=/opt/epics-tools/services/{{beamline_name}}/glassfish5/bin/asadmin start-domain domain1
+ExecStop=/opt/epics-tools/services/{{beamline_name}}/glassfish5/bin/asadmin stop-domain domain1
+TimeoutSec=180
+
+[Install]
+WantedBy=multi-user.target

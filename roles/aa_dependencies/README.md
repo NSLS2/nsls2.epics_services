@@ -3,15 +3,15 @@ aa_dependencies
 
 Installs system-level dependencies required by the
 [EPICS Archiver Appliance](https://github.com/archiver-appliance/epicsarchiverap):
-OpenJDK 17, Tomcat (with Tomcat Native), and the MySQL JDBC connector.
+Tomcat (with Tomcat Native) and the MySQL JDBC connector.
 
 All packages are installed from RPM repositories. The MySQL connector is
 downloaded from the MySQL CDN.
 
+JDK 17 is installed separately via the `jdk_dependency` role.
+
 What it does
 ------------
-- Installs OpenJDK 17 (`java-17-openjdk`, `java-17-openjdk-devel`) and sets the
-  `java_home_rpm` fact
 - Installs Tomcat and Tomcat Native via RPM
 - Creates the dependencies directory and downloads the MySQL connector JAR
 
@@ -21,8 +21,8 @@ None.
 
 Depended on by
 --------------
-- `epics_tools_services_aa` (single-instance orchestrator)
-- `epics_tools_services_aa_cluster` (cluster orchestrator)
+- `aa_service` (single-instance orchestrator)
+- `aa_cluster_service` (cluster orchestrator)
 
 Role Variables
 --------------

@@ -7,7 +7,7 @@ for the
 cluster deployment.
 
 This role is only included by the cluster orchestrator
-(`epics_tools_services_aa_cluster`). Single-instance deployments do not use
+(`aa_cluster_service`). Single-instance deployments do not use
 Caddy.
 
 What it does
@@ -25,7 +25,7 @@ Dependencies
 
 Depended on by
 --------------
-- `epics_tools_services_aa_cluster` (cluster orchestrator)
+- `aa_cluster_service` (cluster orchestrator)
 
 Role Variables
 --------------

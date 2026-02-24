@@ -1,0 +1,92 @@
+---
+# tasks file for elasticsearch_dependency
+
+- name: Import Elasticsearch GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    key: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Add Elasticsearch yum repository
+  become: true
+  ansible.builtin.template:
+    src: elasticsearch.repo.j2
+    dest: /etc/yum.repos.d/elasticsearch.repo
+    mode: "0644"
+    owner: root
+    group: root
+
+- name: Install Elasticsearch
+  become: true
+  ansible.builtin.yum:
+    name: "elasticsearch-{{ elastic_version }}"
+    state: present
+  notify:
+    - Restart elasticsearch
+
+- name: Reset Elasticsearch keystore to remove auto-generated security entries
+  become: true
+  ansible.builtin.command:
+    cmd: /usr/share/elasticsearch/bin/elasticsearch-keystore create
+    creates: /etc/elasticsearch/.keystore_reset
+    stdin: "y"
+  register: _es_keystore_reset
+  notify:
+    - Restart elasticsearch
+
+- name: Mark keystore as reset  # noqa: no-handler
+  become: true
+  ansible.builtin.file:
+    path: /etc/elasticsearch/.keystore_reset
+    state: touch
+    mode: "0644"
+    owner: root
+    group: elasticsearch
+  when: _es_keystore_reset.changed
+
+- name: Ensure data directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ elastic_data }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: "0750"
+
+- name: Ensure log directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ elastic_logs }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: "0750"
+
+- name: Install the elasticsearch configuration
+  become: true
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    mode: "0660"
+    owner: root
+    group: elasticsearch
+  notify:
+    - Restart elasticsearch
+
+- name: Configure Elasticsearch JVM heap size
+  become: true
+  ansible.builtin.template:
+    src: jvm_heap.options.j2
+    dest: /etc/elasticsearch/jvm.options.d/heap.options
+    mode: "0644"
+    owner: root
+    group: elasticsearch
+  notify:
+    - Restart elasticsearch
+
+- name: Enable elasticsearch service
+  become: true
+  ansible.builtin.systemd:
+    name: elasticsearch
+    enabled: true
+    daemon_reload: true

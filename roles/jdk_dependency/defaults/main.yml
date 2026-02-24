@@ -1,0 +1,4 @@
+---
+# No configurable defaults — JDK 17 is installed from RPM.
+# Other roles should reference the RPM path directly:
+#   /usr/lib/jvm/java-17-openjdk

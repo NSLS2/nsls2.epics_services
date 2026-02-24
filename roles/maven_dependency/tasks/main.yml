@@ -1,0 +1,21 @@
+---
+- name: Ensure Maven directory exists
+  become: true
+  ansible.builtin.file:
+    path: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+    state: directory
+    owner: "{{ maven_dependency_owner }}"
+    group: "{{ maven_dependency_owner }}"
+    mode: "u=rwX,g=rwX,o=rX"
+
+- name: Install Maven
+  become: true
+  ansible.builtin.unarchive:
+    src: "{{ maven_url }}"
+    dest: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+    creates: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}/bin/mvn"
+    remote_src: true
+    owner: "{{ maven_dependency_owner }}"
+    group: "{{ maven_dependency_owner }}"
+    extra_opts:
+      - --strip-components=1

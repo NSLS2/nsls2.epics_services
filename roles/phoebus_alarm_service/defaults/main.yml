@@ -1,0 +1,38 @@
+---
+# defaults file for phoebus_alarm_service
+beamline_name: "tst"
+
+java_home: "/usr/lib/jvm/java-17-openjdk"
+
+# Alarm Server channel access options
+alarm_epics_ca_addr_list: localhost
+
+epics_services_account: csstudio
+
+zookeeper_port: 2181
+
+kafka_installation: "/opt/epics-tools/services/{{ beamline_name }}/kafka"
+kafka_server: "localhost"
+kafka_port: 9092
+
+es_host: "localhost"
+es_port: 9200
+
+alarm_config: "Accelerator"
+
+alarm_mail_server: "localhost"
+alarm_mail_server_port: 25
+alarm_mail_server_from: "{{ beamline_name }}_phoebus@localhost"
+
+phoebus_alarm_server_version: 5.0.0
+phoebus_alarm_server_jar: "service-alarm-server-{{ phoebus_alarm_server_version }}.jar"
+phoebus_alarm_server_procServ_port: "60046"
+
+phoebus_alarm_logger_version: 5.0.0
+phoebus_alarm_logger_jar: "service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
+phoebus_alarm_logger_procServ_port: "60047"
+
+phoebus_alarm_config_logger_version: 5.0.0
+phoebus_alarm_config_logger_jar: "service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
+phoebus_alarm_config_logger_procServ_port: "60048"
+phoebus_alarm_config_local_repo: "/opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/alarm_config_logger"

@@ -27,4 +27,4 @@ Dependencies
 ------------
 
 Phoebus Web runtime:
-role: epics_tools_services_phoebus_web_runtime
+role: phoebus_web_runtime_service

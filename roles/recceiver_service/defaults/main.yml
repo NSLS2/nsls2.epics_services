@@ -1,0 +1,16 @@
+---
+# defaults file for recceiver_service
+#
+# Override organization-specific values in your inventory:
+#   recsync_addr_list: "your-broadcast:5049,another-broadcast:5049"
+#   cf_url: "http://your-channelfinder:8080/ChannelFinder"
+
+# RecSync broadcast addresses (organization-specific)
+recsync_addr_list: ""
+
+# ChannelFinder URL (organization-specific)
+cf_url: ""
+cf_user: cfstore
+cf_password: password
+
+epics_services_account: csstudio
