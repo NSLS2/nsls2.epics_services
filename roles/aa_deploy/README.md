@@ -3,8 +3,7 @@ aa_deploy
 
 Unified deployment role for the
 [EPICS Archiver Appliance](https://github.com/archiver-appliance/epicsarchiverap).
-Handles both single-instance and cluster deployments using the same task flow,
-with SSL and cluster features gated by variables.
+Handles both single-instance and cluster deployments using the same task flow.
 
 Each Archiver Appliance instance is deployed as **four separate Tomcat
 processes** (mgmt, engine, etl, retrieval), each managed by its own systemd
@@ -22,8 +21,7 @@ What it does
 - Deploys configuration scripts (single_machine_install.sh,
   deployMultipleTomcats.py, addMysqlConnPool.py, policies.py)
 - Deploys `appliances.xml` when cluster appliances are defined
-- Runs the installation script with unified environment variables (SSL and
-  cluster settings are passed as env vars and handled conditionally)
+- Runs the installation script with unified environment variables
 - Deploys site-specific static content (facility_template_changes.html)
 - Deploys per-instance startup scripts and systemd unit files
 - Restarts and enables all four instance services
@@ -35,8 +33,6 @@ Dependencies
 - `aa_dependencies` (JDK, Tomcat, MySQL connector)
 - `aa_mysql` (database must exist before deployment)
 - `aa_build` (the built tar.gz must be available)
-- `aa_ssl` *(cluster only)* -- certificates must be in place before deployment
-
 Depended on by
 --------------
 - `epics_tools_services_aa` (single-instance orchestrator)
@@ -49,7 +45,6 @@ Role Variables
 
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
-| `aa_enable_ssl` | bool | `false` | Enable SSL connectors in Tomcat. Set to `true` in cluster deployments. |
 | `aa_cleanup_legacy_service` | bool | `false` | When `true`, disables and removes the old monolithic `{{ beamline_name }}_aa` service and startup script. |
 
 **Required variables** (provided by the calling orchestrator):
@@ -86,16 +81,8 @@ Role Variables
 | `aa_logs_base_dir` | string | Base directory for log files. |
 | `aa_data_mount_name` | string | Systemd mount dependency for data volumes (empty string if none). |
 
-**Optional variables** (used when `aa_enable_ssl` is true):
+**Optional variables:**
 
 | Variable | Type | Description |
 | --- | --- | --- |
-| `aa_ssl_cert_file` | string | Path to the SSL certificate file. |
-| `aa_ssl_key_file` | string | Path to the SSL private key file. |
-| `aa_ssl_chain_file` | string | Path to the CA chain file. |
-| `aa_ssl_port_mgmt` | string | HTTPS port for the mgmt instance. |
-| `aa_ssl_port_engine` | string | HTTPS port for the engine instance. |
-| `aa_ssl_port_etl` | string | HTTPS port for the etl instance. |
-| `aa_ssl_port_retrieval` | string | HTTPS port for the retrieval instance. |
-| `aa_trusted_proxies` | list | IP addresses of trusted reverse proxies. |
 | `aa_cluster_appliances` | list | Cluster appliance definitions (triggers appliances.xml deployment). |

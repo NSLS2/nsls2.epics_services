@@ -61,21 +61,6 @@ def deployMultipleTomcats(destFolder):
         )
         sys.exit(1)
 
-    # SSL configuration from environment variables
-    enableSSL = os.getenv("ENABLE_SSL", "false").lower() == "true"
-    sslCertFile = os.getenv("SSL_CERT_FILE", "")
-    sslKeyFile = os.getenv("SSL_KEY_FILE", "")
-    sslChainFile = os.getenv("SSL_CHAIN_FILE", "")
-    trustedProxies = os.getenv("TRUSTED_PROXIES", "0:0:0:0:0:0:0:1|127\\.0\\.0\\.1")
-
-    # SSL ports for each component
-    sslPorts = {
-        "mgmt": os.getenv("SSL_PORT_MGMT", ""),
-        "engine": os.getenv("SSL_PORT_ENGINE", ""),
-        "etl": os.getenv("SSL_PORT_ETL", ""),
-        "retrieval": os.getenv("SSL_PORT_RETRIEVAL", ""),
-    }
-
     print(
         "Using\n\ttomcat installation at",
         tomcatHome,
@@ -86,8 +71,6 @@ def deployMultipleTomcats(destFolder):
         "\n\tinto folder",
         destFolder,
     )
-    if enableSSL:
-        print("SSL is ENABLED with certificate:", sslCertFile)
 
     # Parse the tomcat/conf/server.xml file and determine the stop start port
     # We start incrementing and use this port+1 for each of the new webapps
@@ -148,27 +131,15 @@ def deployMultipleTomcats(destFolder):
                 "port", str(newServerStopStartPort)
             )
 
-            # Find the Service element to add connectors
-            serviceElement = newServerDom.getElementsByTagName("Service").item(0)
-
             # Find the 'Connector' whose 'protocol' is 'HTTP/1.1'
             haveSetConnector = False
-            httpConnectorToReplace = None
             for httplistenerNode in newServerDom.getElementsByTagName("Connector"):
                 if (
                     httplistenerNode.hasAttribute("protocol")
                     and httplistenerNode.getAttribute("protocol") == "HTTP/1.1"
                 ):
-                    if enableSSL and sslPorts[app]:
-                        # When SSL is enabled, save this connector to replace with SSL connector
-                        httpConnectorToReplace = httplistenerNode
-                        haveSetConnector = True
-                    else:
-                        # No SSL, just update the HTTP port
-                        httplistenerNode.setAttribute(
-                            "port", str(httplistenerports[app])
-                        )
-                        haveSetConnector = True
+                    httplistenerNode.setAttribute("port", str(httplistenerports[app]))
+                    haveSetConnector = True
                 else:
                     print(
                         "Commenting connector with protocol ",
@@ -184,75 +155,6 @@ def deployMultipleTomcats(destFolder):
                 raise AssertionError(
                     "We have not set the HTTP listener port for " + app
                 )
-
-            # Add SSL connector if enabled
-            if enableSSL and sslPorts[app]:
-                print(f"Adding SSL connector for {app} on port {sslPorts[app]}")
-
-                # Create SSL Connector element with APR protocol
-                sslConnector = newServerDom.createElement("Connector")
-                sslConnector.setAttribute("port", str(sslPorts[app]))
-                sslConnector.setAttribute(
-                    "protocol", "org.apache.coyote.http11.Http11AprProtocol"
-                )
-                sslConnector.setAttribute("maxThreads", "150")
-                sslConnector.setAttribute("SSLEnabled", "true")
-                sslConnector.setAttribute("scheme", "https")
-                sslConnector.setAttribute("secure", "true")
-                sslConnector.setAttribute("connectionTimeout", "20000")
-                sslConnector.setAttribute("maxParameterCount", "1000")
-
-                # Create UpgradeProtocol for HTTP/2
-                upgradeProtocol = newServerDom.createElement("UpgradeProtocol")
-                upgradeProtocol.setAttribute(
-                    "className", "org.apache.coyote.http2.Http2Protocol"
-                )
-                sslConnector.appendChild(upgradeProtocol)
-
-                # Create SSLHostConfig element
-                sslHostConfig = newServerDom.createElement("SSLHostConfig")
-                sslHostConfig.setAttribute("honorCipherOrder", "false")
-
-                # Create Certificate element with file paths
-                certificate = newServerDom.createElement("Certificate")
-                certificate.setAttribute("certificateKeyFile", sslKeyFile)
-                certificate.setAttribute("certificateFile", sslCertFile)
-                if sslChainFile:
-                    certificate.setAttribute("certificateChainFile", sslChainFile)
-                certificate.setAttribute("type", "RSA")
-
-                sslHostConfig.appendChild(certificate)
-                sslConnector.appendChild(sslHostConfig)
-
-                # Replace the HTTP connector with the SSL connector
-                # This ensures only one connector on the port (HTTPS instead of HTTP)
-                if httpConnectorToReplace:
-                    print(
-                        f"Replacing HTTP connector with HTTPS connector on port {sslPorts[app]}"
-                    )
-                    serviceElement.replaceChild(sslConnector, httpConnectorToReplace)
-                else:
-                    # Fallback if no HTTP connector found
-                    serviceElement.appendChild(sslConnector)
-
-                # Add RemoteIpValve to the Host element for correct IP logging with proxies
-                print(f"Adding RemoteIpValve for {app} to handle X-Forwarded-* headers")
-                hostElement = newServerDom.getElementsByTagName("Host").item(0)
-
-                remoteIpValve = newServerDom.createElement("Valve")
-                remoteIpValve.setAttribute(
-                    "className", "org.apache.catalina.valves.RemoteIpValve"
-                )
-                remoteIpValve.setAttribute("internalProxies", trustedProxies)
-                remoteIpValve.setAttribute("remoteIpHeader", "x-forwarded-for")
-                remoteIpValve.setAttribute("remoteIpProxiesHeader", "x-forwarded-by")
-                remoteIpValve.setAttribute("protocolHeader", "x-forwarded-proto")
-
-                # Insert RemoteIpValve as the first child of Host element
-                if hostElement.firstChild:
-                    hostElement.insertBefore(remoteIpValve, hostElement.firstChild)
-                else:
-                    hostElement.appendChild(remoteIpValve)
 
             with open(subFolder + "/conf/server.xml", "w") as file:
                 newServerDom.writexml(file)
