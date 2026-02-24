@@ -1,0 +1,12 @@
+---
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart AA service
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ beamline_name }}_aa.service"
+    state: restarted
+    enabled: true

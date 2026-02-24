@@ -14,7 +14,7 @@ aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-n
 
 aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
 aa_build_loc: /tmp/aa_{{ beamline_name }}_build
-aa_version: 2.0.8
+aa_version: 2.2.1
 
 # Installation and deployment locations
 aa_install_location: "/opt/epics-tools/services/{{ beamline_name }}/aa/install"

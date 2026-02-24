@@ -1,0 +1,18 @@
+---
+# tasks file for epics_tools_services_aa
+
+# download build and install dependencies
+- name: Include dependency tasks
+  ansible.builtin.include_tasks: dependencies.yml
+
+- name: Include MySQL configuration tasks
+  ansible.builtin.include_tasks: configure_mysql.yml
+
+# build aa
+# TODO: replace with the use of prebuilt binaries
+- name: Include build tasks
+  ansible.builtin.include_tasks: build_aa.yml
+
+# install and deploy aa
+- name: Include install tasks
+  ansible.builtin.include_tasks: install_aa.yml

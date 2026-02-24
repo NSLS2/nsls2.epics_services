@@ -1,0 +1,35 @@
+---
+# Install PyMySQL
+- name: Install PyMySQL
+  become: true
+  ansible.builtin.pip:
+    name: PyMySQL
+
+- name: Install the mysql client
+  become: true
+  ansible.builtin.package:
+    name: mysql
+    state: present
+
+# Create the archiver database
+- name: Create a new database with name "{{ aa_mysql_database }}"
+  become: true
+  community.mysql.mysql_db:
+    name: "{{ aa_mysql_database }}"
+    state: present
+    login_host: "{{ aa_mysql_server }}"
+    login_user: root
+    login_password: "{{ jdbc_root_user }}"
+
+# Create the aa users and grant privileges
+- name: Create aa mysql user
+  become: true
+  community.mysql.mysql_user:
+    state: present
+    name: "{{ aa_mysql_user }}"
+    password: "{{ aa_mysql_password }}"
+    priv: '{{ aa_mysql_database }}.*:ALL,GRANT'
+    host: '%'
+    login_host: "{{ aa_mysql_server }}"
+    login_user: root
+    login_password: "{{ jdbc_root_user }}"
