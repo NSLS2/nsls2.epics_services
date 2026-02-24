@@ -1,0 +1,59 @@
+---
+# defaults file for epics_tools_services_aa
+
+beamline_name: tst
+beamline_id: "31"
+
+epics_services_account: csstudio
+
+# Dependency locations and versions
+aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
+aa_dependencies_tomcat_version: "9.0.109"
+aa_build_loc: /tmp/aa_{{ beamline_name }}_build
+aa_version: 2.2.1
+
+# Installation and deployment locations
+# The installation location is used to prepare the various aa services needed
+# in a deployment
+aa_install_location: "/opt/epics-tools/services/{{ beamline_name }}/aa/install"
+# The deploy location is the final location consisting of the configured and runnable
+# instances of the aa services
+aa_deploy_location: "/opt/epics-tools/services/{{ beamline_name }}/aa/deploy"
+
+# Archiver Appliance MySQL info
+aa_mysql_server: "localhost"
+aa_mysql_database: "{{ beamline_name }}_archappl"
+aa_mysql_user: "{{ beamline_name }}_archappl"
+aa_mysql_password: "{{ beamline_name }}_archappl"
+# jdbc_root_user: "create_password"
+
+# Archiver Identity and Ports
+aa_identity: appliance0
+cluster_inetport: "1{{ beamline_id }}70"
+mgmt_port: "1{{ beamline_id }}65"
+engine_port: "1{{ beamline_id }}66"
+etl_port: "1{{ beamline_id }}67"
+data_retrieval_port: "1{{ beamline_id }}68"
+
+# Archiver channel access options
+aa_epics_ca_addr_list: localhost
+
+# Archiver Java Options
+aa_java_home: "/opt/epics-tools/lib/jvm/jdk-17"
+aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+aa_java_opts_mgmt: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+
+# Archiver Data Locations
+aa_sts: "{{ aa_deploy_location }}/data/sts/ArchiverStore"
+aa_mts: "{{ aa_deploy_location }}/data/mts/ArchiverStore"
+aa_lts: "{{ aa_deploy_location }}/data/lts/ArchiverStore"
+
+# Archiver Log Locations
+aa_logs_base_dir: "/var/log/archiver-appliance"
+aa_configure_custom_logs: false
+
+# Systemd mount dependency
+# Example: "nsls2-data-beamline.mount" - leave empty if no mount dependency needed
+aa_data_mount_name: ""
