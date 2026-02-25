@@ -50,12 +50,20 @@
     dest: "/etc/systemd/system/{{ tomcat_service_name }}.service"
   when: ansible_service_mgr == "systemd"
 
+- name: Validate SSL keystore file is set when SSL is enabled
+  assert:
+    that:
+      - tomcat_ssl_keystore_file | length > 0
+    fail_msg: "tomcat_ssl_keystore_file must be set when tomcat_ssl_enabled is true"
+  when: tomcat_ssl_enabled | bool
+
 - name: Set ports and other server configuration
   template:
     src: server.xml.j2
     dest: "{{ tomcat_dest }}/conf/server.xml"
     owner:  "{{ epics_services_account }}"
     group:  "{{ epics_services_account }}"
+  notify: restart tomcat
 
 - name: Start and enable tomcat
   service:
