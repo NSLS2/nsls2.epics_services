@@ -20,3 +20,15 @@ ui_admin_pass: Str0ngAdminP@ssw3rd          # UI admin password
 java_home: "/usr/lib/jvm/java-17-openjdk"
 
 epics_services_account: csstudio
+
+# SSL/TLS configuration (NIO connector, no APR needed)
+tomcat_ssl_enabled: false
+tomcat_ssl_port: 4443
+tomcat_ssl_keystore_file: ""
+tomcat_ssl_keystore_password: "changeit"
+
+# APR lifecycle listener (not needed for NIO SSL)
+tomcat_apr_enabled: false
+
+# Health check valve (provides /health endpoint, requires Tomcat >= 9.0.55)
+tomcat_health_check_enabled: false
