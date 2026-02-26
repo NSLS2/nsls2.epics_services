@@ -3,7 +3,7 @@
 
 - name: Ensure kafka services directory exists
   ansible.builtin.file:
-    path: {{ kafka_install_dir }}
+    path: "{{ kafka_install_dir }}"
     state: directory
     mode: '0775'
     owner: "{{ epics_services_account }}"
@@ -12,7 +12,7 @@
 - name: Install kafka
   ansible.builtin.unarchive:
     src: https://downloads.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz
-    dest: {{ kafka_install_dir }}
+    dest: "{{ kafka_install_dir }}"
     remote_src: true
     mode: '0775'
     owner: "{{ epics_services_account }}"
@@ -26,7 +26,7 @@
 - name: Ensure kafka logs directory has correct ownership
   become: true
   ansible.builtin.file:
-    path: {{ kafka_install_dir }}/logs
+    path: "{{ kafka_install_dir }}/logs"
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -36,7 +36,7 @@
   become: true
   ansible.builtin.template:
     src: zookeeper.properties
-    dest: {{ kafka_install_dir }}/config/zookeeper.properties
+    dest: "{{ kafka_install_dir }}/config/zookeeper.properties"
     mode: '0644'
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -47,7 +47,7 @@
   become: true
   ansible.builtin.template:
     src: server.properties
-    dest: {{ kafka_install_dir }}/config/server.properties
+    dest: "{{ kafka_install_dir }}/config/server.properties"
     mode: '0644'
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"

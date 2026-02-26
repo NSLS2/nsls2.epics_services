@@ -11,7 +11,7 @@
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm.sh.j2
-    dest: {{ phoebus_alarm_install_dir }}/alarm_server/run-phoebus-alarm.sh
+    dest: "{{ phoebus_alarm_install_dir }}/alarm_server/run-phoebus-alarm.sh"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -36,7 +36,7 @@
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm-logger.sh.j2
-    dest: {{ phoebus_alarm_install_dir }}/alarm_logger/run-phoebus-alarm-logger.sh
+    dest: "{{ phoebus_alarm_install_dir }}/alarm_logger/run-phoebus-alarm-logger.sh"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -61,8 +61,7 @@
   become: true
   ansible.builtin.template:
     src: run-phoebus-alarm-config-logger.sh.j2
-    dest: >-
-      {{ phoebus_alarm_install_dir }}/alarm_config_logger/run-phoebus-alarm-config-logger.sh
+    dest: "{{ phoebus_alarm_install_dir }}/alarm_config_logger/run-phoebus-alarm-config-logger.sh"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
