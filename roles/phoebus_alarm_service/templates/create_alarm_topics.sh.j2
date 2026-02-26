@@ -18,15 +18,15 @@ config=$1
 # Create the compacted topics.
 for topic in "$1"
 do
-    {{ kafka_installation }}/bin/kafka-topics.sh  --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --create --replication-factor 1 --partitions 1 --topic $topic
-    {{ kafka_installation }}/bin/kafka-configs.sh --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --entity-type topics --alter --entity-name $topic \
+    {{ kafka_install_dir }}/bin/kafka-topics.sh  --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --create --replication-factor 1 --partitions 1 --topic $topic
+    {{ kafka_install_dir }}/bin/kafka-configs.sh --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --entity-type topics --alter --entity-name $topic \
            --add-config cleanup.policy=compact,segment.ms=10000,min.cleanable.dirty.ratio=0.01,min.compaction.lag.ms=1000
 done
 
 # Create the deleted topics
 for topic in "${1}Command" "${1}Talk"
 do
-    {{ kafka_installation }}/bin/kafka-topics.sh  --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --create --replication-factor 1 --partitions 1 --topic $topic
-    {{ kafka_installation }}/bin/kafka-configs.sh --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --entity-type topics --alter --entity-name $topic \
+    {{ kafka_install_dir }}/bin/kafka-topics.sh  --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --create --replication-factor 1 --partitions 1 --topic $topic
+    {{ kafka_install_dir }}/bin/kafka-configs.sh --bootstrap-server {{ kafka_server }}:{{ kafka_port }} --entity-type topics --alter --entity-name $topic \
            --add-config cleanup.policy=delete,segment.ms=10000,min.cleanable.dirty.ratio=0.01,min.compaction.lag.ms=1000,retention.ms=20000,delete.retention.ms=1000,file.delete.delay.ms=1000
 done

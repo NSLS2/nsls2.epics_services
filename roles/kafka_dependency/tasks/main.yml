@@ -3,7 +3,7 @@
 
 - name: Ensure kafka services directory exists
   ansible.builtin.file:
-    path: /opt/epics-tools/services/{{ beamline_name }}/kafka
+    path: {{ kafka_install_dir }}
     state: directory
     mode: '0775'
     owner: "{{ epics_services_account }}"
@@ -12,7 +12,7 @@
 - name: Install kafka
   ansible.builtin.unarchive:
     src: https://downloads.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz
-    dest: /opt/epics-tools/services/{{ beamline_name }}/kafka
+    dest: {{ kafka_install_dir }}
     remote_src: true
     mode: '0775'
     owner: "{{ epics_services_account }}"
@@ -26,7 +26,7 @@
 - name: Ensure kafka logs directory has correct ownership
   become: true
   ansible.builtin.file:
-    path: /opt/epics-tools/services/{{ beamline_name }}/kafka/logs
+    path: {{ kafka_install_dir }}/logs
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -36,7 +36,7 @@
   become: true
   ansible.builtin.template:
     src: zookeeper.properties
-    dest: /opt/epics-tools/services/{{ beamline_name }}/kafka/config/zookeeper.properties
+    dest: {{ kafka_install_dir }}/config/zookeeper.properties
     mode: '0644'
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -47,7 +47,7 @@
   become: true
   ansible.builtin.template:
     src: server.properties
-    dest: /opt/epics-tools/services/{{ beamline_name }}/kafka/config/server.properties
+    dest: {{ kafka_install_dir }}/config/server.properties
     mode: '0644'
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -58,7 +58,7 @@
   become: true
   ansible.builtin.template:
     src: zookeeper.service
-    dest: /etc/systemd/system/{{ beamline_name }}_zookeeper.service
+    dest: /etc/systemd/system/zookeeper.service
     mode: '0644'
     owner: root
     group: root
@@ -70,7 +70,7 @@
   become: true
   ansible.builtin.template:
     src: kafka.service
-    dest: /etc/systemd/system/{{ beamline_name }}_kafka.service
+    dest: /etc/systemd/system/kafka.service
     mode: '0644'
     owner: root
     group: root

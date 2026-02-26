@@ -1,14 +1,14 @@
 ---
 # defaults file for kafka_dependency
 
-beamline_name: tst
-
 epics_services_account: csstudio
 
 kafka_java_home: "/usr/lib/jvm/java-17-openjdk"
 
+kafka_install_dir: /opt/epics-tools/services/kafka
+
 zookeeper_port: 2181
-zookeeper_data: /opt/epics-tools/services/{{ beamline_name }}/kafka/data/zookeeper
+zookeeper_data: "{{ kafka_install_dir }}/data/zookeeper"
 
 kafka_port: 9092
-kafka_logs: /opt/epics-tools/services/{{ beamline_name }}/kafka/kafka-logs
+kafka_logs: "{{ kafka_install_dir }}/kafka-logs"

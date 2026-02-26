@@ -1,23 +1,23 @@
-# File /etc/systemd/system/{{beamline_name}}phoebus_server.service
+# File /etc/systemd/system/phoebus_server.service
 #
 # After changes
 #   sudo systemctl daemon-reload
 #
 # Start/status/stop
-#   sudo systemctl start {{ beamline_name }}_phoebus_server.service
-#   sudo systemctl status {{ beamline_name }}_phoebus_server.service
-#   sudo systemctl stop {{ beamline_name }}_phoebus_server.service
+#   sudo systemctl start phoebus_server.service
+#   sudo systemctl status phoebus_server.service
+#   sudo systemctl stop phoebus_server.service
 #
 # Start when computer boots:
-#   sudo systemctl enable {{ beamline_name }}_phoebus_server.service
+#   sudo systemctl enable phoebus_server.service
 #
 
 [Unit]
 Description=alarm service
 Documentation=https://github.com/shroffk/phoebus/tree/master/services/alarm-server
 Wants=network-online.target
-After={{ beamline_name }}_kafka.service
-Requires={{ beamline_name }}_kafka.service
+After=kafka.service
+Requires=kafka.service
 
 StartLimitIntervalSec=500
 StartLimitBurst=5
@@ -31,10 +31,10 @@ RestartSec=5s
 
 Environment=JAVA_HOME={{ java_home }}
 Environment=PATH={{ java_home }}/bin:/usr/bin:/usr/local/bin
-Environment=SERVER=/opt/epics-tools/services/{{beamline_name}}/phoebus_alarm/alarm_server
+Environment=SERVER={{ phoebus_alarm_install_dir }}/alarm_server
 Environment=PORT={{ phoebus_alarm_server_procServ_port }}
 
-Environment=SETTINGS=/opt/epics-tools/services/{{beamline_name}}/phoebus_alarm/phoebus_alarm_preferences.ini
+Environment=SETTINGS={{ phoebus_alarm_install_dir }}/phoebus_alarm_preferences.ini
 
 ExecStart=/usr/bin/procServ --foreground --noautorestart --name alarm-server --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm.pid ${PORT} ./run-phoebus-alarm.sh -settings ${SETTINGS}
 

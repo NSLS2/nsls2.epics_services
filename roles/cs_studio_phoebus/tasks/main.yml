@@ -11,7 +11,6 @@
     - { path: "/opt/css", recurse: false }
     - { path: "{{ cs_studio_phoebus_products_dest }}", recurse: true }
 
-# tasks file for cs_studio_phoebus
 - name: Clone and/or update the phoebus repo
   ansible.builtin.git:
     repo: 'https://github.com/ControlSystemStudio/phoebus.git'
@@ -21,6 +20,7 @@
     update: true
     single_branch: false
     depth: 0
+  register: _phoebus_repo
 
 - name: Clone and/or update the site-specific products repo
   become: true
@@ -33,6 +33,7 @@
     update: true
     single_branch: false
     depth: 0
+  register: _products_repo
   when: cs_studio_phoebus_products_repo | length > 0
 
 # Override the default settings.xml maven file if `cs_studio_phoebus_override_mvn_settings` is set.
@@ -53,6 +54,7 @@
     mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
   args:
     chdir: /opt/css/lib/phoebus/
+  when: _phoebus_repo.changed
   changed_when: true
 
 - name: Build the common phoebus binaries
@@ -63,6 +65,7 @@
     mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true
   args:
     chdir: /opt/css/lib/phoebus/
+  when: _phoebus_repo.changed or (_products_repo.changed | default(false))
   changed_when: true
 
 - name: Build site-specific Phoebus products
@@ -73,8 +76,10 @@
     mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Ddocs=/opt/css/lib/phoebus/docs
   args:
     chdir: "{{ cs_studio_phoebus_products_dest }}/products"
+  when: >-
+    (cs_studio_phoebus_products_repo | length > 0) and
+    (_phoebus_repo.changed or (_products_repo.changed | default(false)))
   changed_when: true
-  when: cs_studio_phoebus_products_repo | length > 0
 
 - name: Create run-phoebus
   ansible.builtin.template:
