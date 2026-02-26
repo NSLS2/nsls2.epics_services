@@ -8,13 +8,13 @@
 - name: Restart zookeeper
   become: true
   ansible.builtin.systemd:
-    name: "{{ beamline_name }}_zookeeper"
+    name: "zookeeper"
     state: restarted
     enabled: true
 
 - name: Restart kafka
   become: true
   ansible.builtin.systemd:
-    name: "{{ beamline_name }}_kafka"
+    name: "kafka"
     state: restarted
     enabled: true

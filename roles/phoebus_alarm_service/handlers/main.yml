@@ -8,20 +8,20 @@
 - name: Restart alarm server
   become: true
   ansible.builtin.systemd:
-    name: "{{ beamline_name }}_phoebus_alarm"
+    name: "phoebus_alarm"
     state: restarted
     enabled: true
 
 - name: Restart alarm logger
   become: true
   ansible.builtin.systemd:
-    name: "{{ beamline_name }}_phoebus_alarm_logger"
+    name: "phoebus_alarm_logger"
     state: restarted
     enabled: true
 
 - name: Restart alarm config logger
   become: true
   ansible.builtin.systemd:
-    name: "{{ beamline_name }}_phoebus_alarm_config_logger"
+    name: "phoebus_alarm_config_logger"
     state: restarted
     enabled: true

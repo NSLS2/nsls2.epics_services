@@ -16,12 +16,12 @@ Each service runs under [procServ](https://github.com/ralphlange/procServ) for
 console access and is managed via systemd.
 
 **Installation location:**
-`/opt/epics-tools/services/{{ beamline_name }}/phoebus_alarm/`
+`/opt/epics-tools/services/phoebus_alarm/`
 
 **Service names:**
-- `{{ beamline_name }}_phoebus_alarm` (alarm server, procServ port 60046)
-- `{{ beamline_name }}_phoebus_alarm_logger` (alarm logger, procServ port 60047)
-- `{{ beamline_name }}_phoebus_alarm_config_logger` (alarm config logger, procServ port 60048)
+- `phoebus_alarm` (alarm server, procServ port 60046)
+- `phoebus_alarm_logger` (alarm logger, procServ port 60047)
+- `phoebus_alarm_config_logger` (alarm config logger, procServ port 60048)
 
 What it does
 ------------
@@ -49,7 +49,6 @@ Role Variables
 
 | Variable | Type | Description |
 | --- | --- | --- |
-| `beamline_name` | string | Beamline identifier, used in paths and service names. |
 | `alarm_config` | string | Alarm configuration name (e.g. `Accelerator`). Must match the client preferences `config_name`. |
 
 **Optional** (have defaults that work for standard single-host deployments):
@@ -57,18 +56,19 @@ Role Variables
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
 | `java_home` | string | `/usr/lib/jvm/java-17-openjdk` | JAVA_HOME for alarm services. |
-| `phoebus_logback` | string | `/opt/css/phoebus-products/config/logback.xml` | Path to logback configuration file. |
+| `phoebus_logback` | string | `/opt/css/nsls2-phoebus/config/logback.xml` | Path to logback configuration file. |
 | `alarm_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
 | `epics_services_account` | string | `csstudio` | OS user that owns service files. |
+| `phoebus_alarm_install_dir` | string | `/opt/epics-tools/services/phoebus_alarm` | Installation directory for alarm services. |
+| `kafka_install_dir` | string | `/opt/epics-tools/services/kafka` | Path to the Kafka installation (for topic scripts). |
 | `kafka_server` | string | `localhost` | Kafka broker hostname. |
 | `kafka_port` | int | `9092` | Kafka broker port. |
 | `zookeeper_port` | int | `2181` | Zookeeper client port. |
-| `kafka_installation` | string | `.../kafka` | Path to the Kafka installation (for topic scripts). |
 | `es_host` | string | `localhost` | Elasticsearch hostname. |
 | `es_port` | int | `9200` | Elasticsearch HTTP port. |
 | `alarm_mail_server` | string | `localhost` | SMTP server for alarm email notifications. |
 | `alarm_mail_server_port` | int | `25` | SMTP port. |
-| `alarm_mail_server_from` | string | `{{ beamline_name }}_phoebus@localhost` | From address for alarm emails. |
+| `alarm_mail_server_from` | string | `phoebus_alarm@localhost` | From address for alarm emails. |
 | `phoebus_alarm_server_version` | string | `5.0.0` | Alarm server JAR version. |
 | `phoebus_alarm_logger_version` | string | `5.0.0` | Alarm logger JAR version. |
 | `phoebus_alarm_config_logger_version` | string | `5.0.0` | Alarm config logger JAR version. |
@@ -82,12 +82,12 @@ Example Playbook
 ```yaml
 - hosts: all
   vars:
-    beamline_name: tst
     alarm_config: TST_OPR
     alarm_mail_server: smtpgw.example.com
     alarm_mail_server_from: tst_phoebus@example.com
   roles:
     - nsls2.epics_services.jdk_dependency
+    - nsls2.epics_services.maven_dependency
     - nsls2.epics_services.elasticsearch_dependency
     - nsls2.epics_services.kafka_dependency
     - nsls2.epics_services.cs_studio_phoebus
@@ -98,5 +98,5 @@ Or via command line:
 
 ```bash
 ansible-playbook deploy_alarm.yml -l myhost.example.com \
-  -e "beamline_name=tst alarm_config=TST_OPR"
+  -e "alarm_config=TST_OPR"
 ```
