@@ -5,7 +5,7 @@
   become: true
   ansible.builtin.template:
     src: create_alarm_topics.sh.j2
-    dest: {{ phoebus_alarm_install_dir }}/create_alarm_topics.sh
+    dest: "{{ phoebus_alarm_install_dir }}/create_alarm_topics.sh"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
