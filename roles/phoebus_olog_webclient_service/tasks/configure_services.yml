@@ -1,5 +1,5 @@
 ---
-# configure the systemd services for the Olog services
+# configure the systemd services for the Olog Webclient services
 
 - name: Install procServ
   ansible.builtin.include_role:
@@ -7,7 +7,7 @@
 
 # Olog Webclient
 
-# setup run-phoebus-olog.sh
+# setup run-phoebus-olog-webclient.sh
 - name: Copy run-phoebus-olog-webclient.sh file
   become: true
   ansible.builtin.copy:
@@ -16,6 +16,8 @@
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog_webclient
 
 - name: Copy build-run-phoebus-olog-webclient.sh file
   become: true
@@ -27,18 +29,14 @@
     group: "{{ epics_services_account }}"
 
 # setup systemd service file
-- name: Create systemd olog server service files
+- name: Create systemd olog webclient service files
   become: true
   ansible.builtin.template:
     src: phoebus_olog_webclient.service.j2
-    dest: /etc/systemd/system/{{ beamline_name }}_phoebus_olog_webclient.service
+    dest: "/etc/systemd/system/phoebus_olog_webclient.service"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-
-# start olog server
-- name: Restart alarm server
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: true
-    name: "{{ beamline_name }}_phoebus_olog_webclient"
+  notify:
+    - Reload systemd daemon
+    - Restart phoebus_olog_webclient

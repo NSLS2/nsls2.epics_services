@@ -5,7 +5,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 
 # figure out the path to the product jar
 if [[ -z "${OLOG_JAR}" ]]; then
-  OLOG_JAR=/opt/epics-tools/services/{{ beamline_name }}/olog/{{ phoebus_olog_jar }}
+  OLOG_JAR={{ phoebus_olog_install_dir }}/{{ phoebus_olog_jar }}
 fi
 
 JDK_JAVA_OPTIONS=" -DCA_DISABLE_REPEATER=true"
@@ -17,4 +17,4 @@ export JDK_JAVA_OPTIONS
 
 echo $JDK_JAVA_OPTIONS
 
-java -Dspring.config.location=/opt/epics-tools/services/{{ beamline_name }}/olog/olog.properties -jar ${OLOG_JAR}
+java -Dspring.config.location={{ phoebus_olog_install_dir }}/olog.properties -jar ${OLOG_JAR}

@@ -1,49 +1,51 @@
 ---
 - name: Add MongoDB community repository
-  yum_repository:
+  ansible.builtin.yum_repository:
     name: mongodb-org-6.0.1
     file: mongodb-org-6.0.1
     description: MongoDB community repository
     baseurl: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
-    gpgcheck: yes
+    gpgcheck: true
     gpgkey: https://www.mongodb.org/static/pgp/server-6.0.asc
-    enabled: yes
+    enabled: true
 
 - name: Install MongoDB
-  package:
+  ansible.builtin.package:
     name: mongodb-org
-    state: latest
+    state: present
 
 - name: Make run directory
-  file:
-    path: /var/run/{{ mongod_name }}
+  ansible.builtin.file:
+    path: "/var/run/{{ mongod_name }}"
     state: directory
     owner: "{{ mongod_user }}"
     group: "{{ mongod_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: Make data directory
-  file:
+  ansible.builtin.file:
     path: "{{ mongod_data_path }}"
     state: directory
     owner: "{{ mongod_user }}"
     group: "{{ mongod_group }}"
-    mode: 0755
+    mode: "0755"
 
 - name: Create config file
-  template:
+  ansible.builtin.template:
     src: "{{ mongod_config_template }}"
-    dest: /etc/{{ mongod_name }}.conf
+    dest: "/etc/{{ mongod_name }}.conf"
     owner: "{{ mongod_user }}"
     group: "{{ mongod_group }}"
+    mode: "0644"
   notify:
     - Restart mongod service
 
 - name: Create systemd file
-  template:
+  ansible.builtin.template:
     src: "{{ mongod_systemd_template }}"
-    dest: /etc/systemd/system/{{ mongod_name }}.service
+    dest: "/etc/systemd/system/{{ mongod_name }}.service"
     owner: "root"
     group: "root"
+    mode: "0644"
   notify:
     - Restart mongod service
