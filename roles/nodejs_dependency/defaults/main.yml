@@ -1,0 +1,4 @@
+---
+# defaults file for nodejs_dependency
+
+nodejs_version: 21

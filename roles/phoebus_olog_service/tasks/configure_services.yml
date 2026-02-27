@@ -12,34 +12,34 @@
   become: true
   ansible.builtin.template:
     src: run-phoebus-olog.sh.j2
-    dest: /opt/epics-tools/services/{{ beamline_name }}/olog/run-phoebus-olog.sh
+    dest: "{{ phoebus_olog_install_dir }}/run-phoebus-olog.sh"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog
 
 # setup olog properties
 - name: Create olog.properties
   become: true
   ansible.builtin.template:
     src: olog.properties.j2
-    dest: /opt/epics-tools/services/{{ beamline_name }}/olog/olog.properties
+    dest: "{{ phoebus_olog_install_dir }}/olog.properties"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog
 
 # setup systemd service file
 - name: Create systemd olog server service files
   become: true
   ansible.builtin.template:
     src: phoebus_olog.service.j2
-    dest: /etc/systemd/system/{{ beamline_name }}_phoebus_olog.service
+    dest: "/etc/systemd/system/phoebus_olog.service"
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-
-# start olog server
-- name: Restart alarm server
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: true
-    name: "{{ beamline_name }}_phoebus_olog"
+  notify:
+    - Reload systemd daemon
+    - Restart phoebus_olog

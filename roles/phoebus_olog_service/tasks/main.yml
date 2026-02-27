@@ -1,10 +1,10 @@
 ---
 # tasks file for phoebus_olog_service
 
-# create the installation location for the alarm server
+# create the installation location for the olog server
 - name: Ensure services folder exists
   ansible.builtin.file:
-    path: /opt/epics-tools/services/{{ beamline_name }}/olog
+    path: "{{ phoebus_olog_install_dir }}"
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -16,35 +16,38 @@
   become_user: "{{ epics_services_account }}"
   ansible.builtin.git:
     repo: 'https://github.com/Olog/phoebus-olog.git'
-    dest: /opt/epics-tools/services/{{ beamline_name }}/olog/phoebus-olog
+    dest: "{{ phoebus_olog_install_dir }}/phoebus-olog"
     force: true
     version: "{{ phoebus_olog_version }}"
     update: true
+  register: _olog_repo
 
 # build the Olog library
-- name: Build the Olog binaries
+- name: Build the Olog binaries  # noqa: no-handler
   become: true
   become_user: "{{ epics_services_account }}"
   ansible.builtin.command: mvn clean install -Pdeployable-jar -DskipTests
   args:
-    chdir: /opt/epics-tools/services/{{ beamline_name }}/olog/phoebus-olog
+    chdir: "{{ phoebus_olog_install_dir }}/phoebus-olog"
   environment:
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: _olog_repo.changed
   changed_when: true
 
-# copy binaries from /opt/epics-tools/services/{{ beamline_name }}/olog/phoebus-olog/target/service-olog-5.0.*.jar
-- name: Copy phoebus olog server jar
+# copy binaries
+- name: Copy phoebus olog server jar  # noqa: no-handler
   become: true
   ansible.builtin.copy:
-    src: "/opt/epics-tools/services/{{ beamline_name }}/olog/phoebus-olog/target/{{ phoebus_olog_jar }}"
-    dest: "/opt/epics-tools/services/{{ beamline_name }}/olog/{{ phoebus_olog_jar }}"
+    src: "{{ phoebus_olog_install_dir }}/phoebus-olog/target/{{ phoebus_olog_jar }}"
+    dest: "{{ phoebus_olog_install_dir }}/{{ phoebus_olog_jar }}"
     force: true
     mode: "0755"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     remote_src: true
+  when: _olog_repo.changed
 
 # Setup and configure the Olog systemd services
 - name: Include tasks to configure Olog systemd services

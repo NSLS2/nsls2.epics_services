@@ -1,13 +1,13 @@
 ---
 # defaults file for phoebus_olog_webclient_service
-beamline_name: "tst"
-beamline_id: "31"
+
+epics_services_account: csstudio
 
 # Olog REST service parameters
 phoebus_olog_url: "http://localhost:8080/Olog"
-phoebus_olog_webclient_installation_dir: /opt/epics-tools/services/{{ beamline_name }}/olog_webclient
-phoebus_olog_webclient_project_path: "{{ phoebus_olog_webclient_installation_dir }}/phoebus-olog-web-client"
+phoebus_olog_webclient_install_dir: /opt/epics-tools/services/phoebus_olog_webclient
+phoebus_olog_webclient_project_path: "{{ phoebus_olog_webclient_install_dir }}/phoebus-olog-web-client"
 phoebus_olog_webclient_version: "v2.2.1"
 
 ## procServ port
-olog_webclient_procServ_port: "4{{ beamline_id }}47"
+olog_webclient_procServ_port: 60050
