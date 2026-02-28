@@ -1,0 +1,12 @@
+---
+- name: Restart AA instance services
+  become: true
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: true
+    name: "{{ aa_service_prefix }}_{{ item }}.service"
+  loop:
+    - mgmt
+    - engine
+    - etl
+    - retrieval

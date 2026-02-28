@@ -11,23 +11,24 @@
 
 - name: Clone and/or update the aa repo
   become: true
-#  become_user: csstudio
   ansible.builtin.git:
     repo: 'https://github.com/archiver-appliance/epicsarchiverap.git'
     dest: "{{ aa_build_loc }}/epicsarchiverap"
     version: "{{ aa_version }}"
     force: true
+  register: _repo
 
-- name: Cleanup build directory
+- name: Cleanup build directory  # noqa: no-handler
   ansible.builtin.file:
     path: "{{ aa_build_loc }}/epicsarchiverap/build"
     state: absent
+  when: _repo.changed
 
-- name: Build
+- name: Build  # noqa: no-changed-when no-handler
   ansible.builtin.command:
     chdir: "{{ aa_build_loc }}/epicsarchiverap"
     cmd: ./gradlew -x sphinx
   environment:
     JAVA_HOME: "{{ aa_java_home }}"
     TOMCAT_HOME: "{{ aa_tomcat_home }}"
-  changed_when: true
+  when: _repo.changed
