@@ -8,8 +8,9 @@ aa_service_prefix: aa
 # Site name - displayed in the facility template header
 aa_site_name: "Archiver Appliance"
 
-# Tomcat configuration (using system RPM installation)
-aa_tomcat_home: "/usr/share/tomcat"
+# Tomcat configuration
+aa_tomcat_version: "11.0.12"
+aa_tomcat_home: "/opt/epics-tools/apache-tomcat-{{ aa_tomcat_version }}"
 aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-native RPM
 
 # Dependency locations and versions
@@ -43,7 +44,7 @@ data_retrieval_port: 16068
 aa_epics_ca_addr_list: localhost
 
 # Archiver Java Options
-aa_java_home: "/usr/lib/jvm/java-17-openjdk"
+aa_java_home: "/usr/lib/jvm/java-21-openjdk"
 aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"

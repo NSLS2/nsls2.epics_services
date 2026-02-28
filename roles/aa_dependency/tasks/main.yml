@@ -1,13 +1,30 @@
 ---
-# Install dependencies via RPM and download MySQL connector
+# Install dependencies and download MySQL connector
 
-- name: Install Tomcat and Tomcat Native via RPM
+- name: Install OpenJDK 21 (required for AA build and runtime)
   become: true
   ansible.builtin.package:
     name:
-      - tomcat
+      - java-21-openjdk
+      - java-21-openjdk-devel
+    state: present
+
+- name: Install Tomcat Native library via RPM
+  become: true
+  ansible.builtin.package:
+    name:
       - tomcat-native
     state: present
+
+- name: Download and install Tomcat {{ aa_tomcat_version }}
+  become: true
+  ansible.builtin.unarchive:
+    src: "https://archive.apache.org/dist/tomcat/tomcat-{{ aa_tomcat_version.split('.')[0] }}/v{{ aa_tomcat_version }}/bin/apache-tomcat-{{ aa_tomcat_version }}.tar.gz"
+    dest: "{{ aa_tomcat_home | dirname }}"
+    remote_src: true
+    creates: "{{ aa_tomcat_home }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
 
 - name: Ensure aa_dependencies directory exists
   become: true

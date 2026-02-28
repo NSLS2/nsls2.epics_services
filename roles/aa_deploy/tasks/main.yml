@@ -24,13 +24,13 @@
 # Stop old monolithic service if it exists (migration from legacy single-service setup)
 - name: Check if old monolithic AA service unit file exists
   ansible.builtin.stat:
-    path: /etc/systemd/system/{{ aa_service_prefix }}_aa.service
+    path: /etc/systemd/system/{{ aa_service_prefix }}.service
   register: legacy_service_status
 
 - name: Stop old monolithic AA service if running
   become: true
   ansible.builtin.systemd:
-    name: "{{ aa_service_prefix }}_aa.service"
+    name: "{{ aa_service_prefix }}.service"
     state: stopped
     daemon_reload: true
   when: legacy_service_status.stat.exists
@@ -38,7 +38,7 @@
 # Stop existing per-instance services if they exist
 - name: Check if AA instance services exist
   ansible.builtin.stat:
-    path: "/etc/systemd/system/{{ aa_service_prefix }}_{{ item }}_aa.service"
+    path: "/etc/systemd/system/{{ aa_service_prefix }}_{{ item }}.service"
   loop:
     - mgmt
     - engine
@@ -49,7 +49,7 @@
 - name: Stop AA instance services if they exist
   become: true
   ansible.builtin.systemd:
-    name: "{{ aa_service_prefix }}_{{ item.item }}_aa.service"
+    name: "{{ aa_service_prefix }}_{{ item.item }}.service"
     state: stopped
     daemon_reload: true
   loop: "{{ aa_instance_services.results }}"
@@ -117,6 +117,16 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
+
+- name: Copy MySQL schema file from source to install scripts
+  become: true
+  ansible.builtin.copy:
+    src: "{{ aa_build_loc }}/epicsarchiverap/src/main/org/epics/archiverappliance/config/persistence/archappl_mysql.sql"
+    dest: "{{ aa_install_location }}/install_scripts/archappl_mysql.sql"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: '0644'
 
 - name: Deploy policies configuration
   become: true
@@ -223,7 +233,7 @@
   become: true
   ansible.builtin.template:
     src: aa_instance.service.j2
-    dest: "/etc/systemd/system/{{ aa_service_prefix }}_{{ item }}_aa.service"
+    dest: "/etc/systemd/system/{{ aa_service_prefix }}_{{ item }}.service"
     mode: '0644'
     owner: root
     group: root
@@ -242,7 +252,7 @@
     state: restarted
     enabled: true
     daemon_reload: true
-    name: "{{ aa_service_prefix }}_{{ item }}_aa.service"
+    name: "{{ aa_service_prefix }}_{{ item }}.service"
   loop:
     - mgmt
     - engine
@@ -253,7 +263,7 @@
 - name: Disable and stop old monolithic AA service
   become: true
   ansible.builtin.systemd:
-    name: "{{ aa_service_prefix }}_aa.service"
+    name: "{{ aa_service_prefix }}.service"
     state: stopped
     enabled: false
     daemon_reload: true
@@ -262,7 +272,7 @@
 - name: Remove old monolithic AA service unit file
   become: true
   ansible.builtin.file:
-    path: "/etc/systemd/system/{{ aa_service_prefix }}_aa.service"
+    path: "/etc/systemd/system/{{ aa_service_prefix }}.service"
     state: absent
   when: aa_cleanup_legacy_service | bool and legacy_service_status.stat.exists
 

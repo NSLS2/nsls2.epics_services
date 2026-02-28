@@ -5,6 +5,34 @@
   ansible.builtin.pip:
     name: PyMySQL
 
+- name: Check for installed MySQL packages that conflict with MariaDB
+  ansible.builtin.shell:
+    cmd: rpm -qa 'mysql-*' --qf '%{NAME}\n' | grep -v connector
+  register: _mysql_packages
+  changed_when: false
+  failed_when: false
+
+- name: Remove conflicting MySQL packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ _mysql_packages.stdout_lines }}"
+    state: absent
+  when: _mysql_packages.stdout_lines | length > 0
+
+- name: Reset mysql module stream to avoid MariaDB conflict
+  become: true
+  ansible.builtin.command:
+    cmd: dnf module reset mysql -y
+  register: _mysql_module_reset
+  changed_when: "'Nothing to do' not in _mysql_module_reset.stdout"
+
+- name: Enable mariadb module stream
+  become: true
+  ansible.builtin.command:
+    cmd: dnf module enable mariadb -y
+  register: _mariadb_module_enable
+  changed_when: "'Nothing to do' not in _mariadb_module_enable.stdout"
+
 - name: Install local server (MariaDB) and client libs
   become: true
   ansible.builtin.package:
