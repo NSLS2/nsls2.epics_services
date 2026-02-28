@@ -5,7 +5,7 @@ export PATH="${JAVA_HOME}/bin:${PATH}"
 
 # figure out the path to the product jar
 if [[ -z "${CF_JAR}" ]]; then
-  CF_JAR=/opt/epics-tools/services/{{ beamline_name }}/cf/{{ cf_version }}.jar
+  CF_JAR={{ channelfinder_install_dir }}/{{ cf_version }}.jar
 fi
 
 JDK_JAVA_OPTIONS=" -DCA_DISABLE_REPEATER=true"
@@ -17,4 +17,4 @@ export JDK_JAVA_OPTIONS
 
 echo $JDK_JAVA_OPTIONS
 
-java -Dspring.config.location=/opt/epics-tools/services/{{ beamline_name }}/cf/cf.properties -jar ${CF_JAR}
+java -Dspring.config.location={{ channelfinder_install_dir }}/cf.properties -jar ${CF_JAR}

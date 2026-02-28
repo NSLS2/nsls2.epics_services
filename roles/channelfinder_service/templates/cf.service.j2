@@ -1,22 +1,22 @@
-# File /etc/systemd/system/{{beamline_name}}phoebus_server.service
+# File /etc/systemd/system/channelfinder.service
 #
 # After changes
 #   sudo systemctl daemon-reload
 #
 # Start/status/stop
-#   sudo systemctl start {{ beamline_name }}_phoebus_server.service
-#   sudo systemctl status {{ beamline_name }}_phoebus_server.service
-#   sudo systemctl stop {{ beamline_name }}_phoebus_server.service
+#   sudo systemctl start channelfinder.service
+#   sudo systemctl status channelfinder.service
+#   sudo systemctl stop channelfinder.service
 #
 # Start when computer boots:
-#   sudo systemctl enable {{ beamline_name }}_phoebus_server.service
+#   sudo systemctl enable channelfinder.service
 #
 
 [Unit]
-Description=alarm service
+Description=ChannelFinder service
 Documentation=https://github.com/ChannelFinder/ChannelFinderService
 Wants=network-online.target
-After={{ beamline_name }}_elastic.service
+After=elasticsearch.service
 
 StartLimitIntervalSec=500
 StartLimitBurst=5
@@ -30,7 +30,7 @@ RestartSec=5s
 
 Environment=JAVA_HOME={{ cf_java_home }}
 Environment=PATH={{ cf_java_home }}/bin:/usr/bin:/usr/local/bin
-Environment=SERVER=/opt/epics-tools/services/{{beamline_name}}/cf
+Environment=SERVER={{ channelfinder_install_dir }}
 Environment=PORT={{ cf_procServ_port }}
 
 ExecStart=/usr/bin/procServ --foreground --noautorestart --name cf --chdir ${SERVER} --pidfile ${SERVER}/cf.pid --logfile ${SERVER}/console.log ${PORT} ./run-cf.sh

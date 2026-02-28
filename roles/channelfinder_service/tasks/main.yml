@@ -4,7 +4,7 @@
 # Create the installation location for the cf server
 - name: Ensure services folder exists
   ansible.builtin.file:
-    path: /opt/epics-tools/services/{{ beamline_name }}/cf
+    path: "{{ channelfinder_install_dir }}"
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
@@ -16,34 +16,35 @@
   become_user: "{{ epics_services_account }}"
   ansible.builtin.git:
     repo: 'https://github.com/ChannelFinder/ChannelFinderService.git'
-    dest: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService
+    dest: "{{ channelfinder_install_dir }}/ChannelFinderService"
     force: true
     version: "{{ cf_version }}"
+  register: _cf_repo
 
 # Build the ChannelFinder library
-- name: Build the ChannelFinder binaries
+- name: Build the ChannelFinder binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
   ansible.builtin.command: mvn clean install
   args:
-    chdir: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService
+    chdir: "{{ channelfinder_install_dir }}/ChannelFinderService"
   environment:
     JAVA_HOME: "{{ cf_java_home }}"
     MVN_HOME: "{{ cf_mvn_home }}"
     PATH: "{{ cf_java_home }}/bin:{{ cf_mvn_home }}/bin:{{ ansible_env.PATH }}"
-  changed_when: true
+  when: _cf_repo.changed
 
-# Copy binaries from /opt/epics-tools/services/{{beamline_name}}/cf/ChannelFinderService/target/ChannelFinder-*.3.jar
-- name: Copy alarm ChannelFinder service jar
+- name: Copy ChannelFinder service jar  # noqa: no-handler
   become: true
   ansible.builtin.copy:
-    src: /opt/epics-tools/services/{{ beamline_name }}/cf/ChannelFinderService/target/{{ cf_version }}.jar
-    dest: /opt/epics-tools/services/{{ beamline_name }}/cf/{{ cf_version }}.jar
+    src: "{{ channelfinder_install_dir }}/ChannelFinderService/target/{{ cf_version }}.jar"
+    dest: "{{ channelfinder_install_dir }}/{{ cf_version }}.jar"
     force: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     remote_src: true
     mode: "0755"
+  when: _cf_repo.changed
 
 # Set up and configure the ChannelFinder systemd services
 - name: Include tasks to configure ChannelFinder services

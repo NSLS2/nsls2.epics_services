@@ -1,0 +1,13 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart channelfinder
+  become: true
+  ansible.builtin.systemd:
+    name: "channelfinder"
+    state: restarted
+    enabled: true
