@@ -4,6 +4,11 @@
 beamline_name: tst
 beamline_id: "31"
 
+# Backward-compatible mapping from beamline_name to generic variables
+# (cluster genericization is out of scope; these bridge the gap)
+aa_service_prefix: "{{ beamline_name }}"
+aa_site_name: "{{ beamline_name | upper }}"
+
 epics_services_account: "epics-services-{{ beamline_name }}"
 
 # Tomcat configuration (using system RPM installation)

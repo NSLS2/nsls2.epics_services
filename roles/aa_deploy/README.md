@@ -10,8 +10,8 @@ processes** (mgmt, engine, etl, retrieval), each managed by its own systemd
 service unit.
 
 **Service names:**
-`{{ beamline_name }}_mgmt_aa`, `{{ beamline_name }}_engine_aa`,
-`{{ beamline_name }}_etl_aa`, `{{ beamline_name }}_retrieval_aa`
+`{{ aa_service_prefix }}_mgmt_aa`, `{{ aa_service_prefix }}_engine_aa`,
+`{{ aa_service_prefix }}_etl_aa`, `{{ aa_service_prefix }}_retrieval_aa`
 
 What it does
 ------------
@@ -30,9 +30,10 @@ What it does
 
 Dependencies
 ------------
-- `aa_dependencies` (JDK, Tomcat, MySQL connector)
-- `aa_mysql` (database must exist before deployment)
+- `aa_dependency` (JDK, Tomcat, MySQL connector)
+- `aa_mysql_dependency` (database must exist before deployment)
 - `aa_build` (the built tar.gz must be available)
+
 Depended on by
 --------------
 - `aa_service` (single-instance orchestrator)
@@ -45,13 +46,14 @@ Role Variables
 
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
-| `aa_cleanup_legacy_service` | bool | `false` | When `true`, disables and removes the old monolithic `{{ beamline_name }}_aa` service and startup script. |
+| `aa_cleanup_legacy_service` | bool | `false` | When `true`, disables and removes the old monolithic `{{ aa_service_prefix }}_aa` service and startup script. |
 
 **Required variables** (provided by the calling orchestrator):
 
 | Variable | Type | Description |
 | --- | --- | --- |
-| `beamline_name` | string | Beamline identifier, used in paths and service names. |
+| `aa_service_prefix` | string | Prefix for systemd unit names and startup scripts. |
+| `aa_site_name` | string | Display name shown in the facility template header. |
 | `epics_services_account` | string | OS user/group that owns service files. |
 | `aa_install_location` | string | Staging directory for unpacked build artifacts. |
 | `aa_deploy_location` | string | Final deployment directory for running Tomcat instances. |

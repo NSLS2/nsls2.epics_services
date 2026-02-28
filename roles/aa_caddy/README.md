@@ -41,7 +41,7 @@ Role Variables
 
 | Variable | Type | Description |
 | --- | --- | --- |
-| `beamline_name` | string | Beamline identifier, used in the generated Caddyfile comment. |
+| `aa_service_prefix` | string | Service prefix, used in the generated Caddyfile comment. |
 | `mgmt_port` | string | HTTP port for the mgmt Tomcat instance. |
 | `engine_port` | string | HTTP port for the engine Tomcat instance. |
 | `etl_port` | string | HTTP port for the etl Tomcat instance. |

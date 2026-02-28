@@ -1,5 +1,5 @@
-aa_mysql
-========
+aa_mysql_dependency
+===================
 
 Installs and configures a local MariaDB instance for the
 [EPICS Archiver Appliance](https://github.com/archiver-appliance/epicsarchiverap).

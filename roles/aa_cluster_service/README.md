@@ -31,8 +31,8 @@ What it does
 ------------
 This is a thin orchestrator that delegates to composable sub-roles:
 
-1. `aa_dependencies` -- installs JDK, Tomcat, MySQL connector
-2. `aa_mysql` -- installs and configures a local MariaDB instance
+1. `aa_dependency` -- installs JDK, Tomcat, MySQL connector
+2. `aa_mysql_dependency` -- installs and configures a local MariaDB instance
 3. `aa_build` -- clones and builds the Archiver Appliance from source
 4. `aa_deploy` -- deploys the built artifacts with Tomcat instances,
    configures `appliances.xml` for the cluster, installs systemd services

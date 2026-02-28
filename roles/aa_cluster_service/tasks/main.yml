@@ -8,11 +8,11 @@
 
 - name: Install dependencies (Tomcat, MySQL connector)
   ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_dependencies
+    name: nsls2.epics_services.aa_dependency
 
 - name: Configure local MariaDB
   ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_mysql
+    name: nsls2.epics_services.aa_mysql_dependency
 
 - name: Build Archiver Appliance
   ansible.builtin.include_role:
