@@ -1,5 +1,5 @@
-aa_dependencies
-===============
+aa_dependency
+=============
 
 Installs system-level dependencies required by the
 [EPICS Archiver Appliance](https://github.com/archiver-appliance/epicsarchiverap):

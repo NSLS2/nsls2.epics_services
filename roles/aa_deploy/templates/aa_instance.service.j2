@@ -1,5 +1,5 @@
 [Unit]
-Description={{beamline_name}} Archiver Appliance {{ aa_instance_name | upper }} Server
+Description={{ aa_service_prefix }} Archiver Appliance {{ aa_instance_name | upper }} Server
 After=syslog.target network.target{% if aa_data_mount_name %} {{ aa_data_mount_name }}{% endif %}
 
 StartLimitIntervalSec=500
@@ -18,8 +18,8 @@ RestartSec=5s
 Environment=JAVA_HOME="{{ aa_java_home }}"
 Environment=CATALINA_PID="{{ aa_deploy_location }}/{{ aa_instance_name }}/pid"
 
-ExecStart={{ aa_deploy_location}}/{{ beamline_name }}_{{ aa_instance_name }}_startup.sh start
-ExecStop={{ aa_deploy_location }}/{{ beamline_name }}_{{ aa_instance_name }}_startup.sh stop
+ExecStart={{ aa_deploy_location}}/{{ aa_service_prefix }}_{{ aa_instance_name }}_startup.sh start
+ExecStop={{ aa_deploy_location }}/{{ aa_service_prefix }}_{{ aa_instance_name }}_startup.sh stop
 TimeoutStartSec=180
 TimeoutStopSec=180
 

@@ -15,7 +15,7 @@ What it does
 
 Dependencies
 ------------
-- `aa_dependencies` (provides JDK and Tomcat, required for the Gradle build)
+- `aa_dependency` (provides JDK and Tomcat, required for the Gradle build)
 
 Depended on by
 --------------
