@@ -11,8 +11,9 @@ aa_site_name: "{{ beamline_name | upper }}"
 
 epics_services_account: "epics-services-{{ beamline_name }}"
 
-# Tomcat configuration (using system RPM installation)
-aa_tomcat_home: "/usr/share/tomcat"
+# Tomcat configuration
+aa_tomcat_version: "11.0.12"
+aa_tomcat_home: "/opt/epics-tools/apache-tomcat-{{ aa_tomcat_version }}"
 
 aa_dependencies_loc: /tmp/aa_{{ beamline_name }}_dependencies
 aa_build_loc: /tmp/aa_{{ beamline_name }}_build
@@ -48,7 +49,7 @@ aa_caddy_tls_key: ""
 aa_epics_ca_addr_list: ""
 
 # Archiver Java Options
-aa_java_home: "/usr/lib/jvm/java-17-openjdk"
+aa_java_home: "/usr/lib/jvm/java-21-openjdk"
 aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
