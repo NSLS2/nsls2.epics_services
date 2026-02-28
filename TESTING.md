@@ -119,6 +119,32 @@ Verify the PLAY RECAP shows `changed=0` and no handlers fire.
 | AA ETL | `aa_etl.service` | 16067 | — | — |
 | AA Retrieval | `aa_retrieval.service` | 16068 | — | — |
 
+## Genericization and testing progress
+
+Primary service roles are being migrated from NSLS-II-specific defaults
+(`beamline_name`, `beamline_id`, computed ports) to generic, portable defaults.
+Each role is tracked through three milestones:
+
+- **Genericized** — `beamline_name`/`beamline_id` removed, generic defaults added
+- **Deployed** — successfully deployed to `epics-services-tst`
+- **Idempotent** — second run produces `changed=0`
+
+| Role | Genericized | Deployed | Idempotent | Notes |
+| --- | --- | --- | --- | --- |
+| `phoebus_olog_service` | Yes | Yes | Yes | |
+| `phoebus_olog_webclient_service` | Yes | Yes | Yes | |
+| `channelfinder_service` | Yes | Yes | Yes | |
+| `aa_service` | Yes | Yes | Yes | |
+| `phoebus_alarm_service` | Yes | — | — | Needs deploy/test |
+| `recceiver_service` | Yes | — | — | Needs deploy/test |
+| `phoebus_web_runtime_service` | — | — | — | Still uses `beamline_name` |
+| `save_restore_service` | — | — | — | Still uses `beamline_name` |
+| `shift_service` | — | — | — | Still uses `beamline_name` |
+| `aa_cluster_service` | — | — | — | Still uses `beamline_name`; bridge vars in place |
+
+Roles not listed above (dependencies, cs_studio_*, cs_studio_bobs_*) are either
+already generic or do not deploy standalone services.
+
 ## Troubleshooting
 
 - **Stale collection:** If old task names or `beamline_name` references
