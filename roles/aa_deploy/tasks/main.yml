@@ -35,8 +35,8 @@
     daemon_reload: true
   when: legacy_service_status.stat.exists
 
-# Stop existing per-instance services if they exist
-- name: Check if AA instance services exist
+# Stop existing per-instance services before re-deploy
+- name: Check if AA instance services exist  # noqa: no-handler
   ansible.builtin.stat:
     path: "/etc/systemd/system/{{ aa_service_prefix }}_{{ item }}.service"
   loop:
@@ -45,26 +45,28 @@
     - etl
     - retrieval
   register: aa_instance_services
+  when: _repo.changed
 
-- name: Stop AA instance services if they exist
+- name: Stop AA instance services for re-deploy  # noqa: no-handler
   become: true
   ansible.builtin.systemd:
     name: "{{ aa_service_prefix }}_{{ item.item }}.service"
     state: stopped
     daemon_reload: true
-  loop: "{{ aa_instance_services.results }}"
-  when: item.stat.exists
+  loop: "{{ aa_instance_services.results | default([]) }}"
+  when: _repo.changed and item.stat.exists
 
 # Prepare the Archiver binaries for installation
-- name: Find service package
+- name: Find service package  # noqa: no-handler
   become: true
   ansible.builtin.find:
     paths: "{{ aa_build_loc }}"
     patterns: "archappl*tar.gz"
     recurse: true
   register: find_result
+  when: _repo.changed
 
-- name: Unpack service on remote host
+- name: Unpack service on remote host  # noqa: no-handler
   become: true
   ansible.builtin.unarchive:
     src: "{{ find_result.files[0].path }}"
@@ -72,16 +74,18 @@
     remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  when: _repo.changed
 
-- name: Set owner and group on install location
+- name: Set owner and group on install location  # noqa: no-handler
   become: true
   ansible.builtin.file:
     path: "{{ aa_install_location }}"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     recurse: true
+  when: _repo.changed
 
-- name: Unpack the mysql connector
+- name: Unpack the mysql connector  # noqa: no-handler
   become: true
   ansible.builtin.unarchive:
     src: "{{ aa_dependencies_loc }}/mysql-connector-java-5.1.34.tar.gz"
@@ -89,9 +93,10 @@
     remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  when: _repo.changed
 
 # Deploy installation and configuration scripts
-- name: Deploy single installation script
+- name: Deploy single installation script  # noqa: no-handler
   become: true
   ansible.builtin.template:
     src: single_machine_install.sh
@@ -99,8 +104,9 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
+  when: _repo.changed
 
-- name: Deploy mysql config script
+- name: Deploy mysql config script  # noqa: no-handler
   become: true
   ansible.builtin.template:
     src: addMysqlConnPool.py
@@ -108,8 +114,9 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
+  when: _repo.changed
 
-- name: Deploy tomcat installation script
+- name: Deploy tomcat installation script  # noqa: no-handler
   become: true
   ansible.builtin.template:
     src: deployMultipleTomcats.py
@@ -117,8 +124,9 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
+  when: _repo.changed
 
-- name: Copy MySQL schema file from source to install scripts
+- name: Copy MySQL schema file from source to install scripts  # noqa: no-handler
   become: true
   ansible.builtin.copy:
     src: "{{ aa_build_loc }}/epicsarchiverap/src/main/org/epics/archiverappliance/config/persistence/archappl_mysql.sql"
@@ -127,8 +135,9 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
+  when: _repo.changed
 
-- name: Deploy policies configuration
+- name: Deploy policies configuration  # noqa: no-handler
   become: true
   ansible.builtin.template:
     src: policies.py
@@ -136,6 +145,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
+  when: _repo.changed
 
 # Deploy appliances.xml for cluster configuration (only when cluster appliances are defined)
 - name: Deploy appliances.xml configuration
@@ -149,7 +159,7 @@
   when: aa_cluster_appliances is defined and aa_cluster_appliances | length > 0
 
 # Run the Install script with unified environment variables
-- name: Install AA
+- name: Install AA  # noqa: no-changed-when no-handler
   become: true
   ansible.builtin.command:
     chdir: "{{ aa_install_location }}/install_scripts"
@@ -163,9 +173,9 @@
     SITE_SPECIFIC_POLICIES_FILE: "{{ aa_install_location }}/conf/policies.py"
     ARCHAPPL_MYIDENTITY: "{{ aa_identity }}"
     ARCHAPPL_APPLIANCES: "{{ aa_deploy_location ~ '/appliances.xml' if (aa_cluster_appliances is defined and aa_cluster_appliances | length > 0) else '' }}"
-  changed_when: true
+  when: _repo.changed
 
-- name: Deploy facility template changes
+- name: Deploy facility template changes  # noqa: no-handler
   become: true
   ansible.builtin.template:
     src: facility_template_changes.html
@@ -173,9 +183,10 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
+  when: _repo.changed
 
 # Configure site specific content
-- name: Configure static AA content
+- name: Configure static AA content  # noqa: no-changed-when no-handler
   become: true
   ansible.builtin.command:
     chdir: "{{ aa_install_location }}/install_scripts"
@@ -186,15 +197,16 @@
   environment:
     DEPLOY_DIR: "{{ aa_deploy_location }}"
     PATH: "{{ aa_java_home }}/bin:${PATH}"
-  changed_when: true
+  when: _repo.changed
 
 # A temporary fix for the mysql connection host
-- name: Replace mysql host string
+- name: Replace mysql host string  # noqa: no-handler
   become: true
   ansible.builtin.replace:
     path: "{{ aa_deploy_location }}/mgmt/conf/context.xml"
     regexp: 'jdbc:mysql://localhost:3306'
     replace: "jdbc:mysql://{{ aa_mysql_server }}:3306"
+  when: _repo.changed
 
 # Deploy per-instance startup scripts
 - name: Deploy startup script for each instance
@@ -213,15 +225,17 @@
   vars:
     aa_instance_name: "{{ item.name }}"
     aa_java_opts: "{{ item.java_opts }}"
+  notify: Restart AA instance services
 
 # Fix permissions for deploy
-- name: Set owner and group on deploy location
+- name: Set owner and group on deploy location  # noqa: no-handler
   become: true
   ansible.builtin.file:
     path: "{{ aa_deploy_location }}"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     recurse: true
+  when: _repo.changed
 
 - name: Include custom log configuration
   ansible.builtin.include_role:
@@ -244,12 +258,13 @@
     - retrieval
   vars:
     aa_instance_name: "{{ item }}"
+  notify: Restart AA instance services
 
-# Start AA instances in proper order: mgmt -> engine -> etl -> retrieval
-- name: Restart and enable instance services
+# Ensure AA instances are running and enabled
+- name: Start and enable instance services
   become: true
   ansible.builtin.systemd:
-    state: restarted
+    state: started
     enabled: true
     daemon_reload: true
     name: "{{ aa_service_prefix }}_{{ item }}.service"

@@ -114,6 +114,10 @@ Verify the PLAY RECAP shows `changed=0` and no handlers fire.
 | Phoebus Olog | `phoebus_olog.service` | 9080 | 9443 | 60049 |
 | Phoebus Olog Webclient | `phoebus_olog_webclient.service` | 3000 | — | — |
 | ChannelFinder | `channelfinder.service` | 7080 | 7443 | 60051 |
+| AA Mgmt | `aa_mgmt.service` | 16065 | — | — |
+| AA Engine | `aa_engine.service` | 16066 | — | — |
+| AA ETL | `aa_etl.service` | 16067 | — | — |
+| AA Retrieval | `aa_retrieval.service` | 16068 | — | — |
 
 ## Troubleshooting
 
