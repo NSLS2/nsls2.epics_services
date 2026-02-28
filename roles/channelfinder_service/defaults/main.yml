@@ -1,12 +1,12 @@
 ---
 # defaults file for channelfinder_service
-beamline_name: "tst"
-beamline_id: "31"
 
-epics_services_account: epics-services-{{ beamline_name }}
+epics_services_account: csstudio
 
-cf_http_port: "1{{ beamline_id }}80"
-cf_https_port: "1{{ beamline_id }}81"
+channelfinder_install_dir: /opt/epics-tools/services/channelfinder
+
+cf_http_port: 8080
+cf_https_port: 8443
 # Channel Finder version
 cf_version: ChannelFinder-4.7.3
 
@@ -17,7 +17,7 @@ cf_mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
 phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
 
 es_host: "localhost"
-es_port: "4{{ beamline_id }}92"
+es_port: 9200
 
 # procServ port
-cf_procServ_port: "1{{ beamline_id }}46"
+cf_procServ_port: 60051
