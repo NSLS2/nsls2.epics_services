@@ -1,24 +1,29 @@
-tomcat_dependency
-=================
+# tomcat_dependency
 
-Install a general tomcat services
-Based on role
-<https://github.com/jmutai/tomcat-ansible>
+Installs Tomcat from the RPM package (`tomcat`).
 
-Requirements
-------------
-OpenJDK 11
-role: jdk_dependency
+Requires **RHEL 10+** (or equivalent) to get Tomcat 10.1+, which is needed
+by services using Jakarta EE (`jakarta.servlet`).
 
-Role Variables
---------------
+## RPM path
 
-| Variable                        | Type   | Description                                                                                      |
-|---------------------------------|--------|--------------------------------------------------------------------------------------------------|
-| `tomcat_dest`                   | string | The installation location of the tomcat server                                                   |
-| `tomcat_ssl_enabled`            | bool   | Enable the NIO SSL/TLS connector (default: `false`)                                              |
-| `tomcat_ssl_port`               | int    | HTTPS listen port (default: `4443`)                                                              |
-| `tomcat_ssl_keystore_file`      | string | Path to the Java keystore file (required when SSL is enabled)                                    |
-| `tomcat_ssl_keystore_password`  | string | Keystore password (default: `changeit`)                                                          |
-| `tomcat_apr_enabled`            | bool   | Enable the APR lifecycle listener (default: `false`)                                             |
-| `tomcat_health_check_enabled`   | bool   | Enable the HealthCheckValve at `/health` (default: `false`, requires Tomcat >= 9.0.55)           |
+After installation the Tomcat home is available at:
+
+```text
+/usr/share/tomcat
+```
+
+Roles that depend on Tomcat should include this role and reference
+that path directly.
+
+## Usage
+
+```yaml
+- name: Install Tomcat
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
+```
+
+## Depended on by
+
+- `nsls2.epics_services.aa_service`
