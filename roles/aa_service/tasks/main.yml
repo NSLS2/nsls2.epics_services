@@ -5,8 +5,13 @@
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk_dependency
 
-- name: Install dependencies (Tomcat, MySQL connector)
-  ansible.builtin.include_tasks: install_dependencies.yml
+- name: Install Tomcat
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
+
+- name: Install MariaDB JDBC connector
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.mariadb_dependency
 
 - name: Configure local MariaDB
   ansible.builtin.include_tasks: configure_mysql.yml

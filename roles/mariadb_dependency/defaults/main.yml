@@ -1,0 +1,4 @@
+---
+# No configurable defaults — the MariaDB JDBC connector is installed from RPM.
+# Other roles should reference the RPM path directly:
+#   /usr/lib/java/mariadb-java-client.jar

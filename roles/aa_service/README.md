@@ -41,7 +41,8 @@ What it does
 ------------
 
 1. Installs OpenJDK 21 (`jdk_dependency` shared role)
-2. Installs Tomcat and MariaDB JDBC connector via RPM
+2. Installs Tomcat (`tomcat_dependency` shared role) and MariaDB JDBC connector
+   (`mariadb_dependency` shared role)
 3. Installs and configures a local MariaDB instance
 4. Clones and builds the Archiver Appliance from source
 5. Deploys the built artifacts, configures Tomcat instances,
@@ -53,6 +54,8 @@ Dependencies
 ------------
 
 - `nsls2.epics_services.jdk_dependency` (included automatically)
+- `nsls2.epics_services.tomcat_dependency` (included automatically)
+- `nsls2.epics_services.mariadb_dependency` (included automatically)
 - `community.mysql` collection
 
 Role Variables

@@ -1,7 +1,7 @@
 ---
-- name: Install Tomcat via RPM
+- name: Install MariaDB JDBC connector via RPM
   become: true
   ansible.builtin.package:
     name:
-      - tomcat
+      - mariadb-java-client
     state: present
