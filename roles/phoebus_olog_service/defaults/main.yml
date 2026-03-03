@@ -7,7 +7,7 @@
 #   ldap_urls: "ldaps://your-ldap-server.example.com/dc=example,dc=com"
 #   ldap_base_dn: "dc=example,dc=com"
 
-java_home: "/usr/lib/jvm/java-17-openjdk"
+java_home: "/usr/lib/jvm/java-21-openjdk"
 mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
 
 # Path to logback configuration

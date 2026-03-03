@@ -21,7 +21,7 @@ What it does
 
 Dependencies
 ------------
-- `jdk_dependency` (OpenJDK 17)
+- `jdk_dependency` (OpenJDK 21)
 
 Depended on by
 --------------

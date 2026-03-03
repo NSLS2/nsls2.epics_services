@@ -1,23 +1,22 @@
 ---
 # tasks file for aa_service
-# Thin orchestrator - delegates to composable sub-roles
 
-- name: Install JDK 17
+- name: Install JDK 21
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk_dependency
 
 - name: Install dependencies (Tomcat, MySQL connector)
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_dependency
+  ansible.builtin.include_tasks: install_dependencies.yml
 
 - name: Configure local MariaDB
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_mysql_dependency
+  ansible.builtin.include_tasks: configure_mysql.yml
 
 - name: Build Archiver Appliance
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_build
+  ansible.builtin.include_tasks: build.yml
 
 - name: Deploy Archiver Appliance
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_deploy
+  ansible.builtin.include_tasks: deploy.yml
+
+- name: Configure custom logging
+  ansible.builtin.include_tasks: configure_logging.yml
+  when: aa_configure_custom_logs | bool

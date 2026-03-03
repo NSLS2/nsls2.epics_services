@@ -26,7 +26,7 @@ What it does
 
 Dependencies
 ------------
-- `jdk_dependency` (OpenJDK 17)
+- `jdk_dependency` (OpenJDK 21)
 
 Depended on by
 --------------
@@ -39,7 +39,7 @@ Role Variables
 | --- | --- | --- | --- |
 | `beamline_name` | string | `tst` | Used in installation path and service names. |
 | `epics_services_account` | string | `csstudio` | OS user that owns the Kafka installation. |
-| `kafka_java_home` | string | `/usr/lib/jvm/java-17-openjdk` | JAVA_HOME for Kafka and Zookeeper. |
+| `kafka_java_home` | string | `/usr/lib/jvm/java-21-openjdk` | JAVA_HOME for Kafka and Zookeeper. |
 | `zookeeper_port` | int | `2181` | Zookeeper client port. |
 | `zookeeper_data` | string | `.../kafka/data/zookeeper` | Zookeeper data directory. |
 | `kafka_port` | int | `9092` | Kafka broker port. |

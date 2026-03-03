@@ -13,7 +13,7 @@ Install the save restore service
 
 Dependencies
 ------------
-OpenJDK 17
+OpenJDK 21
 role: jdk_dependency
 
 elastic
