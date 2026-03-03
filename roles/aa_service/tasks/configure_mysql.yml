@@ -5,9 +5,9 @@
   ansible.builtin.pip:
     name: PyMySQL
 
-- name: Check for installed MySQL packages that conflict with MariaDB
+- name: Check for installed MySQL packages that conflict with MariaDB  # noqa: command-instead-of-module
   ansible.builtin.shell:
-    cmd: rpm -qa 'mysql-*' --qf '%{NAME}\n' | grep -v connector
+    cmd: set -o pipefail && rpm -qa 'mysql-*' --qf '%{NAME}\n' | grep -v connector
   register: _mysql_packages
   changed_when: false
   failed_when: false

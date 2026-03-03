@@ -3,7 +3,7 @@
 
 epics_services_account: csstudio
 
-kafka_java_home: "/usr/lib/jvm/java-17-openjdk"
+kafka_java_home: "/usr/lib/jvm/java-21-openjdk"
 
 kafka_install_dir: /opt/epics-tools/services/kafka
 

@@ -33,7 +33,7 @@ What it does
 
 Dependencies
 ------------
-- `jdk_dependency` (OpenJDK 17)
+- `jdk_dependency` (OpenJDK 21)
 - `elasticsearch_dependency` (Elasticsearch -- stores alarm history)
 - `kafka_dependency` (Kafka and Zookeeper -- alarm message bus)
 - `cs_studio_phoebus` (builds the alarm service JARs)
@@ -55,7 +55,7 @@ Role Variables
 
 | Variable | Type | Default | Description |
 | --- | --- | --- | --- |
-| `java_home` | string | `/usr/lib/jvm/java-17-openjdk` | JAVA_HOME for alarm services. |
+| `java_home` | string | `/usr/lib/jvm/java-21-openjdk` | JAVA_HOME for alarm services. |
 | `phoebus_logback` | string | `/opt/css/nsls2-phoebus/config/logback.xml` | Path to logback configuration file. |
 | `alarm_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
 | `epics_services_account` | string | `csstudio` | OS user that owns service files. |

@@ -8,15 +8,15 @@ aa_service_prefix: aa
 # Site name - displayed in the facility template header
 aa_site_name: "Archiver Appliance"
 
-# Tomcat configuration
-aa_tomcat_version: "11.0.12"
-aa_tomcat_home: "/opt/epics-tools/apache-tomcat-{{ aa_tomcat_version }}"
-aa_tomcat_native_lib: "/usr/lib64"  # Location of libtcnative-1.so from tomcat-native RPM
+# Tomcat configuration (system RPM: /usr/share/tomcat)
+aa_tomcat_home: "/usr/share/tomcat"
 
-# Dependency locations and versions
-aa_dependencies_loc: /tmp/aa_dependencies
+# Build location and version
 aa_build_loc: /tmp/aa_build
 aa_version: 2.2.1
+
+# MariaDB JDBC connector JAR (from mariadb-java-client RPM)
+aa_mysql_connector_jar: "/usr/lib/java/mariadb-java-client.jar"
 
 # Installation and deployment locations
 aa_install_dir: /opt/epics-tools/services/archiver_appliance
@@ -62,3 +62,31 @@ aa_configure_custom_logs: false
 # Systemd mount dependency
 # Example: "data-beamline.mount" - leave empty if no mount dependency needed
 aa_data_mount_name: ""
+
+# SSL/TLS configuration (NIO connector, no APR/Tomcat Native needed)
+# Enable and set keystore path from the infrastructure playbook (e.g. acme_certificates)
+aa_ssl_enabled: false
+aa_ssl_keystore_file: ""
+aa_ssl_keystore_password: "changeit"
+aa_ssl_port_mgmt: 16075
+aa_ssl_port_engine: 16076
+aa_ssl_port_etl: 16077
+aa_ssl_port_retrieval: 16078
+
+# Health check valve (provides /health endpoint, requires Tomcat >= 9.0.55)
+aa_health_check_enabled: false
+
+# Legacy cleanup (opt-in removal of old monolithic AA service)
+aa_cleanup_legacy_service: false
+
+# Cluster appliances configuration
+# When empty (default), deploys a single-node Archiver Appliance.
+# When populated, aa_deploy generates appliances.xml for cluster awareness.
+aa_cluster_appliances: []
+# Example:
+#  - identity: appliance0
+#    hostname: archiver1.example.com
+#    cluster_inetport: "{{ cluster_inetport }}"
+#  - identity: appliance1
+#    hostname: archiver2.example.com
+#    cluster_inetport: "{{ cluster_inetport }}"

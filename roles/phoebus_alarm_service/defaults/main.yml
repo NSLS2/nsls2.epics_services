@@ -1,7 +1,7 @@
 ---
 # defaults file for phoebus_alarm_service
 
-java_home: "/usr/lib/jvm/java-17-openjdk"
+java_home: "/usr/lib/jvm/java-21-openjdk"
 
 # Path to logback configuration
 phoebus_logback: "/opt/css/nsls2-phoebus/config/logback.xml"

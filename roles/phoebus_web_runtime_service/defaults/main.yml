@@ -10,7 +10,7 @@ beamline_id: "31"
 
 epics_services_account: csstudio
 
-java_home: "/usr/lib/jvm/java-17-openjdk"
+java_home: "/usr/lib/jvm/java-21-openjdk"
 mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
 
 epics_ca_addr_list: localhost

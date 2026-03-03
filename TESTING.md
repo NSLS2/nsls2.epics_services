@@ -1,5 +1,5 @@
-Testing Roles Against epics-services-tst
-=========================================
+Testing Roles Against arcapp1-dev
+==================================
 
 This document describes how to build, deploy, and verify roles from the
 `nsls2.epics_services` collection using the NSLS-II test infrastructure.
@@ -9,7 +9,7 @@ This document describes how to build, deploy, and verify roles from the
 | Host | Purpose |
 | --- | --- |
 | `runansible1.nsls2.bnl.gov` | Ansible control node; runs playbooks |
-| `epics-services-tst.nsls2.bnl.gov` | Target test host for EPICS services |
+| `arcapp1-dev.nsls2.bnl.gov` | Target test host for EPICS services |
 
 The collection is installed on `runansible1` via `requirements.yml` in
 `/nsls2/users/asligar/ansible/collections/`. This path takes precedence
@@ -48,18 +48,11 @@ It contains one commented-out section per service. Uncomment only the
 service you want to test and comment out the others:
 
 ```yaml
-# --- ChannelFinder ---
-- name: Deploy ChannelFinder Service
+# --- Archiver Appliance ---
+- name: Deploy Archiver Appliance Service
   hosts: all
-  vars:
-    # Port overrides to avoid conflict with Zookeeper admin (8080)
-    cf_http_port: 7080
-    cf_https_port: 7443
   roles:
-    - nsls2.epics_services.jdk_dependency
-    - nsls2.epics_services.maven_dependency
-    - nsls2.epics_services.elasticsearch_dependency
-    - nsls2.epics_services.channelfinder_service
+    - nsls2.epics_services.aa_service
 ```
 
 **Port conflicts:** Zookeeper's admin port occupies 8080 on the test host.
@@ -72,7 +65,7 @@ for ChannelFinder, 9080/9443 for Olog).
 ssh runansible1.nsls2.bnl.gov \
   "cd /nsls2/users/asligar/ansible && \
    ansible-playbook deploy_epics_services.yml \
-   -l epics-services-tst.nsls2.bnl.gov"
+   -l arcapp1-dev.nsls2.bnl.gov"
 ```
 
 Add `-v` for verbose output. The playbook connects as `root` (per
@@ -81,16 +74,16 @@ Add `-v` for verbose output. The playbook connects as `root` (per
 ## Step 4 — Verify on the target host
 
 ```bash
-ssh root@epics-services-tst.nsls2.bnl.gov
+ssh root@arcapp1-dev.nsls2.bnl.gov
 
 # Check service status
-systemctl status channelfinder
+systemctl status aa_mgmt aa_engine aa_etl aa_retrieval
 
 # Check ports are listening
-ss -tlnp | grep -E '7080|7443|60051'
+ss -tlnp | grep -E '16065|16066|16067|16068'
 
-# Test the API
-curl -sk https://localhost:7443/ChannelFinder
+# Test the mgmt API
+curl -s http://localhost:16065/mgmt/bpl/getApplianceInfo
 ```
 
 ## Step 5 — Test idempotency
@@ -101,12 +94,12 @@ Re-run the playbook. A correct role should produce `changed=0`:
 ssh runansible1.nsls2.bnl.gov \
   "cd /nsls2/users/asligar/ansible && \
    ansible-playbook deploy_epics_services.yml \
-   -l epics-services-tst.nsls2.bnl.gov"
+   -l arcapp1-dev.nsls2.bnl.gov"
 ```
 
 Verify the PLAY RECAP shows `changed=0` and no handlers fire.
 
-## Currently deployed services on epics-services-tst
+## Currently deployed services on arcapp1-dev
 
 | Service | systemd unit | HTTP | HTTPS | procServ |
 | --- | --- | --- | --- | --- |
@@ -126,7 +119,7 @@ Primary service roles are being migrated from NSLS-II-specific defaults
 Each role is tracked through three milestones:
 
 - **Genericized** — `beamline_name`/`beamline_id` removed, generic defaults added
-- **Deployed** — successfully deployed to `epics-services-tst`
+- **Deployed** — successfully deployed to `arcapp1-dev`
 - **Idempotent** — second run produces `changed=0`
 
 | Role | Genericized | Deployed | Idempotent | Notes |
@@ -134,13 +127,12 @@ Each role is tracked through three milestones:
 | `phoebus_olog_service` | Yes | Yes | Yes | |
 | `phoebus_olog_webclient_service` | Yes | Yes | Yes | |
 | `channelfinder_service` | Yes | Yes | Yes | |
-| `aa_service` | Yes | Yes | Yes | |
+| `aa_service` | Yes | Blocked | — | Blocked — requires RHEL 10 (Tomcat 10+ RPM for Jakarta EE / AA 2.2.1) |
 | `phoebus_alarm_service` | Yes | — | — | Needs deploy/test |
 | `recceiver_service` | Yes | — | — | Needs deploy/test |
 | `phoebus_web_runtime_service` | — | — | — | Still uses `beamline_name` |
 | `save_restore_service` | — | — | — | Still uses `beamline_name` |
 | `shift_service` | — | — | — | Still uses `beamline_name` |
-| `aa_cluster_service` | — | — | — | Still uses `beamline_name`; bridge vars in place |
 
 Roles not listed above (dependencies, cs_studio_*, cs_studio_bobs_*) are either
 already generic or do not deploy standalone services.
@@ -156,5 +148,17 @@ already generic or do not deploy standalone services.
   ```bash
   ssh runansible1.nsls2.bnl.gov \
     "ansible -m debug -a 'var=epics_services_account' \
-     epics-services-tst.nsls2.bnl.gov"
+     arcapp1-dev.nsls2.bnl.gov"
   ```
+
+- **RPM not found (`mariadb-java-client`, `tomcat`):** Ensure the target
+  host has access to RHEL AppStream repos. Check with:
+  ```bash
+  ssh root@arcapp1-dev.nsls2.bnl.gov "dnf info tomcat mariadb-java-client"
+  ```
+
+- **AA blocked on RHEL 8:** Archiver Appliance 2.2.1 requires Tomcat 10+
+  (Jakarta EE / `jakarta.servlet`), but RHEL 8's Tomcat RPM is v9
+  (`javax.servlet`). RHEL 10 ships Tomcat 10.1+ as an RPM.
+  `arcapp1-dev` must be re-provisioned to RHEL 10 before AA
+  deployment can resume.

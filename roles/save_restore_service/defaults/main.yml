@@ -16,7 +16,7 @@ save_restore_https_port: 2{{ beamline_id }}81
 save_restore_version: "4.7.4"
 save_restore_jar: /opt/epics-tools/services/{{beamline_name}}/save_restore/service-save-and-restore-{{ save_restore_version }}.jar
 
-save_restore_java_home: "/usr/lib/jvm/java-17-openjdk"
+save_restore_java_home: "/usr/lib/jvm/java-21-openjdk"
 
 # Path to logback configuration
 phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"

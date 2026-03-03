@@ -94,7 +94,7 @@ EOF
 # The library is installed in /usr/lib64/libtcnative-1.so
 echo "Tomcat Native library provided by tomcat-native RPM package"
 
-MSG="Where's the mysql client jar? - this is named something like mysql-connector-java-5.1.21-bin.jar."
+MSG="Where's the mysql client jar? (from mariadb-java-client RPM)"
 echo $MSG
 #MYSQL_CLIENT_JAR=$(zenity  --title "$MSG" --file-selection)
 

@@ -1,5 +1,0 @@
----
-# Caddy reverse proxy for Archiver Appliance
-# Certificate management is handled externally (e.g. acme_certificates role)
-aa_caddy_tls_cert: ""
-aa_caddy_tls_key: ""
