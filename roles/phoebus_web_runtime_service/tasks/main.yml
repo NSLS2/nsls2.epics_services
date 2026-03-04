@@ -1,80 +1,97 @@
 ---
 # tasks file for phoebus_web_runtime_service
 
+- name: Install JDK 21
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Tomcat
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
+
 # PV Web Socket library
 - name: Clone and/or update the pvws repo
   become: true
+  become_user: "{{ epics_services_account }}"
   ansible.builtin.git:
     repo: "{{ pvws_repo }}"
     dest: "{{ pvws_dest }}"
     force: true
     version: "{{ pvws_version }}"
+  register: _pvws_repo
 
 # Display Builder Web Runtime library
 - name: Clone and/or update the dbwr repo
   become: true
+  become_user: "{{ epics_services_account }}"
   ansible.builtin.git:
     repo: "{{ dbwr_repo }}"
     dest: "{{ dbwr_dest }}"
     force: true
     version: "{{ dbwr_version }}"
+  register: _dbwr_repo
 
 # Build the pvws library
-- name: Build the pvws binaries
-  ansible.builtin.command: mvn clean install
+- name: Build the pvws binaries  # noqa: no-handler
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.command: mvn clean install -DskipTests
   args:
     chdir: "{{ pvws_dest }}/"
   environment:
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: _pvws_repo.changed
   changed_when: true
 
 # Build the dbwr library
-- name: Build the dbwr binaries
-  ansible.builtin.command: mvn clean install
+- name: Build the dbwr binaries  # noqa: no-handler
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.command: mvn clean install -DskipTests
   args:
     chdir: "{{ dbwr_dest }}/"
   environment:
     JAVA_HOME: "{{ java_home }}"
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+  when: _dbwr_repo.changed
   changed_when: true
 
 # Copy pvws.war to tomcat
-- name: Copy pvws war
+- name: Copy pvws war  # noqa: no-handler
+  become: true
   ansible.builtin.copy:
     src: "{{ pvws_dest }}/target/pvws.war"
-    dest: "{{ tomcat_dest }}/webapps/{{ beamline_name }}#pvws.war"
+    dest: "{{ tomcat_dest }}/webapps/pvws.war"
     remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: "0644"
+  when: _pvws_repo.changed
+  notify: Restart tomcat
 
 # Copy dbwr.war to tomcat
-- name: Copy dbwr war
+- name: Copy dbwr war  # noqa: no-handler
+  become: true
   ansible.builtin.copy:
     src: "{{ dbwr_dest }}/target/dbwr.war"
-    dest: "{{ tomcat_dest }}/webapps/{{ beamline_name }}#dbwr.war"
+    dest: "{{ tomcat_dest }}/webapps/dbwr.war"
     remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: "0644"
+  when: _dbwr_repo.changed
+  notify: Restart tomcat
 
 # Set up the environment variable
 - name: Set environ variables
+  become: true
   ansible.builtin.template:
     src: setenv.sh
     dest: "{{ tomcat_dest }}/bin/setenv.sh"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: "0755"
-
-# Restart tomcat
-- name: Restart and enable tomcat
-  ansible.builtin.service:
-    daemon_reload: true
-    name: "{{ tomcat_service_name }}"
-    state: restarted
-    enabled: true
-  when: ansible_service_mgr == "systemd"
+  notify: Restart tomcat

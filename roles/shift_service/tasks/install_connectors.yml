@@ -1,19 +1,18 @@
 ---
-# install connectors and third party libraries
+# Install connectors and third party libraries
 
 - name: Download xercesImpl
-  get_url:
+  ansible.builtin.get_url:
     url: https://repo1.maven.org/maven2/xerces/xercesImpl/2.9.1/xercesImpl-2.9.1.jar
-    dest: /opt/epics-tools/services/{{beamline_name}}/glassfish5/glassfish/lib
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/lib"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0644"
 
-- name: Download mysql jdbc connector
-  ansible.builtin.unarchive:
-    src: https://downloads.mysql.com/archives/get/p/3/file/mysql-connector-java-5.1.34.tar.gz
-    dest: /tmp
-    remote_src: yes
-
-- name: Copy connector to Glassfish
-  become: yes
-  command: mv /tmp/mysql-connector-java-5.1.34/mysql-connector-java-5.1.34-bin.jar /opt/epics-tools/services/{{beamline_name}}/glassfish5/glassfish/lib
+- name: Download MySQL JDBC connector
+  ansible.builtin.get_url:
+    url: https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.34/mysql-connector-java-5.1.34.jar
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/lib/mysql-connector-java-5.1.34-bin.jar"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0644"

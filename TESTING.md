@@ -11,9 +11,42 @@ This document describes how to build, deploy, and verify roles from the
 | `runansible1.nsls2.bnl.gov` | Ansible control node; runs playbooks |
 | `arcapp1-dev.nsls2.bnl.gov` | Target test host for EPICS services |
 
-The collection is installed on `runansible1` via `requirements.yml` in
-`/nsls2/users/asligar/ansible/collections/`. This path takes precedence
-over `~/.ansible/collections/`.
+### Two-repo setup
+
+Testing involves **two separate repositories**:
+
+| Repository | Location (local) | Location (runansible1) | Purpose |
+| --- | --- | --- | --- |
+| `nsls2.epics_services` | `/home/asligar/git_projects/nsls2.epics_services` | installed as a collection | Generic Ansible collection containing the EPICS service roles. Roles have no NSLS-II-specific defaults. |
+| `ansible` (fork: `sligara7/ansible`) | `/home/asligar/git_projects/ansible` | `/nsls2/users/asligar/ansible` | NSLS-II site-specific playbooks and inventory. Contains `deploy_epics_services.yml` with port overrides, credentials, AD config, etc. |
+
+The **deploy playbook** (`deploy_epics_services.yml`) lives in the `ansible`
+repo on the `phoebus-alarm` branch. It imports roles from the
+`nsls2.epics_services` collection and provides site-specific variable
+overrides (port conflicts, AD URLs, DB passwords, etc.).
+
+The **collection** (`nsls2.epics_services`) is built locally, copied to
+`runansible1`, and installed to `/nsls2/users/asligar/ansible/collections/`.
+This path takes precedence over `~/.ansible/collections/`.
+
+### Keeping the playbook in sync
+
+The deploy playbook is edited on `runansible1` during testing. To sync
+changes back to the local checkout:
+
+```bash
+# On runansible1 — commit and push
+ssh runansible1.nsls2.bnl.gov \
+  "cd /nsls2/users/asligar/ansible && \
+   git add deploy_epics_services.yml && \
+   git commit -m 'Update deploy playbook' && \
+   git push"
+
+# Locally — pull the changes
+cd /home/asligar/git_projects/ansible
+git checkout phoebus-alarm
+git pull
+```
 
 ## Step 1 — Build and install the collection
 
@@ -111,6 +144,7 @@ Verify the PLAY RECAP shows `changed=0` and no handlers fire.
 | AA Engine | `aa_engine.service` | 16066 | — | — |
 | AA ETL | `aa_etl.service` | 16067 | — | — |
 | AA Retrieval | `aa_retrieval.service` | 16068 | — | — |
+| Shift (GlassFish) | `shift_glassfish.service` | 11080 | 11443 | — |
 
 ## Genericization and testing progress
 
@@ -130,9 +164,9 @@ Each role is tracked through three milestones:
 | `aa_service` | Yes | Blocked | — | Blocked — requires RHEL 10 (Tomcat 10+ RPM for Jakarta EE / AA 2.2.1) |
 | `phoebus_alarm_service` | Yes | — | — | Needs deploy/test |
 | `recceiver_service` | Yes | — | — | Needs deploy/test |
-| `phoebus_web_runtime_service` | — | — | — | Still uses `beamline_name` |
-| `save_restore_service` | — | — | — | Still uses `beamline_name` |
-| `shift_service` | — | — | — | Still uses `beamline_name` |
+| `phoebus_web_runtime_service` | Yes | Blocked | — | GitHub HTTPS 401 from arcapp1-dev; needs PAT in vault |
+| `save_restore_service` | Yes | Blocked | — | Needs pre-built JAR from `cs_studio_phoebus` (GitHub blocked) |
+| `shift_service` | Yes | Yes | Yes | Ports 11080/11443/11848 on arcapp1-dev |
 
 Roles not listed above (dependencies, cs_studio_*, cs_studio_bobs_*) are either
 already generic or do not deploy standalone services.
@@ -155,6 +189,17 @@ already generic or do not deploy standalone services.
   host has access to RHEL AppStream repos. Check with:
   ```bash
   ssh root@arcapp1-dev.nsls2.bnl.gov "dnf info tomcat mariadb-java-client"
+  ```
+
+- **GitHub HTTPS 401 from arcapp1-dev:** Git clone operations to
+  `github.com` fail with `could not read Username` because GitHub
+  returns HTTP 401 for unauthenticated git-over-HTTPS. This blocks
+  `phoebus_web_runtime_service` (clones PVWS/DBWR) and
+  `save_restore_service` (needs JAR from `cs_studio_phoebus` build).
+  **Fix:** Store a GitHub PAT in Ansible Vault and inject it into
+  repo URLs in the deploy playbook:
+  ```yaml
+  pvws_repo: "https://{{ github_token }}@github.com/ControlSystemStudio/pvws.git"
   ```
 
 - **AA blocked on RHEL 8:** Archiver Appliance 2.2.1 requires Tomcat 10+

@@ -38,6 +38,13 @@
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log" suffix=".txt"
                pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+{% if aa_remote_ip_valve_enabled | bool %}
+        <Valve className="org.apache.catalina.valves.RemoteIpValve"
+               internalProxies="{{ aa_remote_ip_internal_proxies }}"
+               remoteIpHeader="x-forwarded-for"
+               remoteIpProxiesHeader="x-forwarded-by"
+               protocolHeader="x-forwarded-proto" />
+{% endif %}
 {% if aa_health_check_enabled | bool %}
         <Valve className="org.apache.catalina.valves.HealthCheckValve" checkContainersAvailable="true"/>
 {% endif %}

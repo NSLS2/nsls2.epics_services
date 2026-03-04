@@ -1,21 +1,21 @@
 ---
 # defaults file for shift_service
-beamline_name: "test"
-beamline_id: "80"
 
 epics_services_account: csstudio
 
-http_port: "3{{beamline_id}}80"
-https_port: "3{{beamline_id}}81"
-admin_port: "3{{beamline_id}}48"
+shift_install_dir: /opt/epics-tools/services/shift
 
-# shift mysql database connection info
+http_port: 8080
+https_port: 8443
+admin_port: 4848
+
+# Shift MySQL database connection info
 shift_jdbc_server: "localhost"
-shift_jdbc_dbname: "{{ beamline_name }}_shift"
-shift_jdbc_user: "{{ beamline_name }}_shift"
-shift_jdbc_password: "shift@{{ beamline_name }}"
-#jdbc_root_user
-configure_mysql: yes
+shift_jdbc_dbname: "shift"
+shift_jdbc_user: "shift"
+shift_jdbc_password: "shift"
+# jdbc_root_user must be set in inventory
+configure_mysql: true
 
 # JAVA HOME
 java_home: "/usr/lib/jvm/java-1.8.0-openjdk"

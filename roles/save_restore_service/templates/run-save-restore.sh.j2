@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export JAVA_HOME={{ save_restore_java_home}}
+export JAVA_HOME={{ save_restore_java_home }}
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # figure out the path to the product jar
@@ -17,4 +17,4 @@ export JDK_JAVA_OPTIONS
 
 echo $JDK_JAVA_OPTIONS
 
-java -Dspring.config.location=/opt/epics-tools/services/{{beamline_name}}/save_restore/save_restore.properties -jar ${SAVE_RESTORE_JAR}
+java -Dspring.config.location={{ save_restore_install_dir }}/save_restore.properties -jar ${SAVE_RESTORE_JAR}

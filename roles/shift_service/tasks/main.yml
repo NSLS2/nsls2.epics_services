@@ -7,77 +7,84 @@
     name: java-1.8.0-openjdk-devel
     state: present
 
-- name: ensure services directory exists
-  file:
-    path: /opt/epics-tools/services/{{beamline_name}}
+- name: Ensure services directory exists
+  become: true
+  ansible.builtin.file:
+    path: "{{ shift_install_dir }}"
     state: directory
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0755"
 
-- name: install open galssfish 5.0.1
+- name: Install GlassFish 5.0.1
   ansible.builtin.unarchive:
     src: http://download.oracle.com/glassfish/5.0.1/release/glassfish-5.0.1.zip
-    dest: /opt/epics-tools/services/{{beamline_name}}/
-    remote_src: yes
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: "{{ shift_install_dir }}/"
+    remote_src: true
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    creates: "{{ shift_install_dir }}/glassfish5/bin/asadmin"
 
-- name: install the fixed bootstrap file
-  copy:
+- name: Install the fixed bootstrap file
+  ansible.builtin.copy:
     src: grizzly-npn-bootstrap.jar
-    dest: /opt/epics-tools/services/{{beamline_name}}/glassfish5/glassfish/modules/endorsed/grizzly-npn-bootstrap.jar
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/modules/endorsed/grizzly-npn-bootstrap.jar"
     force: true
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0644"
 
-# install jdbc connectors and third party libraries
-- name: install jdbc connectors and third party libraries
-  include: install_connectors.yml
+- name: Set AS_JAVA in GlassFish asenv.conf
+  become: true
+  ansible.builtin.lineinfile:
+    path: "{{ shift_install_dir }}/glassfish5/glassfish/config/asenv.conf"
+    regexp: '^AS_JAVA='
+    line: 'AS_JAVA="{{ java_home }}"'
+  notify: Restart shift_glassfish
 
-# setup and configure the mysql server
-- name: setup and configure the mysql server
-  include: configure_mysql.yml
+# Install JDBC connectors and third party libraries
+- name: Install JDBC connectors and third party libraries
+  ansible.builtin.include_tasks: install_connectors.yml
+
+# Setup and configure the MySQL server
+- name: Setup and configure the MySQL server
+  ansible.builtin.include_tasks: configure_mysql.yml
   when: configure_mysql
 
-- name: Check if Service Glassfish Exists
-  stat: path=/etc/systemd/system/"{{beamline_name}}_glassfish"
-  register: service_status
-
-- name: Stop service glassfish, if running
-  systemd:
-    name: "{{beamline_name}}_glassfish"
-    state: stopped
-  when: service_status.stat.exists
-  register: service_stopped
-
-# setup the domain.xml
-- name: setup glassfish domain.xml
+# Setup the domain.xml
+- name: Setup GlassFish domain.xml
   become: true
-  template:
+  ansible.builtin.template:
     src: domain.xml
-    dest: /opt/epics-tools/services/{{beamline_name}}/glassfish5/glassfish/domains/domain1/config/domain.xml
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/domains/domain1/config/domain.xml"
+    mode: "0644"
+  notify: Restart shift_glassfish
 
-# install shift war
+# Install shift war
 - name: Download shift war
-  get_url:
+  ansible.builtin.get_url:
     url: https://sourceforge.net/projects/olog/files/shift/Shift-1.1.war/download
-    dest: /opt/epics-tools/services/{{beamline_name}}/glassfish5/glassfish/domains/domain1/autodeploy/Shift-1.1.war
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/domains/domain1/autodeploy/Shift-1.1.war"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0644"
 
-# setup systemd service file
-- name: create systemd service files
+# Setup systemd service file
+- name: Create systemd service file
   become: true
-  template:
+  ansible.builtin.template:
     src: glassfish.service
-    dest: /etc/systemd/system/{{beamline_name}}_glassfish.service
-    mode: 0755
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: /etc/systemd/system/shift_glassfish.service
+    mode: "0644"
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart shift_glassfish
 
-# start glassfish
-- name: Restart glassfish
+- name: Enable shift_glassfish service
+  become: true
   ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: yes
-    name: "{{beamline_name}}_glassfish"
+    name: shift_glassfish
+    enabled: true
+    daemon_reload: true

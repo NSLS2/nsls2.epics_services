@@ -5,9 +5,6 @@
 #   pvws_repo: "https://github.com/your-org/pvws.git"
 #   dbwr_repo: "https://github.com/your-org/dbwr.git"
 
-beamline_name: "tst"
-beamline_id: "31"
-
 epics_services_account: csstudio
 
 java_home: "/usr/lib/jvm/java-21-openjdk"
@@ -16,7 +13,7 @@ mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
 epics_ca_addr_list: localhost
 epics_ca_max_array_bytes: 1000000
 
-tomcat_dest: /opt/epics-tools/services/tomcat
+tomcat_dest: /usr/share/tomcat
 tomcat_service_name: tomcat
 
 # PVWS (PV Web Socket) configuration
