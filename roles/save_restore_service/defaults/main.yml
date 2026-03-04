@@ -5,28 +5,27 @@
 #   ad_url: "ldap://your-ad-server.example.com"
 #   ad_domain: "example.com"
 
-beamline_name: "tst"
-beamline_id: "31"
-
-epics_services_account: epics-services-{{beamline_name}}
-
-save_restore_http_port: 2{{ beamline_id }}80
-save_restore_https_port: 2{{ beamline_id }}81
-
-save_restore_version: "4.7.4"
-save_restore_jar: /opt/epics-tools/services/{{beamline_name}}/save_restore/service-save-and-restore-{{ save_restore_version }}.jar
+epics_services_account: csstudio
 
 save_restore_java_home: "/usr/lib/jvm/java-21-openjdk"
+
+save_restore_install_dir: /opt/epics-tools/services/save_restore
+
+save_restore_version: "4.7.4"
+save_restore_jar: "{{ save_restore_install_dir }}/service-save-and-restore-{{ save_restore_version }}.jar"
+
+save_restore_http_port: 8080
+save_restore_https_port: 8443
 
 # Path to logback configuration
 phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
 
-# elastic info
+# Elasticsearch info
 es_host: "localhost"
-es_port: 4{{beamline_id}}92
+es_port: 9200
 
 ## procServ port
-save_restore_procServ_port: "2{{ beamline_id }}46"
+save_restore_procServ_port: "60050"
 
 # Active Directory configuration (organization-specific)
 ad_enabled: true

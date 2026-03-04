@@ -1,22 +1,22 @@
 shift_service
 =============
 
-Install the shift webservice. This installation steps include:
+Install the shift webservice. This installation includes:
 
-1. Installation of the glassfish 5.0.1 java EE server.
-2. Configuring mysql 5.7, create the shift database and the shift user.
-3. Deploy the shift web service.
+1. Installation of the GlassFish 5.0.1 Java EE server.
+2. Configuring MySQL, creating the shift database and user.
+3. Deploying the shift web service.
 
 **Installation location:**
-`/opt/epics-services/{{ beamline_name }}/glassfish5`
+`/opt/epics-tools/services/shift` (configurable via `shift_install_dir`)
 
 **Startup scripts:**
-`systemctl start {{ beamline_name }}_glassfish`
+`systemctl start shift_glassfish`
 
 Dependencies
 ------------
 
-OpenJDK 1.8.0 update 242
+OpenJDK 8
 role: jdk_dependency
 
 Role Variables
@@ -24,14 +24,14 @@ Role Variables
 
 | Variable | Type | Description |
 | --- | --- | --- |
-| `beamline_name` | string | The unique name of the beamline which will be used to determine the installation location of the glassfish service. |
-| `beamline_id` | int | The unique 2 digit id used to identify the beamline, this is used to determine the ports. |
-| `http_port` | int | The glassfish http port, default `3{{ beamline_id }}80`. |
-| `https_port` | int | The glassfish https port, default `3{{ beamline_id }}81`. |
-| `admin_port` | int | The glassfish admin port, default `3{{ beamline_id }}48`. |
-| `java_home` | string | The location of the jdk used by glassfish, required version is jdk8. |
-| `shift_jdbc_server` | string | The mysql server host names. |
-| `shift_jdbc_dbname` | string | The database name for shift, default `{{ beamline_name }}_shift`. |
-| `shift_jdbc_user` | string | The mysql user name for shift, default `{{ beamline_name }}_shift`. |
-| `shift_jdbc_password` | string | The mysql user password for shift, default `shift@{{ beamline_name }}`. |
-| `jdbc_root_user` | string | The mysql root password needed to create the shift user and database. |
+| `shift_install_dir` | string | Installation directory (default: `/opt/epics-tools/services/shift`). |
+| `http_port` | int | GlassFish HTTP port (default: `8080`). |
+| `https_port` | int | GlassFish HTTPS port (default: `8443`). |
+| `admin_port` | int | GlassFish admin port (default: `4848`). |
+| `java_home` | string | JDK 8 path (default: `/usr/lib/jvm/java-1.8.0-openjdk`). |
+| `shift_jdbc_server` | string | MySQL server hostname (default: `localhost`). |
+| `shift_jdbc_dbname` | string | Database name for shift (default: `shift`). |
+| `shift_jdbc_user` | string | MySQL username for shift (default: `shift`). |
+| `shift_jdbc_password` | string | MySQL password for shift (default: `shift`). |
+| `jdbc_root_user` | string | MySQL root password (required when `configure_mysql` is true). |
+| `configure_mysql` | bool | Whether to create the MySQL database and user (default: `true`). |

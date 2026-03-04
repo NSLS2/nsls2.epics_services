@@ -1,5 +1,5 @@
 [Unit]
-Description={{beamline_name}} GlassFish Server
+Description=Shift GlassFish Server
 After=syslog.target network.target
 
 StartLimitIntervalSec=500
@@ -14,10 +14,12 @@ Type=forking
 Restart=on-failure
 RestartSec=5s
 
-Environment=JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
+Environment=JAVA_HOME={{ java_home }}
+Environment=AS_JAVA={{ java_home }}
+Environment=PATH={{ java_home }}/bin:/usr/bin:/usr/local/bin
 
-ExecStart=/opt/epics-tools/services/{{beamline_name}}/glassfish5/bin/asadmin start-domain domain1
-ExecStop=/opt/epics-tools/services/{{beamline_name}}/glassfish5/bin/asadmin stop-domain domain1
+ExecStart={{ shift_install_dir }}/glassfish5/bin/asadmin start-domain domain1
+ExecStop={{ shift_install_dir }}/glassfish5/bin/asadmin stop-domain domain1
 TimeoutSec=180
 
 [Install]

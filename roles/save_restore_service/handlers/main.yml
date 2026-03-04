@@ -1,0 +1,13 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart save_restore
+  become: true
+  ansible.builtin.systemd:
+    name: save_restore
+    state: restarted
+    enabled: true

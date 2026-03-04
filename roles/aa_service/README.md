@@ -103,7 +103,9 @@ Role Variables
 | `aa_ssl_port_engine` | integer | `16076` | SSL port for engine webapp. |
 | `aa_ssl_port_etl` | integer | `16077` | SSL port for ETL webapp. |
 | `aa_ssl_port_retrieval` | integer | `16078` | SSL port for data retrieval webapp. |
-| `aa_health_check_enabled` | bool | `false` | Enable `/health` endpoint (Tomcat >= 9.0.55). |
+| `aa_remote_ip_valve_enabled` | bool | `false` | Enable `RemoteIpValve` (preserves real client IPs behind a reverse proxy). |
+| `aa_remote_ip_internal_proxies` | string | `127\\.0\\.0\\.1` | Regex matching trusted proxy IPs for `RemoteIpValve`. |
+| `aa_health_check_enabled` | bool | `true` | Enable `/health` endpoint (Tomcat >= 9.0.55). |
 | `aa_cluster_appliances` | list | `[]` | Cluster appliance definitions (see below). |
 
 Cluster mode
@@ -136,7 +138,7 @@ Example Playbooks
     - nsls2.epics_services.aa_service
 ```
 
-**With SSL (configured from the infrastructure playbook):**
+**With SSL behind HAProxy (configured from the infrastructure playbook):**
 
 ```yaml
 - hosts: archiver
@@ -144,7 +146,8 @@ Example Playbooks
     aa_ssl_enabled: true
     aa_ssl_keystore_file: "{{ acme_certificates_dir + '/' + acme_certificates_filename.keystore }}"
     aa_ssl_keystore_password: "{{ acme_certificates_keystore_password | default('changeit') }}"
-    aa_health_check_enabled: true
+    aa_remote_ip_valve_enabled: true
+    aa_remote_ip_internal_proxies: "{{ haproxy_internal_proxies_regex }}"
   roles:
     - nsls2.epics_services.aa_service
 ```

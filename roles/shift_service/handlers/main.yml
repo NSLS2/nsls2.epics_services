@@ -1,0 +1,13 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart shift_glassfish
+  become: true
+  ansible.builtin.systemd:
+    name: shift_glassfish
+    state: restarted
+    enabled: true

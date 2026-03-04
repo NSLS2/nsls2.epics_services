@@ -1,38 +1,39 @@
 ---
-# install PyMySQL
+# Install PyMySQL
 - name: Install PyMySQL
-  pip:
+  ansible.builtin.pip:
     name: PyMySQL
 
-- name: Install the mysql client
-  yum:
-    name: mysql
+- name: Install the MariaDB client
+  ansible.builtin.package:
+    name: mariadb
     state: present
 
-# create the shift database
-- name: Create a new database with name {{shift_jdbc_dbname}}
-  mysql_db:
-    name: "{{shift_jdbc_dbname}}"
+# Create the shift database
+- name: Create shift database
+  community.mysql.mysql_db:
+    name: "{{ shift_jdbc_dbname }}"
     state: present
-    login_host: "{{shift_jdbc_server}}"
+    login_host: "{{ shift_jdbc_server }}"
     login_user: root
-    login_password: "{{jdbc_root_user}}"
+    login_password: "{{ jdbc_root_user }}"
 
-# create the shift users and grant prvilidges
-- name: Create shift mysql user
-  mysql_user:
+# Create the shift user and grant privileges
+- name: Create shift MySQL user
+  community.mysql.mysql_user:
     state: present
-    name: "{{shift_jdbc_user}}"
-    password: "{{shift_jdbc_password}}"
-    priv: '{{shift_jdbc_dbname}}.*:ALL,GRANT'
-    host: '%'
-    login_host: "{{shift_jdbc_server}}"
+    name: "{{ shift_jdbc_user }}"
+    password: "{{ shift_jdbc_password }}"
+    priv: "{{ shift_jdbc_dbname }}.*:ALL,GRANT"
+    host: "%"
+    login_host: "{{ shift_jdbc_server }}"
     login_user: root
-    login_password: "{{jdbc_root_user}}"
+    login_password: "{{ jdbc_root_user }}"
 
-# create the shift schema
+# Create the shift schema
 - name: Copy shift template to remote machine
   become: true
-  template:
+  ansible.builtin.template:
     src: shift-base.sql
-    dest: /tmp/{{shift_jdbc_dbname}}_shift_schema.sql
+    dest: "/tmp/{{ shift_jdbc_dbname }}_shift_schema.sql"
+    mode: "0644"

@@ -73,8 +73,13 @@ aa_ssl_port_engine: 16076
 aa_ssl_port_etl: 16077
 aa_ssl_port_retrieval: 16078
 
+# Reverse proxy support (RemoteIpValve — preserves real client IPs behind a load balancer)
+# Enable and set internalProxies to match your HAProxy/load balancer IPs.
+aa_remote_ip_valve_enabled: false
+aa_remote_ip_internal_proxies: "127\\.0\\.0\\.1"
+
 # Health check valve (provides /health endpoint, requires Tomcat >= 9.0.55)
-aa_health_check_enabled: false
+aa_health_check_enabled: true
 
 # Legacy cleanup (opt-in removal of old monolithic AA service)
 aa_cleanup_legacy_service: false
