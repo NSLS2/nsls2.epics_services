@@ -6,6 +6,7 @@ version: 1.0.1
 readme: README.md
 authors:
   - Anthony Sligar <asligar@bnl.gov>
+  - Ankit Dhaka <fankitdha@bnl.gov>
 description: Collection of ansible roles to perform deployments of epics middle layer services
 license:
   - BSD-3-Clause
