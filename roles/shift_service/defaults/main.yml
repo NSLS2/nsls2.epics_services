@@ -19,3 +19,6 @@ configure_mysql: true
 
 # JAVA HOME (JDK 8 — separate from java_home used by JDK 21 services)
 shift_java_home: "/usr/lib/jvm/java-1.8.0-openjdk"
+
+# MariaDB JDBC connector JAR (from mariadb-java-client RPM)
+shift_mysql_connector_jar: "/usr/lib/java/mariadb-java-client.jar"
