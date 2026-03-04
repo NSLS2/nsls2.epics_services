@@ -9,6 +9,10 @@
   ansible.builtin.include_role:
     name: nsls2.epics_services.tomcat_dependency
 
+- name: Install Maven
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
+
 # PV Web Socket library
 - name: Clone and/or update the pvws repo
   become: true

@@ -12,11 +12,10 @@ Install the Phoebus Web Runtime services (PVWS and DBWR) into Tomcat.
 
 Dependencies
 ------------
-OpenJDK 21
-role: jdk_dependency
 
-Tomcat
-role: tomcat_dependency
+- `nsls2.epics_services.jdk_dependency` (included automatically)
+- `nsls2.epics_services.tomcat_dependency` (included automatically)
+- `nsls2.epics_services.maven_dependency` (included automatically)
 
 Role Variables
 --------------
