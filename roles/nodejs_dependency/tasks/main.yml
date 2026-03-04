@@ -10,8 +10,7 @@
 - name: Run NodeSource setup script
   ansible.builtin.command: bash /tmp/nodesource_setup.sh
   args:
-    creates: /etc/yum.repos.d/nodesource-el9.repo
-  changed_when: true
+    creates: /etc/yum.repos.d/nodesource-nodejs.repo
 
 - name: Install Node.js
   ansible.builtin.package:
