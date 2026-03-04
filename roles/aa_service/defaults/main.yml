@@ -44,7 +44,7 @@ data_retrieval_port: 16068
 aa_epics_ca_addr_list: localhost
 
 # Archiver Java Options
-aa_java_home: "/usr/lib/jvm/java-21-openjdk"
+aa_java_home: "{{ java_home }}"
 aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
 aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"

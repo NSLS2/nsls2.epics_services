@@ -1,8 +1,8 @@
 ---
-- name: Install OpenJDK 21 packages
+- name: Install OpenJDK packages ({{ jdk_version }})
   become: true
   ansible.builtin.package:
     name:
-      - java-21-openjdk
-      - java-21-openjdk-devel
+      - "java-{{ jdk_version }}-openjdk"
+      - "java-{{ jdk_version }}-openjdk-devel"
     state: present

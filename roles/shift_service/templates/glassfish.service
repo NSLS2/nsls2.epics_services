@@ -14,9 +14,9 @@ Type=forking
 Restart=on-failure
 RestartSec=5s
 
-Environment=JAVA_HOME={{ java_home }}
-Environment=AS_JAVA={{ java_home }}
-Environment=PATH={{ java_home }}/bin:/usr/bin:/usr/local/bin
+Environment=JAVA_HOME={{ shift_java_home }}
+Environment=AS_JAVA={{ shift_java_home }}
+Environment=PATH={{ shift_java_home }}/bin:/usr/bin:/usr/local/bin
 
 ExecStart={{ shift_install_dir }}/glassfish5/bin/asadmin start-domain domain1
 ExecStop={{ shift_install_dir }}/glassfish5/bin/asadmin stop-domain domain1
