@@ -1,17 +1,6 @@
 ---
 # tasks file for phoebus_web_runtime_service
-
-- name: Install JDK 21
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
-
-- name: Install Tomcat
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.tomcat_dependency
-
-- name: Install Maven
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+# Dependencies (JDK, Maven, Tomcat) are installed by the orchestration layer.
 
 # PV Web Socket library
 - name: Clone and/or update the pvws repo
@@ -20,8 +9,8 @@
   ansible.builtin.git:
     repo: "{{ pvws_repo }}"
     dest: "{{ pvws_dest }}"
-    force: true
     version: "{{ pvws_version }}"
+    update: true
   register: _pvws_repo
 
 # Display Builder Web Runtime library
@@ -31,12 +20,12 @@
   ansible.builtin.git:
     repo: "{{ dbwr_repo }}"
     dest: "{{ dbwr_dest }}"
-    force: true
     version: "{{ dbwr_version }}"
+    update: true
   register: _dbwr_repo
 
 # Build the pvws library
-- name: Build the pvws binaries  # noqa: no-handler
+- name: Build the pvws binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
   ansible.builtin.command: mvn clean install -DskipTests
@@ -47,10 +36,9 @@
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
   when: _pvws_repo.changed
-  changed_when: true
 
 # Build the dbwr library
-- name: Build the dbwr binaries  # noqa: no-handler
+- name: Build the dbwr binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
   ansible.builtin.command: mvn clean install -DskipTests
@@ -61,7 +49,6 @@
     MVN_HOME: "{{ mvn_home }}"
     PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
   when: _dbwr_repo.changed
-  changed_when: true
 
 # Copy pvws.war to tomcat
 - name: Copy pvws war  # noqa: no-handler
