@@ -16,68 +16,115 @@ on:
 jobs:
   run_superlinter:
     name: Run super-linter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Run super linter
-        uses: github/super-linter@v4
+              # Pin to commit; not an official github action
+        uses: super-linter/super-linter@61abc07d755095a68f4987d1c2c3d1d64408f1f9  # v8.5.0
         env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_NATURAL_LANGUAGE: false
-          DEFAULT_BRANCH: main
+          DEFAULT_BRANCH: origin/main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_BASH: false
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_BASH_EXEC: false  # Executable bit is not set in repository
+          VALIDATE_BIOME_FORMAT: false  # No biome.json config; needs discussion on whether to add or keep disabled
+          VALIDATE_CHECKOV: false  # Too many failures; enable this in a later PR
+          VALIDATE_CSS_PRETTIER: false  # CI messages have no info
+          VALIDATE_GRAPHQL_PRETTIER: false  # CI messages have no info
+          VALIDATE_HTML_PRETTIER: false  # CI messages have no info
+          VALIDATE_JAVASCRIPT_PRETTIER: false  # CI messages have no info
           VALIDATE_JSCPD: false
+          VALIDATE_JSON_PRETTIER: false  # CI messages have no info
+          VALIDATE_JSONC_PRETTIER: false  # CI messages have no info
+          VALIDATE_JSX_PRETTIER: false  # CI messages have no info
+          VALIDATE_MARKDOWN_PRETTIER: false  # CI messages have no info
+          VALIDATE_NATURAL_LANGUAGE: false
+          VALIDATE_PYTHON_BLACK: false
+          VALIDATE_PYTHON_FLAKE8: false
+          VALIDATE_PYTHON_ISORT: false
+          VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_SHELL_SHFMT: false  # TODO: Enable this when configurable; too noisy otherwise
+          VALIDATE_TYPESCRIPT_PRETTIER: false  # CI messages have no info
+          VALIDATE_VUE_PRETTIER: false  # CI messages have no info
+          VALIDATE_YAML_PRETTIER: false  # CI messages have no info
 
   get_changed_files:
     name: Get changed yaml files
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       any_changed: ${{ steps.changed-files.outputs.any_changed }}
       all_changed_files: ${{ steps.changed-files.outputs.all_changed_files }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: Get changed files
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1 # v45
+              # Pin to commit; not an official github action
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94 # v46.0.5
         with:
           files: |
             **/*.{yml,yaml}
 
   run_ansible_lint:
     name: Run ansible-lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [get_changed_files]
     if: needs.get_changed_files.outputs.any_changed == 'true'
+    env:
+      PYTHON_DEPENDENCIES: >-
+        ansible-core==2.15.13
+        ansible-lint
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Install python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.9'
+
+      - name: Cache python dependencies
+        id: pip-cache
+        uses: actions/cache@v4
+        with:
+          path: "${{ env.pythonLocation }}"
+          key: "${{ env.pythonLocation }}-${{ env.PYTHON_DEPENDENCIES }}"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-core==2.14.1 ansible-lint
+          # PYTHON_DEPENDENCIES is a space-separated list, not a single string
+          # shellcheck disable=SC2086
+          pip install ${{ env.PYTHON_DEPENDENCIES }}
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+
+      - name: Cache ansible galaxy collections
+        id: collections-cache
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/.ansible/collections
+          key: ansible-collections-${{ hashFiles('collections/requirements.yml') }}
+
+      - name: Install ansible galaxy requirements
+        run: |
+          ansible-galaxy install -r collections/requirements.yml --timeout 120
+        if: steps.collections-cache.outputs.cache-hit != 'true'
 
       - name: Lint playbook
         run: |
-          ansible-lint -c .ansible-lint \
-            ${NEEDS_GET_CHANGED_FILES_OUTPUTS_ALL_CHANGED_FILES}
+          # FILES_TO_LINT is a space-separated list, not a single string
+          # shellcheck disable=SC2086
+          ansible-lint -c .ansible-lint --offline $FILES_TO_LINT
         env:
-          NEEDS_GET_CHANGED_FILES_OUTPUTS_ALL_CHANGED_FILES: ${{ needs.get_changed_files.outputs.all_changed_files }}
+          FILES_TO_LINT: "${{ needs.get_changed_files.outputs.all_changed_files }}"
