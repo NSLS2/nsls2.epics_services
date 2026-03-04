@@ -8,7 +8,7 @@
 epics_services_account: csstudio
 
 java_home: "/usr/lib/jvm/java-21-openjdk"
-mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
+mvn_home: "/opt/epics-tools/lib/apache-maven-{{ maven_version | default('3.9.9') }}"
 
 epics_ca_addr_list: localhost
 epics_ca_max_array_bytes: 1000000
