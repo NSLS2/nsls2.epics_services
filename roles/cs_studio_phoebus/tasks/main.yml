@@ -46,7 +46,7 @@
     mode: "u=rw,g=r,o=r"
   when: cs_studio_phoebus_override_mvn_settings
 
-- name: Build the documentation and help
+- name: Build the documentation and help  # noqa: no-changed-when no-handler
   ansible.builtin.shell: >-
     JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
     MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
@@ -55,7 +55,6 @@
   args:
     chdir: /opt/css/lib/phoebus/
   when: _phoebus_repo.changed
-  changed_when: true
 
 - name: Build the common phoebus binaries
   ansible.builtin.shell: >-
