@@ -1,25 +1,9 @@
 ---
 # tasks file for recceiver_service
-
-# --- Dependencies (co-located ChannelFinder) ---
-
-- name: Include jdk_dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
-
-- name: Include maven_dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
-
-- name: Include elasticsearch_dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
-
-- name: Include channelfinder_service
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.channelfinder_service
-
-# --- RecCeiver ---
+#
+# Dependencies (JDK 21, Maven, Elasticsearch, ChannelFinder) must be
+# installed before this role runs.  The deploy_epics_services
+# orchestration role handles this automatically.
 
 - name: Install Python dependencies
   become: true
