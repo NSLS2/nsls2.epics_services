@@ -9,10 +9,12 @@
     group: "{{ epics_services_account }}"
     mode: "0644"
 
-- name: Download MySQL JDBC connector
-  ansible.builtin.get_url:
-    url: https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.34/mysql-connector-java-5.1.34.jar
-    dest: "{{ shift_install_dir }}/glassfish5/glassfish/lib/mysql-connector-java-5.1.34-bin.jar"
+- name: Copy MariaDB JDBC connector to GlassFish lib
+  become: true
+  ansible.builtin.copy:
+    src: "{{ shift_mysql_connector_jar }}"
+    dest: "{{ shift_install_dir }}/glassfish5/glassfish/lib/mariadb-java-client.jar"
+    remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: "0644"
