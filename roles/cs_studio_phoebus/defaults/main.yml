@@ -7,8 +7,8 @@ cs_studio_phoebus_products_repo: ""
 cs_studio_phoebus_products_version: "main"
 cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
 
-cs_studio_phoebus_java_home: "/usr/lib/jvm/java-21-openjdk"
-cs_studio_phoebus_mvn_home: "/opt/epics-tools/lib/apache-maven-3.9.9"
+cs_studio_phoebus_java_home: "{{ java_home }}"
+cs_studio_phoebus_mvn_home: "{{ mvn_home }}"
 
 # Paths to built artifacts (must be overridden to match your products build)
 cs_studio_phoebus_jar: ""

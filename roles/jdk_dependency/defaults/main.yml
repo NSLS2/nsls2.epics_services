@@ -1,4 +1,3 @@
 ---
-# No configurable defaults — JDK 21 is installed from RPM.
-# Other roles should reference the RPM path directly:
-#   /usr/lib/jvm/java-21-openjdk
+jdk_version: "21"
+java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"

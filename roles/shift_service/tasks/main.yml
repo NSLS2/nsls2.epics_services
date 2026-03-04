@@ -37,7 +37,7 @@
   ansible.builtin.lineinfile:
     path: "{{ shift_install_dir }}/glassfish5/glassfish/config/asenv.conf"
     regexp: '^AS_JAVA='
-    line: 'AS_JAVA="{{ java_home }}"'
+    line: 'AS_JAVA="{{ shift_java_home }}"'
   notify: Restart shift_glassfish
 
 # Install JDBC connectors and third party libraries
