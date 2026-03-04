@@ -19,6 +19,15 @@ ansible-galaxy collection build --force --output-path /tmp/
 ansible-galaxy collection install /tmp/nsls2-epics_services-*.tar.gz
 ```
 
+### Collection dependencies
+
+This collection requires `community.general` and `community.mysql`.
+Install them from `collections/requirements.yml`:
+
+```bash
+ansible-galaxy collection install -r collections/requirements.yml -p collections/
+```
+
 ## Roles
 
 ### Service roles

@@ -12,9 +12,7 @@ license:
   - BSD-3-Clause
 license_file: "LICENSE"
 tags: [infrastructure]
-dependencies:
-  community.general: ">=5.0.0"
-  community.mysql: ">=3.0.0"
+dependencies: {}
 repository: http://github.com/nsls2/nsls2.epics_services
 documentation: http://github.com/nsls2/nsls2.epics_services
 homepage: http://www.bnl.gov/nsls2
