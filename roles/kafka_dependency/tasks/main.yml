@@ -9,9 +9,21 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
 
-- name: Install kafka
+- name: Check if Kafka is already installed
+  ansible.builtin.stat:
+    path: "{{ kafka_install_dir }}/bin/kafka-server-start.sh"
+  register: _kafka_bin
+
+- name: Download Kafka tarball
+  ansible.builtin.get_url:
+    url: "{{ kafka_download_url }}"
+    dest: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+    mode: '0644'
+  when: not _kafka_bin.stat.exists
+
+- name: Install Kafka
   ansible.builtin.unarchive:
-    src: https://downloads.apache.org/kafka/3.9.0/kafka_2.13-3.9.0.tgz
+    src: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
     dest: "{{ kafka_install_dir }}"
     remote_src: true
     mode: '0775'
@@ -19,6 +31,7 @@
     group: "{{ epics_services_account }}"
     extra_opts:
       - --strip-components=1
+  when: not _kafka_bin.stat.exists
   notify:
     - Restart zookeeper
     - Restart kafka
