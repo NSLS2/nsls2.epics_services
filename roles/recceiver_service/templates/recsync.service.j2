@@ -1,0 +1,24 @@
+[Unit]
+Description=RecSync Service
+Documentation=https://github.com/ChannelFinder/recsync/tree/master/server
+Documentation=https://github.com/ChannelFinder/pyCFClient
+After=network.target channelfinder.service
+
+[Service]
+User=recceiver
+Group=65534
+
+Environment="PYTHONPATH={{ recsync_runtime_dir }}"
+
+ExecStart=/usr/bin/twistd --logfile={{ recsync_runtime_dir }}/recsync.log \
+                          --rundir {{ recsync_runtime_dir }} \
+                          --pidfile= \
+                          --reactor=poll \
+                          --nodaemon recceiver -f {{ recsync_runtime_dir }}/recsync.conf
+
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
+Alias=rs.service

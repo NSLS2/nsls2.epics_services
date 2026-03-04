@@ -1,68 +1,88 @@
 ---
 # tasks file for recceiver_service
 
-# procServ
-- name: Install the latest version of python3-twisted
-  yum:
-    name: python3-twisted
-    state: present
+# --- Dependencies (co-located ChannelFinder) ---
 
-- name: Install the latest version of python3-requests
-  yum:
-    name: python3-requests
-    state: present
+- name: Include jdk_dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
 
-- name: Install the latest version of python3-simplejson
-  yum:
-    name: python3-simplejson
-    state: present
+- name: Include maven_dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
 
-- name: Install the latest version of python3-urllib3
-  yum:
-    name: python3-urllib3
-    state: present
+- name: Include elasticsearch_dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.elasticsearch_dependency
 
-- name: Clone the recsync installation repo
+- name: Include channelfinder_service
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.channelfinder_service
+
+# --- RecCeiver ---
+
+- name: Install Python dependencies
   become: true
-  git:
-    repo: 'https://github.com/ChannelFinder/RecSync-env.git'
-    dest: /opt/epics-tools/services/recsync
+  ansible.builtin.package:
+    name:
+      - python3-twisted
+      - python3-requests
+      - python3-simplejson
+      - python3-urllib3
+    state: present
 
-- name: Run 'init' target as root
-  make:
-    chdir: /opt/epics-tools/services/recsync
-    target: init
-  become: yes
-
-- name: Run 'install' target as root
-  make:
-    chdir: /opt/epics-tools/services/recsync
-    target: install
-  become: yes
-
-# recsync conf
-- name: copy recsync configuration
+- name: Clone the RecSync-env repository
   become: true
-  template:
+  ansible.builtin.git:
+    repo: "{{ recsync_repo }}"
+    dest: "{{ recsync_install_dir }}"
+    version: "{{ recsync_version }}"
+  register: _recsync_repo
+
+- name: Run make init  # noqa: no-changed-when no-handler
+  become: true
+  ansible.builtin.command:
+    cmd: make init
+    chdir: "{{ recsync_install_dir }}"
+  when: _recsync_repo.changed
+
+- name: Run make install  # noqa: no-changed-when no-handler
+  become: true
+  ansible.builtin.command:
+    cmd: make install
+    chdir: "{{ recsync_install_dir }}"
+  when: _recsync_repo.changed
+
+- name: Install recsync systemd service
+  become: true
+  ansible.builtin.template:
+    src: recsync.service.j2
+    dest: /etc/systemd/system/recsync.service
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart recsync
+
+- name: Install recsync configuration
+  become: true
+  ansible.builtin.template:
     src: recsync.conf
-    dest: /opt/RecSync/recsync.conf
-    mode: 0755
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
+    dest: "{{ recsync_runtime_dir }}/recsync.conf"
+    mode: '0644'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart recsync
 
-# cf conf
-- name: copy channel finder configuration
+- name: Install ChannelFinder client configuration
   become: true
-  template:
+  ansible.builtin.template:
     src: channelfinderapi.conf
-    dest: /opt/RecSync/channelfinderapi.conf
-    mode: 0755
-    owner:  "{{ epics_services_account }}"
-    group:  "{{ epics_services_account }}"
-
-# start recsync
-- name: Restart recsync
-  ansible.builtin.systemd:
-    state: restarted
-    daemon_reload: yes
-    name: "recsync"
+    dest: "{{ recsync_runtime_dir }}/channelfinderapi.conf"
+    mode: '0644'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart recsync
