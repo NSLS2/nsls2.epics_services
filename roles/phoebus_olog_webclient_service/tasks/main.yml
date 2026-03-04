@@ -21,7 +21,6 @@
   ansible.builtin.git:
     repo: 'https://github.com/Olog/phoebus-olog-web-client.git'
     dest: "{{ phoebus_olog_webclient_project_path }}"
-    force: true
     version: "{{ phoebus_olog_webclient_version }}"
     update: true
   register: _webclient_repo
@@ -41,12 +40,11 @@
     production: false
   when: _webclient_repo.changed
 
-- name: Run npm build script  # noqa: no-handler
+- name: Run npm build script  # noqa: no-changed-when no-handler
   ansible.builtin.command: npm run build
   args:
     chdir: "{{ phoebus_olog_webclient_project_path }}"
   when: _webclient_repo.changed
-  changed_when: true
 
 # Setup and configure the Olog Webclient systemd services
 - name: Include tasks to configure Olog Webclient systemd services
