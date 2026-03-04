@@ -5,7 +5,7 @@ name: epics_services
 version: 1.0.1
 readme: README.md
 authors:
-  - Kunal Shroff <shroffk@bnl.gov>
+  - Anthony Sligar <asligar@bnl.gov>
 description: Collection of ansible roles to perform deployments of epics middle layer services
 license:
   - BSD-3-Clause
