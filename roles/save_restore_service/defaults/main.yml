@@ -25,7 +25,7 @@ es_host: "localhost"
 es_port: 9200
 
 ## procServ port
-save_restore_procServ_port: "60050"
+save_restore_procServ_port: 60050
 
 # Active Directory configuration (organization-specific)
 ad_enabled: true
