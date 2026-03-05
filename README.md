@@ -41,8 +41,9 @@ ansible-galaxy collection install -r collections/requirements.yml -p collections
 ### Service roles
 
 These roles deploy EPICS services. Dependencies (JDK, Maven, etc.) must
-be installed before these roles run — typically handled by an
-orchestration layer.
+be installed before these roles run — handled by a site-specific
+orchestration role in the consuming playbook repository (not part of
+this collection).
 
 | Role | Description |
 | --- | --- |
