@@ -117,41 +117,62 @@ graph LR
     end
 
     jdk --> aa
-    tomcat --> aa
-    mariadb --> aa
-
     jdk --> cf
-    mvn --> cf
-    es --> cf
-
     jdk --> alarm
-    mvn --> alarm
-    es --> alarm
-    kafka --> alarm
-    phoebus_build --> alarm
-
     jdk --> olog
-    mvn --> olog
-    es --> olog
-    mongo --> olog
-
-    nodejs --> olog_web
-    olog -.->|runtime| olog_web
-
     jdk --> webrt
-    mvn --> webrt
-    tomcat --> webrt
-
     jdk --> rec
-    mvn --> rec
-    es --> rec
-    cf -.->|runtime| rec
-
     jdk --> savres
+
+    mvn --> cf
+    mvn --> alarm
+    mvn --> olog
+    mvn --> webrt
+    mvn --> rec
+
+    es --> cf
+    es --> alarm
+    es --> olog
+    es --> rec
     es --> savres
 
-    jdk8 --> shift
+    kafka --> alarm
+
+    mongo --> olog
+
+    tomcat --> aa
+    tomcat --> webrt
+
+    mariadb --> aa
     mariadb --> shift
+
+    nodejs --> olog_web
+
+    procserv --> cf
+    procserv --> alarm
+    procserv --> olog
+    procserv --> olog_web
+    procserv --> savres
+
+    jdk8 --> shift
+
+    phoebus_build --> alarm
+
+    olog -.->|runtime| olog_web
+    cf -.->|runtime| rec
+
+    linkStyle 0,1,2,3,4,5,6 stroke:#2563eb
+    linkStyle 7,8,9,10,11 stroke:#d97706
+    linkStyle 12,13,14,15,16 stroke:#16a34a
+    linkStyle 17 stroke:#dc2626
+    linkStyle 18 stroke:#7c3aed
+    linkStyle 19,20 stroke:#0d9488
+    linkStyle 21,22 stroke:#000000
+    linkStyle 23 stroke:#e91e8f
+    linkStyle 24,25,26,27,28 stroke:#4b0082
+    linkStyle 29 stroke:#6b7280
+    linkStyle 30 stroke:#9333ea
+    linkStyle 31,32 stroke:#64748b,stroke-dasharray:5 5
 ```
 
 Solid arrows are build/install dependencies managed by the orchestration
