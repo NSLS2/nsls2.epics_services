@@ -182,6 +182,9 @@ be running before the dependent service can function.
 
 ## Architecture
 
+See [docs/example-orchestration-role.md](docs/example-orchestration-role.md)
+for a complete, ready-to-use example.
+
 ```
 Orchestration role (site-specific)
 ├── defaults/main.yml        # Site defaults (ports, paths, auth)
