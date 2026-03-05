@@ -6,6 +6,14 @@ Roles are designed to be generic — site-specific configuration (ports,
 paths, authentication) is provided via an orchestration role or
 `host_vars` in the consuming playbook.
 
+## Requirements
+
+- **RHEL 10** (or compatible) — baseline OS for all target hosts.
+  Several services depend on system RPM packages that ship with
+  RHEL 10, including Tomcat 10+ (required by Archiver Appliance 2.3.1
+  for Jakarta EE) and OpenJDK 21.
+- **Ansible** >= 2.15
+
 ## Installation
 
 ```bash
@@ -74,6 +82,81 @@ Centralizing these ensures consistent versions and single-point upgrades.
 | `mariadb_dependency` | MariaDB JDBC connector (RPM) | — |
 | `nodejs_dependency` | Node.js via NodeSource | `nodejs_version` |
 | `procserv_dependency` | procServ process manager | — |
+
+## Service dependency graph
+
+```mermaid
+graph LR
+    subgraph Dependencies
+        jdk[jdk_dependency<br/>OpenJDK 21]
+        mvn[maven_dependency]
+        es[elasticsearch_dependency]
+        kafka[kafka_dependency]
+        mongo[mongodb_dependency]
+        tomcat[tomcat_dependency]
+        mariadb[mariadb_dependency]
+        nodejs[nodejs_dependency]
+        procserv[procserv_dependency]
+        jdk8[JDK 8<br/>direct install]
+    end
+
+    subgraph Build
+        phoebus_build[cs_studio_phoebus]
+    end
+
+    subgraph Services
+        aa[aa_service]
+        cf[channelfinder_service]
+        alarm[phoebus_alarm_service]
+        olog[phoebus_olog_service]
+        olog_web[phoebus_olog_webclient_service]
+        webrt[phoebus_web_runtime_service]
+        rec[recceiver_service]
+        savres[save_restore_service]
+        shift[shift_service]
+    end
+
+    jdk --> aa
+    tomcat --> aa
+    mariadb --> aa
+
+    jdk --> cf
+    mvn --> cf
+    es --> cf
+
+    jdk --> alarm
+    mvn --> alarm
+    es --> alarm
+    kafka --> alarm
+    phoebus_build --> alarm
+
+    jdk --> olog
+    mvn --> olog
+    es --> olog
+    mongo --> olog
+
+    nodejs --> olog_web
+    olog -.->|runtime| olog_web
+
+    jdk --> webrt
+    mvn --> webrt
+    tomcat --> webrt
+
+    jdk --> rec
+    mvn --> rec
+    es --> rec
+    cf -.->|runtime| rec
+
+    jdk --> savres
+    es --> savres
+
+    jdk8 --> shift
+    mariadb --> shift
+```
+
+Solid arrows are build/install dependencies managed by the orchestration
+layer. Dashed arrows are runtime dependencies — the target service must
+be running before the dependent service can function.
 
 ## Architecture
 
