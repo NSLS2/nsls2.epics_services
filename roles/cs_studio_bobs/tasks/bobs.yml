@@ -31,4 +31,4 @@
     repo: "{{ cs_studio_bobs_config.base_repo + '/' + _repo.0 + '.git' }}"
     dest: "{{ cs_studio_bobs_config.basedir + '/' + _repo.1 + '/' + _repo.0 }}"
     version: "{{ _repo.1 }}"
-    force: true
+    update: true

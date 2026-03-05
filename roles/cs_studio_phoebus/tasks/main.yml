@@ -16,10 +16,7 @@
     repo: 'https://github.com/ControlSystemStudio/phoebus.git'
     dest: /opt/css/lib/phoebus
     version: "{{ cs_studio_phoebus_version }}"
-    force: true
     update: true
-    single_branch: false
-    depth: 0
   register: _phoebus_repo
 
 - name: Clone and/or update the site-specific products repo
@@ -29,10 +26,7 @@
     repo: "{{ cs_studio_phoebus_products_repo }}"
     dest: "{{ cs_studio_phoebus_products_dest }}"
     version: "{{ cs_studio_phoebus_products_version }}"
-    force: true
     update: true
-    single_branch: false
-    depth: 0
   register: _products_repo
   when: cs_studio_phoebus_products_repo | length > 0
 

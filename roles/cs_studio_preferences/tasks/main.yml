@@ -19,7 +19,7 @@
     repo: "{{ cs_studio_preferences_config.repo }}"
     dest: "{{ cs_studio_preferences_config.basedir }}"
     version: "{{ cs_studio_preferences_config.version }}"
-    force: true
+    update: true
 
 - name: Create folder for cs-studio perspectives
   ansible.builtin.file:
