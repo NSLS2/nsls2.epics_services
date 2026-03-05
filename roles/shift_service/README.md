@@ -1,5 +1,4 @@
-shift_service
-=============
+# shift_service
 
 Install the shift webservice. This installation includes:
 
@@ -13,14 +12,22 @@ Install the shift webservice. This installation includes:
 **Startup scripts:**
 `systemctl start shift_glassfish`
 
-Dependencies
-------------
+## Important: JDK 8 / GlassFish 5 legacy dependency
 
-OpenJDK 8
-role: jdk_dependency
+This role does **not** use the shared `jdk_dependency` role (JDK 21).
+GlassFish 5 requires **JDK 8** and uses the **Java EE (`javax.*`)** API.
+The orchestration layer must install `java-1.8.0-openjdk-devel` directly
+instead of calling `jdk_dependency`.
 
-Role Variables
---------------
+Migrating to GlassFish 7/8 would require updating the Shift application
+source code from `javax.*` to `jakarta.*` (Jakarta EE namespace migration).
+
+## Dependencies
+
+- **JDK 8** — installed directly by the orchestration layer (not `jdk_dependency`)
+- **MariaDB JDBC connector** — `mariadb_dependency` role
+
+## Role Variables
 
 | Variable | Type | Description |
 | --- | --- | --- |
@@ -28,7 +35,8 @@ Role Variables
 | `http_port` | int | GlassFish HTTP port (default: `8080`). |
 | `https_port` | int | GlassFish HTTPS port (default: `8443`). |
 | `admin_port` | int | GlassFish admin port (default: `4848`). |
-| `java_home` | string | JDK 8 path (default: `/usr/lib/jvm/java-1.8.0-openjdk`). |
+| `shift_java_home` | string | JDK 8 path (default: `/usr/lib/jvm/java-1.8.0-openjdk`). |
+| `shift_mysql_connector_jar` | string | MariaDB JDBC JAR path (default: `/usr/lib/java/mariadb-java-client.jar`). |
 | `shift_jdbc_server` | string | MySQL server hostname (default: `localhost`). |
 | `shift_jdbc_dbname` | string | Database name for shift (default: `shift`). |
 | `shift_jdbc_user` | string | MySQL username for shift (default: `shift`). |
