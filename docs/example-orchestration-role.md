@@ -97,9 +97,9 @@ data_retrieval_port: 16068
 cluster_inetport: 16070
 
 # procServ ports
-phoebus_alarm_server_procServ_port: "60046"
-phoebus_alarm_logger_procServ_port: "60047"
-phoebus_alarm_config_logger_procServ_port: "60048"
+phoebus_alarm_server_procServ_port: 60046
+phoebus_alarm_logger_procServ_port: 60047
+phoebus_alarm_config_logger_procServ_port: 60048
 olog_procServ_port: 60049
 olog_webclient_procServ_port: 60050
 cf_procServ_port: 60051
