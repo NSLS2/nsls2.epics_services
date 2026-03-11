@@ -111,7 +111,7 @@ cf_user: admin
 cf_password: adminPass
 
 # Phoebus Alarm
-alarm_config: "Accelerator"
+alarm_config: "Accelerator"  # set to your site's alarm configuration name
 
 # Phoebus Olog — authentication (override for your site)
 ad_enabled: false
