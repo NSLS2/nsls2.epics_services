@@ -22,7 +22,7 @@ kafka_port: 9092
 es_host: "localhost"
 es_port: 9200
 
-alarm_config: "Accelerator"
+alarm_config: "Alarms"
 
 alarm_mail_server: "localhost"
 alarm_mail_server_port: 25
