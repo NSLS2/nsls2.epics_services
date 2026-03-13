@@ -1,0 +1,35 @@
+---
+# Post-upgrade: resume all PVs that were paused for consolidation
+#
+# After the upgrade completes and AA services are restarted, resume
+# archiving for all PVs.  The pause state is persisted in the database,
+# so PVs remain paused across the restart until explicitly resumed.
+
+- name: Wait for AA mgmt to become available after upgrade
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/getApplianceInfo"
+    method: GET
+    return_content: true
+    status_code: 200
+    timeout: 10
+  register: _aa_mgmt_post_check
+  retries: "{{ aa_post_upgrade_retries }}"
+  delay: "{{ aa_post_upgrade_delay }}"
+  until: _aa_mgmt_post_check.status == 200
+  failed_when: false
+
+- name: Resume all PVs after upgrade
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/resumeArchivingPV?pv=*"
+    method: GET
+    return_content: true
+  register: _aa_resume_result
+  when: _aa_mgmt_post_check.status is defined and _aa_mgmt_post_check.status == 200
+
+- name: Warn if AA mgmt is not reachable after upgrade
+  ansible.builtin.debug:
+    msg: >-
+      WARNING: AA mgmt is not reachable after upgrade.
+      PVs may still be paused — manually resume with:
+      curl 'http://localhost:{{ mgmt_port }}/mgmt/bpl/resumeArchivingPV?pv=*'
+  when: _aa_mgmt_post_check.status is not defined or _aa_mgmt_post_check.status != 200

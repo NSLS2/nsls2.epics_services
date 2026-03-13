@@ -81,6 +81,17 @@ aa_remote_ip_internal_proxies: "127\\.0\\.0\\.1"
 # Health check valve (provides /health endpoint, requires Tomcat >= 9.0.55)
 aa_health_check_enabled: true
 
+# Pre-upgrade data consolidation (opt-in)
+# When true and aa_version changes, all PV data is consolidated from
+# STS/MTS into the target store before stopping services for upgrade.
+# This can be slow for appliances with many PVs — enable deliberately.
+aa_pre_upgrade_consolidate: false
+aa_consolidate_storage: "LTS"
+aa_consolidate_timeout: 300
+# Post-upgrade: how long to wait for mgmt to come back before resuming PVs
+aa_post_upgrade_retries: 30
+aa_post_upgrade_delay: 10
+
 # Legacy cleanup (opt-in removal of old monolithic AA service)
 aa_cleanup_legacy_service: false
 

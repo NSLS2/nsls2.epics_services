@@ -11,8 +11,16 @@
 - name: Build Archiver Appliance
   ansible.builtin.include_tasks: build.yml
 
+- name: Pre-upgrade data consolidation
+  ansible.builtin.include_tasks: pre_upgrade.yml
+  when: _repo.changed and aa_pre_upgrade_consolidate | bool
+
 - name: Deploy Archiver Appliance
   ansible.builtin.include_tasks: deploy.yml
+
+- name: Post-upgrade PV resume
+  ansible.builtin.include_tasks: post_upgrade.yml
+  when: _repo.changed and aa_pre_upgrade_consolidate | bool
 
 - name: Configure custom logging
   ansible.builtin.include_tasks: configure_logging.yml
