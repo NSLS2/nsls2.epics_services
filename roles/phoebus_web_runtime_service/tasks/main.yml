@@ -1,6 +1,17 @@
 ---
 # tasks file for phoebus_web_runtime_service
-# Dependencies (JDK, Maven, Tomcat) are installed by the orchestration layer.
+
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Maven dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
+
+- name: Install Tomcat dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
 
 # PV Web Socket library
 - name: Clone and/or update the pvws repo

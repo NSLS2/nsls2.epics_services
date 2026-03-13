@@ -1,6 +1,18 @@
 ---
 # Build and Deploy Channel Finder server
 
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Maven dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
+
+- name: Install Elasticsearch dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.elasticsearch_dependency
+
 # Create the installation location for the cf server
 - name: Ensure services folder exists
   ansible.builtin.file:

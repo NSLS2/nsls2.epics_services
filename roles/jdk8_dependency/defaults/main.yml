@@ -1,0 +1,4 @@
+---
+# JDK 8 — RHEL < 10 uses system OpenJDK, RHEL 10+ uses Adoptium Temurin
+jdk8_java_home_openjdk: "/usr/lib/jvm/java-1.8.0-openjdk"
+jdk8_java_home_temurin: "/usr/lib/jvm/java-8-temurin-jdk"

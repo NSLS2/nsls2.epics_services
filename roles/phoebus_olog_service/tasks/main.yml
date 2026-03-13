@@ -1,6 +1,22 @@
 ---
 # tasks file for phoebus_olog_service
 
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Maven dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
+
+- name: Install Elasticsearch dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.elasticsearch_dependency
+
+- name: Install MongoDB dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.mongodb_dependency
+
 # create the installation location for the olog server
 - name: Ensure services folder exists
   ansible.builtin.file:

@@ -1,9 +1,13 @@
 ---
 # tasks file for shift_service
-#
-# Dependencies (JDK 8) must be installed before this role runs.
-# The deploy_epics_services orchestration role handles this
-# automatically.
+
+- name: Install JDK 8 dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk8_dependency
+
+- name: Install MariaDB JDBC dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.mariadb_dependency
 
 - name: Ensure services directory exists
   become: true

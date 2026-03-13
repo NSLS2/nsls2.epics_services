@@ -1,9 +1,17 @@
 ---
 # tasks file for aa_service
-#
-# Dependencies (JDK 21, Tomcat, MariaDB JDBC connector) must be
-# installed before this role runs.  The deploy_epics_services
-# orchestration role handles this automatically.
+
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Tomcat dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
+
+- name: Install MariaDB JDBC dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.mariadb_dependency
 
 - name: Configure local MariaDB
   ansible.builtin.include_tasks: configure_mysql.yml
