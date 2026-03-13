@@ -28,7 +28,7 @@
 - name: Build the pvws binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
-  ansible.builtin.command: mvn clean install -DskipTests
+  ansible.builtin.command: "mvn {{ pvws_mvn_args }}"
   args:
     chdir: "{{ pvws_dest }}/"
   environment:
@@ -41,7 +41,7 @@
 - name: Build the dbwr binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
-  ansible.builtin.command: mvn clean install -DskipTests
+  ansible.builtin.command: "mvn {{ dbwr_mvn_args }}"
   args:
     chdir: "{{ dbwr_dest }}/"
   environment:

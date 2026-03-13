@@ -29,11 +29,21 @@
   register: _mongodb_gpg_key
   ignore_errors: true
 
+- name: Check if MongoDB GPG key is already imported
+  ansible.builtin.shell:
+    cmd: rpm -q gpg-pubkey --qf '%{SUMMARY}\n' | grep -qi 'MongoDB'
+  register: _mongodb_gpg_check
+  changed_when: false
+  failed_when: false
+  when: _mongodb_gpg_key is failed
+
 - name: Import MongoDB GPG key (fallback for expired binding signatures)
   become: true
   ansible.builtin.command:
     cmd: "rpm --import https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-  when: _mongodb_gpg_key is failed
+  when:
+    - _mongodb_gpg_key is failed
+    - _mongodb_gpg_check.rc != 0
   changed_when: true
 
 - name: Install MongoDB
