@@ -18,3 +18,7 @@ cs_studio_phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback
 cs_studio_phoebus_owner: "csstudio"
 cs_studio_phoebus_override_mvn_settings: false
 cs_studio_phoebus_force_gpu: false
+
+# When true, build products from pre-deployed files (no git clone needed).
+# Sites that set cs_studio_phoebus_products_repo get clone+build automatically.
+cs_studio_phoebus_build_products: false
