@@ -9,11 +9,21 @@
   register: _es_gpg_key
   ignore_errors: true
 
+- name: Check if Elasticsearch GPG key is already imported
+  ansible.builtin.shell:
+    cmd: rpm -q gpg-pubkey --qf '%{SUMMARY}\n' | grep -qi 'Elasticsearch'
+  register: _es_gpg_check
+  changed_when: false
+  failed_when: false
+  when: _es_gpg_key is failed
+
 - name: Import Elasticsearch GPG key (fallback for OpenPGP v6)
   become: true
   ansible.builtin.command:
     cmd: rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
-  when: _es_gpg_key is failed
+  when:
+    - _es_gpg_key is failed
+    - _es_gpg_check.rc != 0
   changed_when: true
 
 - name: Add Elasticsearch yum repository

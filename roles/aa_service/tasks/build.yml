@@ -15,7 +15,6 @@
     repo: 'https://github.com/archiver-appliance/epicsarchiverap.git'
     dest: "{{ aa_build_loc }}/epicsarchiverap"
     version: "{{ aa_version }}"
-    force: true
   register: _repo
 
 - name: Cleanup build directory  # noqa: no-handler
