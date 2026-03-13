@@ -35,7 +35,7 @@
       become: true
       ansible.builtin.shell: |
         autoreconf -fi
-        ./configure --prefix=/usr/local
+        ./configure --prefix=/usr/local --disable-doc
         make -j$(nproc)
         make install
       args:
