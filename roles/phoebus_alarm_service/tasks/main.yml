@@ -1,6 +1,26 @@
 ---
 # tasks file for phoebus_alarm_service
 
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+
+- name: Install Maven dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.maven_dependency
+
+- name: Install Elasticsearch dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.elasticsearch_dependency
+
+- name: Install Kafka dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.kafka_dependency
+
+- name: Build CS-Studio Phoebus products
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.cs_studio_phoebus
+
 # Alarm Server
 
 # create the installation location for the alarm server
