@@ -1,0 +1,78 @@
+---
+# Pre-upgrade data consolidation for Archiver Appliance
+#
+# When upgrading AA (aa_version changes), consolidate all PV data from
+# STS/MTS into LTS before stopping services.  This ensures no data is
+# lost or left in short/medium-term stores during the upgrade.
+#
+# Requires:
+#   - AA mgmt instance is running and reachable
+#   - aa_pre_upgrade_consolidate: true (default: false)
+#   - _repo.changed is true (set by build.yml when aa_version changes)
+
+- name: Check if AA mgmt is reachable
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/getApplianceInfo"
+    method: GET
+    return_content: true
+    status_code: 200
+    timeout: 10
+  register: _aa_mgmt_check
+  failed_when: false
+
+- name: Skip consolidation if AA mgmt is not reachable
+  ansible.builtin.debug:
+    msg: >-
+      AA mgmt is not reachable at localhost:{{ mgmt_port }} (status={{ _aa_mgmt_check.status | default('unreachable') }}).
+      Skipping pre-upgrade consolidation — this is a fresh install or AA is not running.
+  when: _aa_mgmt_check.status is not defined or _aa_mgmt_check.status != 200
+
+- name: Get all archived PVs
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/getAllPVs?limit=-1"
+    method: GET
+    return_content: true
+  register: _aa_all_pvs
+  when: _aa_mgmt_check.status is defined and _aa_mgmt_check.status == 200
+
+- name: Set PV list fact
+  ansible.builtin.set_fact:
+    _aa_pv_list: "{{ _aa_all_pvs.json | default([]) }}"
+  when: _aa_all_pvs is not skipped
+
+- name: Report PV count for consolidation
+  ansible.builtin.debug:
+    msg: "Found {{ _aa_pv_list | length }} PVs to consolidate into {{ aa_consolidate_storage }} before upgrade"
+  when: _aa_pv_list is defined and _aa_pv_list | length > 0
+
+- name: Pause all PVs before consolidation
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/pauseArchivingPV?pv=*"
+    method: GET
+    return_content: true
+  register: _aa_pause_result
+  when: _aa_pv_list is defined and _aa_pv_list | length > 0
+
+- name: Consolidate data for each PV into {{ aa_consolidate_storage }}
+  ansible.builtin.uri:
+    url: "http://localhost:{{ mgmt_port }}/mgmt/bpl/consolidateDataForPV?pv={{ item | urlencode }}&storage={{ aa_consolidate_storage }}"
+    method: GET
+    return_content: true
+    timeout: "{{ aa_consolidate_timeout }}"
+  register: _aa_consolidate_result
+  loop: "{{ _aa_pv_list }}"
+  loop_control:
+    label: "{{ item }}"
+  when: _aa_pv_list is defined and _aa_pv_list | length > 0
+  failed_when: false
+
+- name: Report consolidation failures
+  ansible.builtin.debug:
+    msg: "WARNING: Consolidation failed for {{ item.item }} — {{ item.json.validation | default(item.json.desc | default('unknown error')) }}"
+  loop: "{{ _aa_consolidate_result.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - _aa_consolidate_result is not skipped
+    - item.json is defined
+    - item.json.status is not defined or item.json.status != "ok"
