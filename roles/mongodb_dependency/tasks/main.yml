@@ -1,20 +1,49 @@
 ---
-- name: Add MongoDB community repository
+# MongoDB doesn't publish repos for every RHEL major version.
+# Cap releasever at 9 since RHEL 9 packages are binary-compatible with 10+.
+- name: Remove stale MongoDB repo file (version changed)
+  become: true
+  ansible.builtin.file:
+    path: "/etc/yum.repos.d/mongodb-org-{{ item }}.repo"
+    state: absent
+  loop: "{{ ['6.0.1', '7.0', '8.0'] | difference(['mongodb_version']) }}"
+  when: false  # enable manually if switching versions on an existing host
+
+- name: Add MongoDB {{ mongodb_version }} community repository
+  become: true
   ansible.builtin.yum_repository:
-    name: mongodb-org-6.0.1
-    file: mongodb-org-6.0.1
-    description: MongoDB community repository
-    baseurl: https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/6.0/x86_64/
+    name: "mongodb-org-{{ mongodb_version }}"
+    file: "mongodb-org-{{ mongodb_version }}"
+    description: "MongoDB {{ mongodb_version }} community repository"
+    baseurl: >-
+      https://repo.mongodb.org/yum/redhat/{{ [ansible_distribution_major_version | int, 9] | min }}/mongodb-org/{{ mongodb_version }}/x86_64/
     gpgcheck: true
-    gpgkey: https://www.mongodb.org/static/pgp/server-6.0.asc
+    gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
     enabled: true
 
+- name: Import MongoDB GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    key: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+    state: present
+  register: _mongodb_gpg_key
+  ignore_errors: true
+
+- name: Import MongoDB GPG key (fallback for expired binding signatures)
+  become: true
+  ansible.builtin.command:
+    cmd: "rpm --import https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+  when: _mongodb_gpg_key is failed
+  changed_when: true
+
 - name: Install MongoDB
+  become: true
   ansible.builtin.package:
     name: mongodb-org
     state: present
 
 - name: Make run directory
+  become: true
   ansible.builtin.file:
     path: "/var/run/{{ mongod_name }}"
     state: directory
@@ -23,6 +52,7 @@
     mode: "0755"
 
 - name: Make data directory
+  become: true
   ansible.builtin.file:
     path: "{{ mongod_data_path }}"
     state: directory
