@@ -19,3 +19,7 @@
     group: "{{ maven_dependency_owner }}"
     extra_opts:
       - --strip-components=1
+
+- name: Export mvn_home for dependent roles
+  ansible.builtin.set_fact:
+    mvn_home: "{{ mvn_home }}"

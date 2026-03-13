@@ -6,3 +6,7 @@
       - "java-{{ jdk_version }}-openjdk"
       - "java-{{ jdk_version }}-openjdk-devel"
     state: present
+
+- name: Export java_home for dependent roles
+  ansible.builtin.set_fact:
+    java_home: "{{ java_home }}"
