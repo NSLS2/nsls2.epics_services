@@ -3,8 +3,11 @@
 
 # java_home provided by jdk_dependency
 
+# Path to CS-Studio Phoebus products (used to derive logback path)
+cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
+
 # Path to logback configuration
-phoebus_logback: "/opt/css/nsls2-phoebus/config/logback.xml"
+phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
 
 # Alarm Server channel access options
 alarm_epics_ca_addr_list: localhost
