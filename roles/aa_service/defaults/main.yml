@@ -55,6 +55,21 @@ aa_sts: "{{ aa_deploy_location }}/data/sts/ArchiverStore"
 aa_mts: "{{ aa_deploy_location }}/data/mts/ArchiverStore"
 aa_lts: "{{ aa_deploy_location }}/data/lts/ArchiverStore"
 
+# Storage partition granularity and retention
+# STS: short-term store — hourly partitions, consolidates data on shutdown
+aa_sts_partition_granularity: "PARTITION_HOUR"
+aa_sts_consolidate_on_shutdown: true
+
+# MTS: medium-term store — daily partitions
+#   hold: number of partitions to keep before ETL promotes to LTS
+#   gather: number of ETL source partitions to merge into one destination partition
+aa_mts_partition_granularity: "PARTITION_DAY"
+aa_mts_hold: 7
+aa_mts_gather: 1
+
+# LTS: long-term store — yearly partitions, permanent retention
+aa_lts_partition_granularity: "PARTITION_YEAR"
+
 # Archiver Log Locations
 aa_logs_base_dir: "/var/log/archiver-appliance"
 aa_configure_custom_logs: false

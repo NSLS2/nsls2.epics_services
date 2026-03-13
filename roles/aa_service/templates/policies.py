@@ -42,11 +42,12 @@ def getFieldsArchivedAsPartOfStream():
     return ["HIHI", "HIGH", "LOW", "LOLO", "LOPR", "HOPR", "DRVH", "DRVL"]
 
 
-# We use the environment variables ARCHAPPL_SHORT_TERM_FOLDER and ARCHAPPL_MEDIUM_TERM_FOLDER to determine the location of the STS and the MTS in the appliance
-shorttermstore_plugin_url = "pb://localhost?name=STS&rootFolder=${ARCHAPPL_SHORT_TERM_FOLDER}&partitionGranularity=PARTITION_HOUR&consolidateOnShutdown=true"
-mediumtermstore_plugin_url = "pb://localhost?name=MTS&rootFolder=${ARCHAPPL_MEDIUM_TERM_FOLDER}&partitionGranularity=PARTITION_DAY&hold=2&gather=1"
-longtermstore_plugin_url = "pb://localhost?name=LTS&rootFolder=${ARCHAPPL_LONG_TERM_FOLDER}&partitionGranularity=PARTITION_YEAR"
-# longtermstore_plugin_url = 'blackhole://localhost'
+# Storage plugin URLs — partition granularity and retention are parameterized
+# via Ansible defaults (aa_sts_partition_granularity, aa_mts_hold, etc.).
+# Folder paths are set via environment variables in the instance startup script.
+shorttermstore_plugin_url = "pb://localhost?name=STS&rootFolder=${ARCHAPPL_SHORT_TERM_FOLDER}&partitionGranularity={{ aa_sts_partition_granularity }}{% if aa_sts_consolidate_on_shutdown %}&consolidateOnShutdown=true{% endif %}"
+mediumtermstore_plugin_url = "pb://localhost?name=MTS&rootFolder=${ARCHAPPL_MEDIUM_TERM_FOLDER}&partitionGranularity={{ aa_mts_partition_granularity }}&hold={{ aa_mts_hold }}&gather={{ aa_mts_gather }}"
+longtermstore_plugin_url = "pb://localhost?name=LTS&rootFolder=${ARCHAPPL_LONG_TERM_FOLDER}&partitionGranularity={{ aa_lts_partition_granularity }}"
 
 
 def determinePolicy(pvInfoDict):
@@ -101,7 +102,7 @@ def determinePolicy(pvInfoDict):
         pvPolicyDict["dataStores"] = [
             shorttermstore_plugin_url,
             # We want to store 3 days worth of data in the MTS.
-            "pb://localhost?name=MTS&rootFolder=${ARCHAPPL_MEDIUM_TERM_FOLDER}&partitionGranularity=PARTITION_DAY&hold=4&gather=1",
+            "pb://localhost?name=MTS&rootFolder=${ARCHAPPL_MEDIUM_TERM_FOLDER}&partitionGranularity={{ aa_mts_partition_granularity }}&hold=4&gather={{ aa_mts_gather }}",
             "blackhole://localhost?name=LTS",
         ]
         pvPolicyDict["policyName"] = "2HzPVs"
