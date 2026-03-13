@@ -64,7 +64,7 @@ aa_sts_consolidate_on_shutdown: true
 #   hold: number of partitions to keep before ETL promotes to LTS
 #   gather: number of ETL source partitions to merge into one destination partition
 aa_mts_partition_granularity: "PARTITION_DAY"
-aa_mts_hold: 7
+aa_mts_hold: 2
 aa_mts_gather: 1
 
 # LTS: long-term store — yearly partitions, permanent retention
