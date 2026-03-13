@@ -17,8 +17,11 @@ save_restore_jar: "{{ save_restore_install_dir }}/service-save-and-restore-{{ sa
 save_restore_http_port: 8080
 save_restore_https_port: 8443
 
+# Path to CS-Studio Phoebus products (used to derive logback path)
+cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
+
 # Path to logback configuration
-phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
+phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
 
 # Elasticsearch info
 es_host: "localhost"

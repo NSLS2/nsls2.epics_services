@@ -13,8 +13,11 @@ cf_version: ChannelFinder-4.7.3
 cf_java_home: "{{ java_home }}"
 cf_mvn_home: "{{ mvn_home }}"
 
+# Path to CS-Studio Phoebus products (used to derive logback path)
+cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
+
 # Path to logback configuration
-phoebus_logback: "/opt/css/phoebus-products/config/logback.xml"
+phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
 
 es_host: "localhost"
 es_port: 9200
