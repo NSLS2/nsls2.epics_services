@@ -17,11 +17,12 @@ tomcat_dest: /usr/share/tomcat
 tomcat_service_name: tomcat
 
 # PVWS (PV Web Socket) configuration
-pvws_repo: "https://github.com/ControlSystemStudio/pvws.git"
-pvws_version: main
+pvws_repo: "https://github.com/ControlSystemStudio/pvws-springboot.git"
+pvws_version: master
 pvws_dest: /opt/css/pvws
 
 # DBWR (Display Builder Web Runtime) configuration
-dbwr_repo: "https://github.com/ControlSystemStudio/dbwr.git"
+# The original ControlSystemStudio/dbwr repo is gone; use the ornl-epics fork.
+dbwr_repo: "https://github.com/ornl-epics/dbwr.git"
 dbwr_version: main
 dbwr_dest: /opt/css/dbwr
