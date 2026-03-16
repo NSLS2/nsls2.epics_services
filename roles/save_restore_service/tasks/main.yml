@@ -80,4 +80,3 @@
   ansible.builtin.systemd:
     name: save_restore
     enabled: true
-    daemon_reload: true
