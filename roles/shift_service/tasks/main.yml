@@ -91,4 +91,3 @@
   ansible.builtin.systemd:
     name: shift_glassfish
     enabled: true
-    daemon_reload: true
