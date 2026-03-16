@@ -151,4 +151,3 @@
   ansible.builtin.systemd:
     name: elasticsearch
     enabled: true
-    daemon_reload: true
