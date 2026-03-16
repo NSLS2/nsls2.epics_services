@@ -1,25 +1,10 @@
 ---
-# defaults file for phoebus_olog_service
-#
-# Override organization-specific values in your inventory:
-#   ad_url: "ldap://your-ad-server.example.com"
-#   ad_domain: "example.com"
-#   ldap_urls: "ldaps://your-ldap-server.example.com/dc=example,dc=com"
-#   ldap_base_dn: "dc=example,dc=com"
-
-# java_home provided by jdk_dependency
-# mvn_home provided by maven_dependency
-
-# Path to CS-Studio Phoebus products (used to derive logback path)
-cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
-
-# Path to logback configuration
-phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
+# Shared vars (epics_services_account, cs_studio_phoebus_products_dest,
+# phoebus_logback, es_host, es_port, mongod_host, mongod_port)
+# in vars/shared.yml
 
 phoebus_olog_version: "v5.0.4"
 phoebus_olog_jar: "service-olog-5.0.4.jar"
-
-epics_services_account: csstudio
 
 phoebus_olog_install_dir: /opt/epics-tools/services/phoebus_olog
 
@@ -28,12 +13,6 @@ olog_http_port: 8080
 olog_https_port: 8443
 
 cors_allowed_origins: "http://localhost:3000"
-
-es_host: "localhost"
-es_port: 9200
-
-mongod_host: "localhost"
-mongod_port: 27017
 
 ## procServ port
 olog_procServ_port: 60049

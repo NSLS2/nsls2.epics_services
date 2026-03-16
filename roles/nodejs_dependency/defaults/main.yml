@@ -1,4 +1,3 @@
 ---
-# defaults file for nodejs_dependency
-
-nodejs_version: 21
+# All defaults moved to vars/shared.yml (collection-level shared defaults).
+# Role-specific overrides can still be added here.

@@ -1,4 +1,8 @@
 ---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
 # tasks file for aa_service
 
 - name: Install JDK dependency

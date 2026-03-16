@@ -1,0 +1,39 @@
+---
+# Shared collection defaults — single source of truth for variables
+# used across multiple roles. Loaded via include_vars (precedence 18).
+# Orchestration set_fact (19) and extra_vars (20) can still override.
+
+# === Shared account ===
+epics_services_account: csstudio
+
+# === Dependency versions ===
+jdk_version: 21
+elastic_version: "8.19.12"
+kafka_version: "3.9.2"
+kafka_scala_version: "2.13"
+maven_version: "3.9.9"
+mongodb_version: "8.0"
+nodejs_version: 21
+
+# === Derived paths ===
+java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"
+mvn_home: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+kafka_install_dir: "/opt/epics-tools/services/kafka"
+cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
+phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
+
+# === Dependency connections ===
+es_host: localhost
+es_port: 9200
+elastic_port: 9200
+kafka_server: localhost
+kafka_port: 9092
+zookeeper_port: 2181
+mongod_host: localhost
+mongod_port: 27017
+
+# === Elasticsearch ===
+elastic_heap_size: "4g"
+elastic_cluster_name: elasticsearch
+elastic_data: /var/lib/elasticsearch
+elastic_logs: /var/log/elasticsearch

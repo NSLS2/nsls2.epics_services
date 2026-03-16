@@ -1,7 +1,5 @@
 ---
-# defaults file for phoebus_olog_webclient_service
-
-epics_services_account: csstudio
+# epics_services_account in vars/shared.yml
 
 # Olog REST service parameters
 phoebus_olog_url: "http://localhost:8080/Olog"

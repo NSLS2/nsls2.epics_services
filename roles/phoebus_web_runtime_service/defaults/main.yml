@@ -1,14 +1,5 @@
 ---
-# defaults file for phoebus_web_runtime_service
-#
-# Override organization-specific values in your inventory:
-#   pvws_repo: "https://github.com/your-org/pvws.git"
-#   dbwr_repo: "https://github.com/your-org/dbwr.git"
-
-epics_services_account: csstudio
-
-# java_home provided by jdk_dependency
-# mvn_home provided by maven_dependency
+# epics_services_account in vars/shared.yml
 
 epics_ca_addr_list: localhost
 epics_ca_max_array_bytes: 1000000
@@ -20,11 +11,9 @@ tomcat_service_name: tomcat
 pvws_repo: "https://github.com/ControlSystemStudio/pvws-springboot.git"
 pvws_version: master
 pvws_dest: /opt/css/pvws
-# pvws-springboot uses Maven profiles: "jar" (default) or "war" (for Tomcat)
 pvws_mvn_args: "clean install -P war -DskipTests"
 
 # DBWR (Display Builder Web Runtime) configuration
-# The original ControlSystemStudio/dbwr repo is gone; use the ornl-epics fork.
 dbwr_repo: "https://github.com/ornl-epics/dbwr.git"
 dbwr_version: main
 dbwr_dest: /opt/css/dbwr
