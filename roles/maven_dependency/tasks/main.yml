@@ -1,30 +1,29 @@
 ---
-- name: Skip if already checked this play
-  ansible.builtin.meta: end_role
-  when: _maven_dependency_done | default(false)
+- name: Install Maven (run once per play)
+  when: not (_maven_dependency_done | default(false))
+  block:
+    - name: Ensure Maven directory exists
+      become: true
+      ansible.builtin.file:
+        path: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+        state: directory
+        owner: "{{ maven_dependency_owner }}"
+        group: "{{ maven_dependency_owner }}"
+        mode: "u=rwX,g=rwX,o=rX"
 
-- name: Ensure Maven directory exists
-  become: true
-  ansible.builtin.file:
-    path: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
-    state: directory
-    owner: "{{ maven_dependency_owner }}"
-    group: "{{ maven_dependency_owner }}"
-    mode: "u=rwX,g=rwX,o=rX"
+    - name: Install Maven
+      become: true
+      ansible.builtin.unarchive:
+        src: "{{ maven_url }}"
+        dest: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
+        creates: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}/bin/mvn"
+        remote_src: true
+        owner: "{{ maven_dependency_owner }}"
+        group: "{{ maven_dependency_owner }}"
+        extra_opts:
+          - --strip-components=1
 
-- name: Install Maven
-  become: true
-  ansible.builtin.unarchive:
-    src: "{{ maven_url }}"
-    dest: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
-    creates: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}/bin/mvn"
-    remote_src: true
-    owner: "{{ maven_dependency_owner }}"
-    group: "{{ maven_dependency_owner }}"
-    extra_opts:
-      - --strip-components=1
-
-- name: Export mvn_home for dependent roles
-  ansible.builtin.set_fact:
-    mvn_home: "{{ mvn_home }}"
-    _maven_dependency_done: true
+    - name: Export mvn_home for dependent roles
+      ansible.builtin.set_fact:
+        mvn_home: "{{ mvn_home }}"
+        _maven_dependency_done: true
