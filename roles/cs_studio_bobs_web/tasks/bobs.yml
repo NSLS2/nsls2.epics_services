@@ -1,19 +1,5 @@
 ---
 
-- name: Check for repo dir
-  ansible.builtin.stat:
-    path: "{{ cs_studio_bobs_web_config.basedir + '/production/' + _repo.0 }}"
-  register: _stat
-
-- name: Recursively change permissions
-  ansible.builtin.file:
-    dest: "{{ cs_studio_bobs_web_config.basedir + '/production/' + _repo.0 }}"
-    owner: root
-    group: root
-    mode: "u=rwX,g=rX,o=rX"
-    recurse: true
-  when: _stat.stat.exists
-
 - name: Ensure proxy is unset
   community.general.git_config:
     repo: "{{ cs_studio_bobs_web_config.basedir + '/production/' + _repo.0 }}"
@@ -32,3 +18,13 @@
     dest: "{{ cs_studio_bobs_web_config.basedir + '/production/' + _repo.0 }}"
     version: "{{ _repo.1 }}"
     update: true
+  register: _bob_clone
+
+- name: Fix permissions after clone  # noqa: no-handler
+  ansible.builtin.file:
+    dest: "{{ cs_studio_bobs_web_config.basedir + '/production/' + _repo.0 }}"
+    owner: root
+    group: root
+    mode: "u=rwX,g=rX,o=rX"
+    recurse: true
+  when: _bob_clone.changed

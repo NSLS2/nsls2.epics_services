@@ -35,7 +35,7 @@
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-    recurse: true
+    mode: "0755"
 
 # Copy binaries from /opt/css/lib/phoebus/services/alarm-server/target/service-alarm-server-{{ phoebus_alarm_server_version }}-bin.tar.gz
 - name: Copy alarm server jar
@@ -55,7 +55,7 @@
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-    recurse: true
+    mode: "0755"
 
 # Copy binaries from /opt/css/lib/phoebus/services/alarm-server/target/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar
 - name: Copy alarm logger server jar
@@ -74,7 +74,7 @@
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-    recurse: true
+    mode: "0755"
 
 # Copy binaries from /opt/css/lib/phoebus/services/alarm-config-logger/target/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}jar
 - name: Copy alarm config logger server jar

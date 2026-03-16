@@ -13,7 +13,7 @@
     state: directory
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-    recurse: true
+    mode: "0755"
 
 # Olog Webclient
 - name: Clone and/or update the Olog webclient repo
