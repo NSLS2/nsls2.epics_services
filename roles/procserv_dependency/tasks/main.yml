@@ -7,43 +7,6 @@
       ansible.builtin.package:
         name: procServ
         state: present
-      register: _procserv_rpm
-      ignore_errors: true
-
-    - name: Build procServ from source (fallback when RPM unavailable)
-      when: _procserv_rpm is failed
-      block:
-        - name: Install build dependencies for procServ
-          become: true
-          ansible.builtin.package:
-            name:
-              - gcc
-              - gcc-c++
-              - make
-              - autoconf
-              - automake
-              - libtelnet-devel
-            state: present
-
-        - name: Clone procServ source
-          become: true
-          ansible.builtin.git:
-            repo: "https://github.com/ralphlange/procServ.git"
-            dest: /usr/local/src/procServ
-            version: "{{ procserv_version | default('master') }}"
-            update: true
-          register: _procserv_src
-
-        - name: Build and install procServ
-          become: true
-          ansible.builtin.shell: |
-            autoreconf -fi
-            ./configure --prefix=/usr/local --disable-doc
-            make -j$(nproc)
-            make install
-          args:
-            chdir: /usr/local/src/procServ
-            creates: /usr/local/bin/procServ
 
     - name: Mark procserv dependency done
       ansible.builtin.set_fact:
