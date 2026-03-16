@@ -1,15 +1,14 @@
 ---
-- name: Skip if already checked this play
-  ansible.builtin.meta: end_role
-  when: _mariadb_dependency_done | default(false)
+- name: Install MariaDB JDBC (run once per play)
+  when: not (_mariadb_dependency_done | default(false))
+  block:
+    - name: Install MariaDB JDBC connector via RPM
+      become: true
+      ansible.builtin.package:
+        name:
+          - mariadb-java-client
+        state: present
 
-- name: Install MariaDB JDBC connector via RPM
-  become: true
-  ansible.builtin.package:
-    name:
-      - mariadb-java-client
-    state: present
-
-- name: Mark mariadb dependency done
-  ansible.builtin.set_fact:
-    _mariadb_dependency_done: true
+    - name: Mark mariadb dependency done
+      ansible.builtin.set_fact:
+        _mariadb_dependency_done: true

@@ -1,122 +1,121 @@
 ---
-- name: Skip if already checked this play
-  ansible.builtin.meta: end_role
-  when: _mongodb_dependency_done | default(false)
+- name: Install MongoDB (run once per play)
+  when: not (_mongodb_dependency_done | default(false))
+  block:
+    # MongoDB doesn't publish repos for every RHEL major version.
+    # Cap releasever at 9 since RHEL 9 packages are binary-compatible with 10+.
+    - name: Remove stale MongoDB repo file (version changed)
+      become: true
+      ansible.builtin.file:
+        path: "/etc/yum.repos.d/mongodb-org-{{ item }}.repo"
+        state: absent
+      loop: "{{ ['6.0.1', '7.0', '8.0'] | difference(['mongodb_version']) }}"
+      when: false  # enable manually if switching versions on an existing host
 
-# MongoDB doesn't publish repos for every RHEL major version.
-# Cap releasever at 9 since RHEL 9 packages are binary-compatible with 10+.
-- name: Remove stale MongoDB repo file (version changed)
-  become: true
-  ansible.builtin.file:
-    path: "/etc/yum.repos.d/mongodb-org-{{ item }}.repo"
-    state: absent
-  loop: "{{ ['6.0.1', '7.0', '8.0'] | difference(['mongodb_version']) }}"
-  when: false  # enable manually if switching versions on an existing host
+    - name: Add MongoDB {{ mongodb_version }} community repository
+      become: true
+      ansible.builtin.yum_repository:
+        name: "mongodb-org-{{ mongodb_version }}"
+        file: "mongodb-org-{{ mongodb_version }}"
+        description: "MongoDB {{ mongodb_version }} community repository"
+        baseurl: >-
+          https://repo.mongodb.org/yum/redhat/{{ [ansible_distribution_major_version | int, 9] | min }}/mongodb-org/{{ mongodb_version }}/x86_64/
+        gpgcheck: true
+        gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+        enabled: true
 
-- name: Add MongoDB {{ mongodb_version }} community repository
-  become: true
-  ansible.builtin.yum_repository:
-    name: "mongodb-org-{{ mongodb_version }}"
-    file: "mongodb-org-{{ mongodb_version }}"
-    description: "MongoDB {{ mongodb_version }} community repository"
-    baseurl: >-
-      https://repo.mongodb.org/yum/redhat/{{ [ansible_distribution_major_version | int, 9] | min }}/mongodb-org/{{ mongodb_version }}/x86_64/
-    gpgcheck: true
-    gpgkey: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-    enabled: true
+    - name: Import MongoDB GPG key
+      become: true
+      ansible.builtin.rpm_key:
+        key: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+        state: present
+      register: _mongodb_gpg_key
+      ignore_errors: true
 
-- name: Import MongoDB GPG key
-  become: true
-  ansible.builtin.rpm_key:
-    key: "https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-    state: present
-  register: _mongodb_gpg_key
-  ignore_errors: true
+    - name: Check if MongoDB GPG key is already imported
+      ansible.builtin.shell:
+        cmd: rpm -q gpg-pubkey --qf '%{SUMMARY}\n' | grep -qi 'MongoDB'
+      register: _mongodb_gpg_check
+      changed_when: false
+      failed_when: false
+      when: _mongodb_gpg_key is failed
 
-- name: Check if MongoDB GPG key is already imported
-  ansible.builtin.shell:
-    cmd: rpm -q gpg-pubkey --qf '%{SUMMARY}\n' | grep -qi 'MongoDB'
-  register: _mongodb_gpg_check
-  changed_when: false
-  failed_when: false
-  when: _mongodb_gpg_key is failed
+    - name: Import MongoDB GPG key (fallback for expired binding signatures)
+      become: true
+      ansible.builtin.command:
+        cmd: "rpm --import https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
+      when:
+        - _mongodb_gpg_key is failed
+        - _mongodb_gpg_check.rc != 0
+      changed_when: true
 
-- name: Import MongoDB GPG key (fallback for expired binding signatures)
-  become: true
-  ansible.builtin.command:
-    cmd: "rpm --import https://www.mongodb.org/static/pgp/server-{{ mongodb_version }}.asc"
-  when:
-    - _mongodb_gpg_key is failed
-    - _mongodb_gpg_check.rc != 0
-  changed_when: true
+    # --- Version-lock: prevent dnf-automatic from upgrading between runs ---
 
-# --- Version-lock: prevent dnf-automatic from upgrading between runs ---
+    - name: Ensure dnf versionlock plugin is installed
+      become: true
+      ansible.builtin.package:
+        name: python3-dnf-plugin-versionlock
+        state: present
 
-- name: Ensure dnf versionlock plugin is installed
-  become: true
-  ansible.builtin.package:
-    name: python3-dnf-plugin-versionlock
-    state: present
+    - name: Install MongoDB
+      become: true
+      ansible.builtin.package:
+        name: mongodb-org
+        state: present
+      register: _mongodb_install
 
-- name: Install MongoDB
-  become: true
-  ansible.builtin.package:
-    name: mongodb-org
-    state: present
-  register: _mongodb_install
+    - name: Lock MongoDB packages
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf versionlock add {{ item }}"
+      loop:
+        - mongodb-org
+        - mongodb-org-server
+        - mongodb-org-mongos
+        - mongodb-org-database
+        - mongodb-org-database-tools-extra
+        - mongodb-mongosh
+      when: _mongodb_install.changed
+      changed_when: true
 
-- name: Lock MongoDB packages
-  become: true
-  ansible.builtin.command:
-    cmd: "dnf versionlock add {{ item }}"
-  loop:
-    - mongodb-org
-    - mongodb-org-server
-    - mongodb-org-mongos
-    - mongodb-org-database
-    - mongodb-org-database-tools-extra
-    - mongodb-mongosh
-  when: _mongodb_install.changed
-  changed_when: true
+    - name: Make run directory
+      become: true
+      ansible.builtin.file:
+        path: "/var/run/{{ mongod_name }}"
+        state: directory
+        owner: "{{ mongod_user }}"
+        group: "{{ mongod_group }}"
+        mode: "0755"
 
-- name: Make run directory
-  become: true
-  ansible.builtin.file:
-    path: "/var/run/{{ mongod_name }}"
-    state: directory
-    owner: "{{ mongod_user }}"
-    group: "{{ mongod_group }}"
-    mode: "0755"
+    - name: Make data directory
+      become: true
+      ansible.builtin.file:
+        path: "{{ mongod_data_path }}"
+        state: directory
+        owner: "{{ mongod_user }}"
+        group: "{{ mongod_group }}"
+        mode: "0755"
 
-- name: Make data directory
-  become: true
-  ansible.builtin.file:
-    path: "{{ mongod_data_path }}"
-    state: directory
-    owner: "{{ mongod_user }}"
-    group: "{{ mongod_group }}"
-    mode: "0755"
+    - name: Create config file
+      ansible.builtin.template:
+        src: "{{ mongod_config_template }}"
+        dest: "/etc/{{ mongod_name }}.conf"
+        owner: "{{ mongod_user }}"
+        group: "{{ mongod_group }}"
+        mode: "0644"
+      notify:
+        - Restart mongod service
 
-- name: Create config file
-  ansible.builtin.template:
-    src: "{{ mongod_config_template }}"
-    dest: "/etc/{{ mongod_name }}.conf"
-    owner: "{{ mongod_user }}"
-    group: "{{ mongod_group }}"
-    mode: "0644"
-  notify:
-    - Restart mongod service
+    - name: Create systemd file
+      ansible.builtin.template:
+        src: "{{ mongod_systemd_template }}"
+        dest: "/etc/systemd/system/{{ mongod_name }}.service"
+        owner: "root"
+        group: "root"
+        mode: "0644"
+      notify:
+        - Restart mongod service
 
-- name: Create systemd file
-  ansible.builtin.template:
-    src: "{{ mongod_systemd_template }}"
-    dest: "/etc/systemd/system/{{ mongod_name }}.service"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  notify:
-    - Restart mongod service
-
-- name: Mark mongodb dependency done
-  ansible.builtin.set_fact:
-    _mongodb_dependency_done: true
+    - name: Mark mongodb dependency done
+      ansible.builtin.set_fact:
+        _mongodb_dependency_done: true

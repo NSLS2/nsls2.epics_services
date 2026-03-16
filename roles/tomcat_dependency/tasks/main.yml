@@ -1,15 +1,14 @@
 ---
-- name: Skip if already checked this play
-  ansible.builtin.meta: end_role
-  when: _tomcat_dependency_done | default(false)
+- name: Install Tomcat (run once per play)
+  when: not (_tomcat_dependency_done | default(false))
+  block:
+    - name: Install Tomcat via RPM
+      become: true
+      ansible.builtin.package:
+        name:
+          - tomcat
+        state: present
 
-- name: Install Tomcat via RPM
-  become: true
-  ansible.builtin.package:
-    name:
-      - tomcat
-    state: present
-
-- name: Mark tomcat dependency done
-  ansible.builtin.set_fact:
-    _tomcat_dependency_done: true
+    - name: Mark tomcat dependency done
+      ansible.builtin.set_fact:
+        _tomcat_dependency_done: true
