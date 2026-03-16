@@ -35,33 +35,76 @@
     owner: root
     group: root
 
-- name: Install Elasticsearch
+# --- Version-lock: prevent dnf-automatic from upgrading between runs ---
+
+- name: Ensure dnf versionlock plugin is installed
+  become: true
+  ansible.builtin.package:
+    name: python3-dnf-plugin-versionlock
+    state: present
+
+- name: Check currently installed Elasticsearch version
+  ansible.builtin.command:
+    cmd: rpm -q --qf '%{VERSION}' elasticsearch
+  register: _es_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Clear Elasticsearch versionlock (version change)
+  become: true
+  ansible.builtin.command:
+    cmd: dnf versionlock delete elasticsearch
+  when:
+    - _es_installed_version.rc == 0
+    - _es_installed_version.stdout != elastic_version
+  changed_when: true
+
+- name: Install Elasticsearch {{ elastic_version }}
   become: true
   ansible.builtin.dnf:
     name: "elasticsearch-{{ elastic_version }}"
     state: present
+    allow_downgrade: true
+  register: _es_install
   notify:
     - Restart elasticsearch
 
-- name: Reset Elasticsearch keystore to remove auto-generated security entries
+- name: Lock Elasticsearch version
+  become: true
+  ansible.builtin.command:
+    cmd: dnf versionlock add elasticsearch
+  when: _es_install.changed
+  changed_when: true
+
+# --- Keystore management (version-aware) ---
+
+- name: Check keystore version marker
+  ansible.builtin.slurp:
+    src: /etc/elasticsearch/.keystore_version
+  register: _es_keystore_version_file
+  failed_when: false
+
+- name: Reset Elasticsearch keystore (first install or version change)
   become: true
   ansible.builtin.command:
     cmd: /usr/share/elasticsearch/bin/elasticsearch-keystore create
-    creates: /etc/elasticsearch/.keystore_reset
     stdin: "y"
   register: _es_keystore_reset
+  when: >-
+    _es_keystore_version_file is failed or
+    (_es_keystore_version_file.content | default('') | b64decode | trim) != elastic_version
   notify:
     - Restart elasticsearch
 
-- name: Mark keystore as reset  # noqa: no-handler
+- name: Record keystore version marker  # noqa: no-handler
   become: true
-  ansible.builtin.file:
-    path: /etc/elasticsearch/.keystore_reset
-    state: touch
+  ansible.builtin.copy:
+    content: "{{ elastic_version }}\n"
+    dest: /etc/elasticsearch/.keystore_version
     mode: "0644"
     owner: root
     group: elasticsearch
-  when: _es_keystore_reset.changed
+  when: _es_keystore_reset is changed
 
 - name: Ensure data directory exists
   become: true

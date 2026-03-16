@@ -40,10 +40,10 @@ ansible-galaxy collection install -r collections/requirements.yml -p collections
 
 ### Service roles
 
-These roles deploy EPICS services. Dependencies (JDK, Maven, etc.) must
-be installed before these roles run — handled by a site-specific
-orchestration role in the consuming playbook repository (not part of
-this collection).
+These roles deploy EPICS services. Each service role is self-contained —
+it includes its own dependencies (JDK, Maven, etc.) via `include_role`.
+The consuming playbook just calls the service role; no dependency
+orchestration is needed.
 
 | Role | Description |
 | --- | --- |
@@ -76,9 +76,9 @@ Centralizing these ensures consistent versions and single-point upgrades.
 | --- | --- | --- |
 | `jdk_dependency` | OpenJDK (default: 21) | `jdk_version`, `java_home` |
 | `maven_dependency` | Apache Maven (default: 3.9.9) | `maven_version`, `mvn_home` |
-| `elasticsearch_dependency` | Elasticsearch 8.x | `es_port`, `es_host` |
-| `kafka_dependency` | Apache Kafka + Zookeeper | `kafka_port`, `zookeeper_port`, `kafka_java_home` |
-| `mongodb_dependency` | MongoDB 6.x | `mongod_port`, `mongod_host` |
+| `elasticsearch_dependency` | Elasticsearch 8.x (default: 8.19.12) | `elastic_version`, `elastic_port` |
+| `kafka_dependency` | Apache Kafka + Zookeeper (default: 3.9.2) | `kafka_version`, `kafka_port`, `zookeeper_port` |
+| `mongodb_dependency` | MongoDB 8.0 | `mongodb_version`, `mongod_port` |
 | `tomcat_dependency` | Apache Tomcat (RPM) | — |
 | `mariadb_dependency` | MariaDB JDBC connector (RPM) | — |
 | `nodejs_dependency` | Node.js via NodeSource | `nodejs_version` |
@@ -180,6 +180,30 @@ Solid arrows are build/install dependencies managed by the orchestration
 layer. Dashed arrows are runtime dependencies — the target service must
 be running before the dependent service can function.
 
+## Dependency version control
+
+RPM-based dependencies (Elasticsearch, MongoDB) are version-pinned in their
+`defaults/main.yml` and locked on the target host using `dnf versionlock`.
+This prevents `dnf-automatic` or manual `dnf update` from upgrading packages
+between Ansible runs, which can cause service failures (e.g. keystore format
+incompatibilities, data file version mismatches).
+
+**How it works:**
+
+1. The role installs the exact version specified in `elastic_version` /
+   `mongodb_version`.
+2. After install, `dnf versionlock add` locks the package so nothing else
+   can change it.
+3. When you update the version in `defaults/main.yml`, the role detects the
+   mismatch, clears the old lock, installs the new version, and re-locks.
+
+**To upgrade a dependency:** update the version variable in the role's
+`defaults/main.yml`, commit, and run the playbook. The role handles the rest.
+
+Source-installed dependencies (Kafka, Maven) are not affected — they are
+downloaded as tarballs at a specific version and don't interact with the
+system package manager.
+
 ## Architecture
 
 See [docs/example-orchestration-role.md](docs/example-orchestration-role.md)
@@ -188,22 +212,19 @@ for a complete, ready-to-use example.
 ```
 Orchestration role (site-specific)
 ├── defaults/main.yml        # Site defaults (ports, paths, auth)
-├── tasks/main.yml            # Enable flags dispatch to per-service files
-├── tasks/phoebus_alarm.yml   # include_role: jdk, maven, es, kafka, ...
-├── tasks/phoebus_olog.yml    # include_role: jdk, maven, es, mongodb, ...
-└── ...
-    └── include_role: nsls2.epics_services.<service>
+├── tasks/main.yml           # Enable flags → include_role per service
+└── tasks/cs_studio.yml      # Complex multi-step deploys stay in task files
 
 nsls2.epics_services (this collection)
-├── roles/*_dependency/       # Shared infrastructure (JDK, Maven, ES, ...)
-└── roles/*_service/          # Service deployment (no inline deps)
+├── roles/*_service/         # Self-contained: includes own dependencies
+└── roles/*_dependency/      # Shared infrastructure (JDK, Maven, ES, ...)
 ```
 
-Dependency roles are **idempotent** — they always run and rely on
-Ansible's built-in module idempotency to skip unchanged state and fix
-configuration drift. Service roles do not install their own
-dependencies (with the exception of lightweight, service-specific
-packages like procServ or Python libraries).
+Each service role includes its own dependency roles via `include_role`.
+Dependency roles are **idempotent** — they rely on Ansible's built-in
+module idempotency to skip unchanged state and fix configuration drift.
+Running the same dependency role from multiple service roles is safe and
+fast (packages already installed, configs unchanged).
 
 ## License
 
