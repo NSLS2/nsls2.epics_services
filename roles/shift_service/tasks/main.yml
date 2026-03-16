@@ -4,10 +4,12 @@
 - name: Install JDK 8 dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk8_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Install MariaDB JDBC dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.mariadb_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Ensure services directory exists
   become: true

@@ -38,6 +38,7 @@
 - name: Install procServ
   ansible.builtin.include_role:
     name: nsls2.epics_services.procserv_dependency
+  when: not (skip_dependencies | default(false))
 
 # setup save_restore.properties
 - name: Create save restore properties file
