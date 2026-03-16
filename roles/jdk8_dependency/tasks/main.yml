@@ -2,6 +2,10 @@
 # Install JDK 8 — OpenJDK on RHEL < 10, Adoptium Temurin on RHEL 10+
 # (RHEL 10 dropped java-1.8.0-openjdk)
 
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _jdk8_dependency_done | default(false)
+
 - name: Install OpenJDK 8 (RHEL < 10)
   become: true
   ansible.builtin.package:
@@ -59,4 +63,10 @@
 - name: Set shift_java_home for Temurin (RHEL 10+)
   ansible.builtin.set_fact:
     shift_java_home: "{{ jdk8_java_home_temurin }}"
+    _jdk8_dependency_done: true
   when: ansible_distribution_major_version | int >= 10
+
+- name: Mark jdk8 dependency done (RHEL < 10)
+  ansible.builtin.set_fact:
+    _jdk8_dependency_done: true
+  when: ansible_distribution_major_version | int < 10

@@ -1,4 +1,8 @@
 ---
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _procserv_dependency_done | default(false)
+
 - name: Install procServ
   become: true
   ansible.builtin.package:
@@ -41,3 +45,7 @@
       args:
         chdir: /usr/local/src/procServ
         creates: /usr/local/bin/procServ
+
+- name: Mark procserv dependency done
+  ansible.builtin.set_fact:
+    _procserv_dependency_done: true

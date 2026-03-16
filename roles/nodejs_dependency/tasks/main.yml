@@ -1,6 +1,10 @@
 ---
 # tasks file for nodejs_dependency
 
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _nodejs_dependency_done | default(false)
+
 - name: Download NodeSource setup script
   ansible.builtin.get_url:
     url: "https://rpm.nodesource.com/setup_{{ nodejs_version }}.x"
@@ -21,3 +25,7 @@
   community.general.npm:
     name: serve
     global: true
+
+- name: Mark nodejs dependency done
+  ansible.builtin.set_fact:
+    _nodejs_dependency_done: true

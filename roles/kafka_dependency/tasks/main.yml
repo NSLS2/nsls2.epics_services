@@ -1,6 +1,10 @@
 ---
 # tasks file for kafka_dependency
 
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _kafka_dependency_done | default(false)
+
 - name: Ensure kafka services directory exists
   ansible.builtin.file:
     path: "{{ kafka_install_dir }}"
@@ -90,3 +94,7 @@
   notify:
     - Reload systemd daemon
     - Restart kafka
+
+- name: Mark kafka dependency done
+  ansible.builtin.set_fact:
+    _kafka_dependency_done: true

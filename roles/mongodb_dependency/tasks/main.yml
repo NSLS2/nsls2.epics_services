@@ -1,4 +1,8 @@
 ---
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _mongodb_dependency_done | default(false)
+
 # MongoDB doesn't publish repos for every RHEL major version.
 # Cap releasever at 9 since RHEL 9 packages are binary-compatible with 10+.
 - name: Remove stale MongoDB repo file (version changed)
@@ -112,3 +116,7 @@
     mode: "0644"
   notify:
     - Restart mongod service
+
+- name: Mark mongodb dependency done
+  ansible.builtin.set_fact:
+    _mongodb_dependency_done: true

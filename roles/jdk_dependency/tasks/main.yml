@@ -1,4 +1,8 @@
 ---
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _jdk_dependency_done | default(false)
+
 - name: Install OpenJDK packages ({{ jdk_version }})
   become: true
   ansible.builtin.package:
@@ -10,3 +14,4 @@
 - name: Export java_home for dependent roles
   ansible.builtin.set_fact:
     java_home: "{{ java_home }}"
+    _jdk_dependency_done: true

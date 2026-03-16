@@ -1,6 +1,10 @@
 ---
 # tasks file for elasticsearch_dependency
 
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _elasticsearch_dependency_done | default(false)
+
 - name: Import Elasticsearch GPG key
   become: true
   ansible.builtin.rpm_key:
@@ -151,3 +155,7 @@
   ansible.builtin.systemd:
     name: elasticsearch
     enabled: true
+
+- name: Mark elasticsearch dependency done
+  ansible.builtin.set_fact:
+    _elasticsearch_dependency_done: true
