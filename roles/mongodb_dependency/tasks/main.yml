@@ -46,11 +46,34 @@
     - _mongodb_gpg_check.rc != 0
   changed_when: true
 
+# --- Version-lock: prevent dnf-automatic from upgrading between runs ---
+
+- name: Ensure dnf versionlock plugin is installed
+  become: true
+  ansible.builtin.package:
+    name: python3-dnf-plugin-versionlock
+    state: present
+
 - name: Install MongoDB
   become: true
   ansible.builtin.package:
     name: mongodb-org
     state: present
+  register: _mongodb_install
+
+- name: Lock MongoDB packages
+  become: true
+  ansible.builtin.command:
+    cmd: "dnf versionlock add {{ item }}"
+  loop:
+    - mongodb-org
+    - mongodb-org-server
+    - mongodb-org-mongos
+    - mongodb-org-database
+    - mongodb-org-database-tools-extra
+    - mongodb-mongosh
+  when: _mongodb_install.changed
+  changed_when: true
 
 - name: Make run directory
   become: true
