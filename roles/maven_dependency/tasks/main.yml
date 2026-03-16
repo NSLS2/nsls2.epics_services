@@ -1,4 +1,8 @@
 ---
+- name: Skip if already checked this play
+  ansible.builtin.meta: end_role
+  when: _maven_dependency_done | default(false)
+
 - name: Ensure Maven directory exists
   become: true
   ansible.builtin.file:
@@ -23,3 +27,4 @@
 - name: Export mvn_home for dependent roles
   ansible.builtin.set_fact:
     mvn_home: "{{ mvn_home }}"
+    _maven_dependency_done: true
