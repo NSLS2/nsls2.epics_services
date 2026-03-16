@@ -226,6 +226,21 @@ module idempotency to skip unchanged state and fix configuration drift.
 Running the same dependency role from multiple service roles is safe and
 fast (packages already installed, configs unchanged).
 
+## Shared defaults (`vars/shared.yml`)
+
+Variables used across multiple roles — service account, dependency versions,
+derived paths, connection endpoints — are defined once in `vars/shared.yml`.
+Every role loads this file as its first task:
+
+```yaml
+- name: Load collection-level shared defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+```
+
+Because `include_vars` sits at precedence 18, orchestration-level `set_fact`
+(19) and playbook `extra_vars` (20) can still override any value.
+
 ## License
 
 BSD-3-Clause
