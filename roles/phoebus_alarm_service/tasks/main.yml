@@ -4,22 +4,27 @@
 - name: Install JDK dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.maven_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Install Elasticsearch dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.elasticsearch_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Install Kafka dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.kafka_dependency
+  when: not (skip_dependencies | default(false))
 
 - name: Build CS-Studio Phoebus products
   ansible.builtin.include_role:
     name: nsls2.epics_services.cs_studio_phoebus
+  when: not (skip_dependencies | default(false))
 
 # Alarm Server
 

@@ -4,6 +4,7 @@
 - name: Install Node.js
   ansible.builtin.include_role:
     name: nsls2.epics_services.nodejs_dependency
+  when: not (skip_dependencies | default(false))
 
 # create the installation location for the Olog Webclient server
 - name: Ensure services folder exists
