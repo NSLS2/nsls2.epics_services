@@ -1,29 +1,11 @@
 ---
-# defaults file for phoebus_alarm_service
+# Shared vars (epics_services_account, cs_studio_phoebus_products_dest,
+# phoebus_logback, kafka_install_dir, kafka_server, kafka_port,
+# zookeeper_port, es_host, es_port) in vars/shared.yml
 
-# java_home provided by jdk_dependency
-
-# Path to CS-Studio Phoebus products (used to derive logback path)
-cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
-
-# Path to logback configuration
-phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
-
-# Alarm Server channel access options
 alarm_epics_ca_addr_list: localhost
 
-epics_services_account: csstudio
-
 phoebus_alarm_install_dir: /opt/epics-tools/services/phoebus_alarm
-
-zookeeper_port: 2181
-
-kafka_install_dir: /opt/epics-tools/services/kafka
-kafka_server: "localhost"
-kafka_port: 9092
-
-es_host: "localhost"
-es_port: 9200
 
 alarm_config: "Alarms"
 

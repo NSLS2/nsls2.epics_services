@@ -1,11 +1,11 @@
 ---
+# cs_studio_phoebus_products_dest in vars/shared.yml
 
 cs_studio_phoebus_version: "master"
 
 # Site-specific products repository (must be overridden per deployment)
 cs_studio_phoebus_products_repo: ""
 cs_studio_phoebus_products_version: "main"
-cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
 
 cs_studio_phoebus_java_home: "{{ java_home }}"
 cs_studio_phoebus_mvn_home: "{{ mvn_home }}"
@@ -15,7 +15,7 @@ cs_studio_phoebus_jar: ""
 cs_studio_phoebus_pref: ""
 cs_studio_phoebus_logging: "{{ cs_studio_phoebus_products_dest }}/config/logging.properties"
 cs_studio_phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
-cs_studio_phoebus_owner: "csstudio"
+cs_studio_phoebus_owner: "{{ epics_services_account }}"
 cs_studio_phoebus_override_mvn_settings: false
 cs_studio_phoebus_force_gpu: false
 

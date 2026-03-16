@@ -1,7 +1,5 @@
 ---
-# defaults file for shift_service
-
-epics_services_account: csstudio
+# epics_services_account in vars/shared.yml
 
 shift_install_dir: /opt/epics-tools/services/shift
 
@@ -14,7 +12,6 @@ shift_jdbc_server: "localhost"
 shift_jdbc_dbname: "shift"
 shift_jdbc_user: "shift"
 shift_jdbc_password: "shift"
-# jdbc_root_user must be set in inventory
 configure_mysql: true
 
 # JAVA HOME (JDK 8 — separate from java_home used by JDK 21 services)

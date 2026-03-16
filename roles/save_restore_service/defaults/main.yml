@@ -1,11 +1,6 @@
 ---
-# defaults file for save_restore_service
-#
-# Override organization-specific values in your inventory:
-#   ad_url: "ldap://your-ad-server.example.com"
-#   ad_domain: "example.com"
-
-epics_services_account: csstudio
+# Shared vars (epics_services_account, cs_studio_phoebus_products_dest,
+# phoebus_logback, es_host, es_port) in vars/shared.yml
 
 save_restore_java_home: "{{ java_home }}"
 
@@ -16,16 +11,6 @@ save_restore_jar: "{{ save_restore_install_dir }}/service-save-and-restore-{{ sa
 
 save_restore_http_port: 8080
 save_restore_https_port: 8443
-
-# Path to CS-Studio Phoebus products (used to derive logback path)
-cs_studio_phoebus_products_dest: "/opt/css/phoebus-products"
-
-# Path to logback configuration
-phoebus_logback: "{{ cs_studio_phoebus_products_dest }}/config/logback.xml"
-
-# Elasticsearch info
-es_host: "localhost"
-es_port: 9200
 
 ## procServ port
 save_restore_procServ_port: 60050

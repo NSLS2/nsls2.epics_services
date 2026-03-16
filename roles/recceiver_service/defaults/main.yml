@@ -1,7 +1,5 @@
 ---
-# defaults file for recceiver_service
-
-epics_services_account: csstudio
+# epics_services_account in vars/shared.yml
 
 recsync_install_dir: /opt/epics-tools/services/recsync
 recsync_runtime_dir: /opt/RecSync

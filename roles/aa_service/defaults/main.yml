@@ -1,7 +1,5 @@
 ---
-# defaults file for aa_service
-
-epics_services_account: csstudio
+# epics_services_account in vars/shared.yml
 
 # Service prefix - used in systemd unit names and startup scripts
 aa_service_prefix: aa
@@ -20,11 +18,7 @@ aa_mysql_connector_jar: "/usr/lib/java/mariadb-java-client.jar"
 
 # Installation and deployment locations
 aa_install_dir: /opt/epics-tools/services/archiver_appliance
-# The installation location is used to prepare the various aa services needed
-# in a deployment
 aa_install_location: "{{ aa_install_dir }}/install"
-# The deploy location is the final location consisting of the configured and runnable
-# instances of the aa services
 aa_deploy_location: "{{ aa_install_dir }}/deploy"
 
 # Archiver Appliance MySQL info
@@ -56,18 +50,11 @@ aa_mts: "{{ aa_deploy_location }}/data/mts/ArchiverStore"
 aa_lts: "{{ aa_deploy_location }}/data/lts/ArchiverStore"
 
 # Storage partition granularity and retention
-# STS: short-term store — hourly partitions, consolidates data on shutdown
 aa_sts_partition_granularity: "PARTITION_HOUR"
 aa_sts_consolidate_on_shutdown: true
-
-# MTS: medium-term store — daily partitions
-#   hold: number of partitions to keep before ETL promotes to LTS
-#   gather: number of ETL source partitions to merge into one destination partition
 aa_mts_partition_granularity: "PARTITION_DAY"
 aa_mts_hold: 2
 aa_mts_gather: 1
-
-# LTS: long-term store — yearly partitions, permanent retention
 aa_lts_partition_granularity: "PARTITION_YEAR"
 
 # Archiver Log Locations
@@ -75,11 +62,9 @@ aa_logs_base_dir: "/var/log/archiver-appliance"
 aa_configure_custom_logs: false
 
 # Systemd mount dependency
-# Example: "data-beamline.mount" - leave empty if no mount dependency needed
 aa_data_mount_name: ""
 
-# SSL/TLS configuration (NIO connector, no APR/Tomcat Native needed)
-# Enable and set keystore path from the infrastructure playbook (e.g. acme_certificates)
+# SSL/TLS configuration
 aa_ssl_enabled: false
 aa_ssl_keystore_file: ""
 aa_ssl_keystore_password: "changeit"
@@ -88,22 +73,17 @@ aa_ssl_port_engine: 16076
 aa_ssl_port_etl: 16077
 aa_ssl_port_retrieval: 16078
 
-# Reverse proxy support (RemoteIpValve — preserves real client IPs behind a load balancer)
-# Enable and set internalProxies to match your HAProxy/load balancer IPs.
+# Reverse proxy support
 aa_remote_ip_valve_enabled: false
 aa_remote_ip_internal_proxies: "127\\.0\\.0\\.1"
 
-# Health check valve (provides /health endpoint, requires Tomcat >= 9.0.55)
+# Health check valve
 aa_health_check_enabled: true
 
 # Pre-upgrade data consolidation (opt-in)
-# When true and aa_version changes, all PV data is consolidated from
-# STS/MTS into the target store before stopping services for upgrade.
-# This can be slow for appliances with many PVs — enable deliberately.
 aa_pre_upgrade_consolidate: false
 aa_consolidate_storage: "LTS"
 aa_consolidate_timeout: 300
-# Post-upgrade: how long to wait for mgmt to come back before resuming PVs
 aa_post_upgrade_retries: 30
 aa_post_upgrade_delay: 10
 
@@ -111,13 +91,4 @@ aa_post_upgrade_delay: 10
 aa_cleanup_legacy_service: false
 
 # Cluster appliances configuration
-# When empty (default), deploys a single-node Archiver Appliance.
-# When populated, aa_deploy generates appliances.xml for cluster awareness.
 aa_cluster_appliances: []
-# Example:
-#  - identity: appliance0
-#    hostname: archiver1.example.com
-#    cluster_inetport: "{{ cluster_inetport }}"
-#  - identity: appliance1
-#    hostname: archiver2.example.com
-#    cluster_inetport: "{{ cluster_inetport }}"

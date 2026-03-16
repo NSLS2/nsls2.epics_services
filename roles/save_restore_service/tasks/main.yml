@@ -1,4 +1,8 @@
 ---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
 # tasks file for save_restore_service
 
 - name: Ensure services folder for save restore exists

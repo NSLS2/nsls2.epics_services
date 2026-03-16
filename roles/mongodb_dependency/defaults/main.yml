@@ -1,11 +1,7 @@
 ---
-# defaults file for mongodb_dependency
+# Shared vars (mongodb_version, epics_services_account, mongod_port)
+# in vars/shared.yml
 
-mongodb_version: "8.0"
-
-epics_services_account: csstudio
-
-mongod_port: 27017
 mongod_user: "mongod"
 mongod_group: "mongod"
 mongod_service: "mongod"
