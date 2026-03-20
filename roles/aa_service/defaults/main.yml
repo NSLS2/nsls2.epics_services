@@ -92,3 +92,6 @@ aa_cleanup_legacy_service: false
 
 # Cluster appliances configuration
 aa_cluster_appliances: []
+# Protocol for cluster inter-node URLs in appliances.xml
+# "http" for direct access (include ports), "https" for reverse proxy
+aa_cluster_protocol: "http"
