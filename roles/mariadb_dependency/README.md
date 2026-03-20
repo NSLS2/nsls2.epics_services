@@ -1,9 +1,20 @@
 # mariadb_dependency
 
-Installs the MariaDB JDBC connector from the RPM package
-(`mariadb-java-client`).
+Installs the MariaDB JDBC connector JAR.
 
-## RPM path
+**Installation strategy:**
+
+1. Tries the system RPM (`mariadb-java-client` package)
+2. Falls back to downloading the JAR from Maven Central if the RPM is unavailable
+
+## Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `mariadb_connector_jar` | `/usr/lib/java/mariadb-java-client.jar` | Path to the installed JAR |
+| `mariadb_connector_version` | `3.3.3` | Version for Maven Central fallback |
+
+## JAR path
 
 After installation the JAR is available at:
 
@@ -11,8 +22,9 @@ After installation the JAR is available at:
 /usr/lib/java/mariadb-java-client.jar
 ```
 
-Roles that depend on the MariaDB connector should include this role
-and reference that path directly.
+The JAR ends up at the same path regardless of install method,
+so downstream roles do not need to distinguish between RPM and
+Maven Central installs.
 
 ## Usage
 
@@ -25,3 +37,4 @@ and reference that path directly.
 ## Depended on by
 
 - `nsls2.epics_services.aa_service`
+- `nsls2.epics_services.shift_service`

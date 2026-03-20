@@ -7,6 +7,20 @@
 epics_services_account: csstudio
 
 # === Dependency versions ===
+# These serve dual purpose:
+#   - Pinned versions: used for tarball downloads and external repo installs
+#   - When an RPM is available, these are the fallback versions if the RPM
+#     is unavailable or does not meet minimum requirements.
+#
+# Minimum requirements (enforced by dependency roles):
+#   JDK:           >= 21  (embedded in RPM name: java-21-openjdk)
+#   Tomcat:        >= 10  (Jakarta EE — javax.servlet removed in Tomcat 10)
+#   Elasticsearch: pinned (external repo + versionlock)
+#   MongoDB:       pinned (external repo + versionlock)
+#   Kafka:         pinned (tarball download)
+#   Maven:         pinned (tarball download)
+#   Node.js:       pinned (NodeSource repo)
+#   MariaDB JDBC:  any    (2.x and 3.x both compatible)
 jdk_version: 21
 elastic_version: "8.19.12"
 kafka_version: "3.9.2"
@@ -14,6 +28,8 @@ kafka_scala_version: "2.13"
 maven_version: "3.9.9"
 mongodb_version: "8.0"
 nodejs_version: 21
+tomcat_version: "10.1.34"
+tomcat_min_major_version: 10
 
 # === Derived paths ===
 java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"

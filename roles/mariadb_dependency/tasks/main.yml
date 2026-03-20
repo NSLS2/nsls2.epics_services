@@ -9,9 +9,30 @@
     - name: Install MariaDB JDBC connector via RPM
       become: true
       ansible.builtin.package:
-        name:
-          - mariadb-java-client
+        name: mariadb-java-client
         state: present
+      register: _mariadb_rpm
+      ignore_errors: true
+
+    - name: Install MariaDB JDBC from Maven Central (fallback when RPM unavailable)
+      when: _mariadb_rpm is failed
+      block:
+        - name: Ensure JAR directory exists
+          become: true
+          ansible.builtin.file:
+            path: "{{ mariadb_connector_jar | dirname }}"
+            state: directory
+            mode: "0755"
+
+        - name: Download MariaDB JDBC connector JAR
+          become: true
+          vars:
+            _maven_base: "https://repo1.maven.org/maven2"
+            _maven_path: "org/mariadb/jdbc/mariadb-java-client"
+          ansible.builtin.get_url:
+            url: "{{ _maven_base }}/{{ _maven_path }}/{{ mariadb_connector_version }}/mariadb-java-client-{{ mariadb_connector_version }}.jar"
+            dest: "{{ mariadb_connector_jar }}"
+            mode: "0644"
 
     - name: Mark mariadb dependency done
       ansible.builtin.set_fact:

@@ -1,4 +1,5 @@
 ---
-# No configurable defaults — Tomcat is installed from RPM.
-# Other roles should reference the RPM path directly:
-#   /usr/share/tomcat
+# tomcat_version in vars/shared.yml
+
+# Where to install Tomcat when using the tarball fallback (RPM unavailable)
+tomcat_source_install_dir: "/opt/tomcat"
