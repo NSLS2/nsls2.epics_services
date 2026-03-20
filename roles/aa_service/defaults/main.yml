@@ -6,8 +6,8 @@ aa_service_prefix: aa
 # Site name - displayed in the facility template header
 aa_site_name: "Archiver Appliance"
 
-# Tomcat configuration (system RPM: /usr/share/tomcat)
-aa_tomcat_home: "/usr/share/tomcat"
+# Tomcat home — auto-detected from tomcat_dependency (RPM or tarball)
+aa_tomcat_home: "{{ tomcat_home | default('/usr/share/tomcat') }}"
 
 # Build location and version
 aa_build_loc: /tmp/aa_build

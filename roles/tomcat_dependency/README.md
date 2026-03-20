@@ -1,20 +1,31 @@
 # tomcat_dependency
 
-Installs Tomcat from the RPM package (`tomcat`).
+Installs Tomcat 10.1+ for services using Jakarta EE (`jakarta.servlet`).
 
-Requires **RHEL 10+** (or equivalent) to get Tomcat 10.1+, which is needed
-by services using Jakarta EE (`jakarta.servlet`).
+**Installation strategy:**
 
-## RPM path
+1. Tries the system RPM (`tomcat` package) — available on RHEL 10+
+2. Falls back to downloading the Apache binary tarball if the RPM is unavailable (e.g. RHEL 8/9)
 
-After installation the Tomcat home is available at:
+## Variables
 
-```text
-/usr/share/tomcat
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `tomcat_version` | `10.1.34` (shared.yml) | Tomcat version for tarball fallback |
+| `tomcat_source_install_dir` | `/opt/tomcat` | Install path for tarball fallback |
 
-Roles that depend on Tomcat should include this role and reference
-that path directly.
+## Exported fact
+
+After running, this role sets the `tomcat_home` fact to the correct path:
+
+| Install method | `tomcat_home` value |
+|----------------|---------------------|
+| RPM | `/usr/share/tomcat` |
+| Tarball | `{{ tomcat_source_install_dir }}` (default `/opt/tomcat`) |
+
+Downstream roles should reference `tomcat_home` rather than
+hardcoding a path. The `aa_service` and `phoebus_web_runtime_service`
+defaults already do this via `{{ tomcat_home | default('/usr/share/tomcat') }}`.
 
 ## Usage
 
@@ -27,3 +38,4 @@ that path directly.
 ## Depended on by
 
 - `nsls2.epics_services.aa_service`
+- `nsls2.epics_services.phoebus_web_runtime_service`

@@ -3,18 +3,81 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# Install JDK — system OpenJDK when available, Adoptium Temurin as fallback
+# (RHEL 8/9 may not have java-21-openjdk in base repos)
+
 - name: Install JDK (run once per play)
   when: not (_jdk_dependency_done | default(false))
   block:
-    - name: Install OpenJDK packages ({{ jdk_version }})
+    - name: Install OpenJDK {{ jdk_version }} via RPM
       become: true
       ansible.builtin.package:
         name:
           - "java-{{ jdk_version }}-openjdk"
           - "java-{{ jdk_version }}-openjdk-devel"
         state: present
+      register: _jdk_rpm
+      ignore_errors: true
 
-    - name: Export java_home for dependent roles
+    - name: Set java_home for OpenJDK install
       ansible.builtin.set_fact:
-        java_home: "{{ java_home }}"
+        java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"
+      when: _jdk_rpm is succeeded
+
+    - name: Install Adoptium Temurin JDK (fallback when OpenJDK RPM unavailable)
+      when: _jdk_rpm is failed
+      block:
+        - name: Import Adoptium GPG key
+          become: true
+          ansible.builtin.rpm_key:
+            key: https://packages.adoptium.net/artifactory/api/gpg/key/public
+            state: present
+          register: _adoptium_gpg_key
+          ignore_errors: true
+
+        - name: Check if Adoptium GPG key is already imported
+          ansible.builtin.shell:
+            cmd: >-
+              rpm -q gpg-pubkey --qf '%{SUMMARY}\n'
+              | grep -qi 'Adoptium'
+          register: _adoptium_gpg_check
+          changed_when: false
+          failed_when: false
+          when: _adoptium_gpg_key is failed
+
+        - name: Import Adoptium GPG key — fallback for OpenPGP v6
+          become: true
+          ansible.builtin.command:
+            cmd: >-
+              rpm --import
+              https://packages.adoptium.net/artifactory/api/gpg/key/public
+          when:
+            - _adoptium_gpg_key is failed
+            - _adoptium_gpg_check.rc != 0
+          changed_when: true
+
+        - name: Add Adoptium Temurin repository
+          become: true
+          ansible.builtin.yum_repository:
+            name: Adoptium
+            description: Adoptium Temurin
+            baseurl: >-
+              https://packages.adoptium.net/artifactory/rpm/rhel/$releasever/$basearch
+            gpgcheck: true
+            gpgkey: >-
+              https://packages.adoptium.net/artifactory/api/gpg/key/public
+            enabled: true
+
+        - name: Install Temurin JDK {{ jdk_version }}
+          become: true
+          ansible.builtin.package:
+            name: "temurin-{{ jdk_version }}-jdk"
+            state: present
+
+        - name: Set java_home for Temurin install
+          ansible.builtin.set_fact:
+            java_home: "{{ jdk_temurin_java_home }}"
+
+    - name: Mark JDK dependency done
+      ansible.builtin.set_fact:
         _jdk_dependency_done: true

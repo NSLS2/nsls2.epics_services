@@ -3,15 +3,102 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# Tomcat 10.1+ is required for Jakarta EE (jakarta.servlet).
+# RHEL 9 ships Tomcat 9 (javax.servlet) which is incompatible.
+# Strategy: try RPM, check version >= 10, fall back to tarball.
+
 - name: Install Tomcat (run once per play)
   when: not (_tomcat_dependency_done | default(false))
   block:
     - name: Install Tomcat via RPM
       become: true
       ansible.builtin.package:
-        name:
-          - tomcat
+        name: tomcat
         state: present
+      register: _tomcat_rpm
+      ignore_errors: true
+
+    - name: Check installed Tomcat version
+      become: true
+      ansible.builtin.shell:
+        cmd: >-
+          rpm -q --queryformat '%{VERSION}' tomcat
+          | cut -d. -f1
+      register: _tomcat_major
+      changed_when: false
+      when: _tomcat_rpm is succeeded
+
+    - name: Set tomcat_home for RPM install
+      ansible.builtin.set_fact:
+        tomcat_home: "/usr/share/tomcat"
+        _tomcat_use_tarball: false
+      when:
+        - _tomcat_rpm is succeeded
+        - _tomcat_major.stdout | int >= tomcat_min_major_version
+
+    - name: RPM version too old — will use tarball instead
+      ansible.builtin.set_fact:
+        _tomcat_use_tarball: true
+      when:
+        - _tomcat_rpm is succeeded
+        - _tomcat_major.stdout | int < tomcat_min_major_version
+
+    - name: Mark tarball needed when RPM unavailable
+      ansible.builtin.set_fact:
+        _tomcat_use_tarball: true
+      when: _tomcat_rpm is failed
+
+    - name: Install Tomcat from tarball (RPM unavailable or too old)
+      when: _tomcat_use_tarball | default(false)
+      block:
+        - name: Create tomcat group
+          become: true
+          ansible.builtin.group:
+            name: tomcat
+            system: true
+
+        - name: Create tomcat user
+          become: true
+          ansible.builtin.user:
+            name: tomcat
+            group: tomcat
+            system: true
+            create_home: false
+            shell: /sbin/nologin
+
+        - name: Create Tomcat install directory
+          become: true
+          ansible.builtin.file:
+            path: "{{ tomcat_source_install_dir }}"
+            state: directory
+            owner: tomcat
+            group: tomcat
+            mode: "0755"
+
+        - name: Download Tomcat tarball
+          become: true
+          vars:
+            _tomcat_base_url: "https://archive.apache.org/dist/tomcat/tomcat-10"
+            _tomcat_tarball: "apache-tomcat-{{ tomcat_version }}.tar.gz"
+          ansible.builtin.get_url:
+            url: "{{ _tomcat_base_url }}/v{{ tomcat_version }}/bin/{{ _tomcat_tarball }}"
+            dest: "/tmp/{{ _tomcat_tarball }}"
+            mode: "0644"
+
+        - name: Extract Tomcat tarball
+          become: true
+          ansible.builtin.unarchive:
+            src: "/tmp/apache-tomcat-{{ tomcat_version }}.tar.gz"
+            dest: "{{ tomcat_source_install_dir }}"
+            remote_src: true
+            extra_opts: ["--strip-components=1"]
+            owner: tomcat
+            group: tomcat
+            creates: "{{ tomcat_source_install_dir }}/bin/bootstrap.jar"
+
+        - name: Set tomcat_home for tarball install
+          ansible.builtin.set_fact:
+            tomcat_home: "{{ tomcat_source_install_dir }}"
 
     - name: Mark tomcat dependency done
       ansible.builtin.set_fact:

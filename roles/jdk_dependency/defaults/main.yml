@@ -1,3 +1,5 @@
 ---
-# All defaults moved to vars/shared.yml (collection-level shared defaults).
-# Role-specific overrides can still be added here.
+# jdk_version in vars/shared.yml
+
+# Adoptium Temurin JAVA_HOME (used when system OpenJDK RPM is unavailable)
+jdk_temurin_java_home: "/usr/lib/jvm/temurin-{{ jdk_version }}-jdk"

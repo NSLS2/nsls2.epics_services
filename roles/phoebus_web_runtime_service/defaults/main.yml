@@ -4,7 +4,7 @@
 epics_ca_addr_list: localhost
 epics_ca_max_array_bytes: 1000000
 
-tomcat_dest: /usr/share/tomcat
+tomcat_dest: "{{ tomcat_home | default('/usr/share/tomcat') }}"
 tomcat_service_name: tomcat
 
 # PVWS (PV Web Socket) configuration
