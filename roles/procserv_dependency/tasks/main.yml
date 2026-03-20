@@ -14,6 +14,11 @@
       register: _procserv_rpm
       ignore_errors: true
 
+    - name: Set procserv_path for RPM install
+      ansible.builtin.set_fact:
+        procserv_path: "/usr/bin/procServ"
+      when: _procserv_rpm is succeeded
+
     - name: Build procServ from source (fallback when RPM unavailable)
       when: _procserv_rpm is failed
       block:
@@ -48,6 +53,10 @@
           args:
             chdir: /usr/local/src/procServ
             creates: /usr/local/bin/procServ
+
+        - name: Set procserv_path for source install
+          ansible.builtin.set_fact:
+            procserv_path: "/usr/local/bin/procServ"
 
     - name: Mark procserv dependency done
       ansible.builtin.set_fact:
