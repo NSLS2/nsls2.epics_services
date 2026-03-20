@@ -35,6 +35,7 @@
       when:
         - _tomcat_rpm is succeeded
         - _tomcat_major.stdout | int >= tomcat_min_major_version
+        - tomcat_home is not defined
 
     - name: RPM version too old — will use tarball instead
       ansible.builtin.set_fact:
@@ -105,6 +106,7 @@
         - name: Set tomcat_home for tarball install
           ansible.builtin.set_fact:
             tomcat_home: "{{ tomcat_source_install_dir }}"
+          when: tomcat_home is not defined
 
     - name: Mark tomcat dependency done
       ansible.builtin.set_fact:
