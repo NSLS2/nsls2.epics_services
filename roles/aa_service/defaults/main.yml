@@ -13,8 +13,8 @@ aa_tomcat_home: "{{ tomcat_home | default('/usr/share/tomcat') }}"
 aa_build_loc: /tmp/aa_build
 aa_version: 2.3.1
 
-# MariaDB JDBC connector JAR (from mariadb-java-client RPM)
-aa_mysql_connector_jar: "/usr/lib/java/mariadb-java-client.jar"
+# MariaDB JDBC connector JAR — auto-detected from mariadb_dependency
+aa_mysql_connector_jar: "{{ mariadb_connector_jar | default('/usr/lib/java/mariadb-java-client.jar') }}"
 
 # Installation and deployment locations
 aa_install_dir: /opt/epics-tools/services/archiver_appliance

@@ -34,6 +34,10 @@
             dest: "{{ mariadb_connector_jar }}"
             mode: "0644"
 
+    - name: Export mariadb_connector_jar path
+      ansible.builtin.set_fact:
+        mariadb_connector_jar: "{{ mariadb_connector_jar }}"
+
     - name: Mark mariadb dependency done
       ansible.builtin.set_fact:
         _mariadb_dependency_done: true
