@@ -17,7 +17,9 @@
     - name: Set procserv_path for RPM install
       ansible.builtin.set_fact:
         procserv_path: "/usr/bin/procServ"
-      when: _procserv_rpm is succeeded
+      when:
+        - _procserv_rpm is succeeded
+        - procserv_path is not defined
 
     - name: Build procServ from source (fallback when RPM unavailable)
       when: _procserv_rpm is failed
@@ -57,6 +59,7 @@
         - name: Set procserv_path for source install
           ansible.builtin.set_fact:
             procserv_path: "/usr/local/bin/procServ"
+          when: procserv_path is not defined
 
     - name: Mark procserv dependency done
       ansible.builtin.set_fact:
