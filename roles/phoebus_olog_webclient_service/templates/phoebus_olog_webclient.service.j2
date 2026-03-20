@@ -32,7 +32,7 @@ RestartSec=5s
 Environment=SERVER={{ phoebus_olog_webclient_project_path }}
 Environment=PROC_PORT={{ olog_webclient_procServ_port }}
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name phoebus_olog_webclient --chdir ${SERVER} --pidfile ${SERVER}/olog_webclient.pid --logfile ${SERVER}/console.log ${PROC_PORT} ./run-phoebus-olog-webclient.sh
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name phoebus_olog_webclient --chdir ${SERVER} --pidfile ${SERVER}/olog_webclient.pid --logfile ${SERVER}/console.log ${PROC_PORT} ./run-phoebus-olog-webclient.sh
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535

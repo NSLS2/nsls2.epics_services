@@ -39,7 +39,7 @@ Environment=ES_HOST={{ es_host }}
 Environment=ES_PORT={{ es_port }}
 Environment=CONFIG={{ alarm_config }}
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name alarm-logger --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm-logger.pid ${PORT} ./run-phoebus-alarm-logger.sh -bootstrap.servers ${KAFKA_SERVER} -topics ${CONFIG} -es_host ${ES_HOST} -es_port ${ES_PORT}
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name alarm-logger --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm-logger.pid ${PORT} ./run-phoebus-alarm-logger.sh -bootstrap.servers ${KAFKA_SERVER} -topics ${CONFIG} -es_host ${ES_HOST} -es_port ${ES_PORT}
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535

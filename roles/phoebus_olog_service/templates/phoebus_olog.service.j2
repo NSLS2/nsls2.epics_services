@@ -34,7 +34,7 @@ Environment=PATH={{ java_home }}/bin:/usr/bin:/usr/local/bin
 Environment=SERVER={{ phoebus_olog_install_dir }}
 Environment=PORT={{ olog_procServ_port }}
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name phoebus_olog --chdir ${SERVER} --pidfile ${SERVER}/olog.pid --logfile ${SERVER}/console.log ${PORT} ./run-phoebus-olog.sh
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name phoebus_olog --chdir ${SERVER} --pidfile ${SERVER}/olog.pid --logfile ${SERVER}/console.log ${PORT} ./run-phoebus-olog.sh
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535

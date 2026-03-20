@@ -40,7 +40,7 @@ Environment=REPO_LOCATION={{ phoebus_alarm_config_local_repo }}
 
 Environment=SETTINGS={{ phoebus_alarm_install_dir }}/phoebus_alarm_preferences.ini
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name alarm-config-logger --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm-config-logger.pid ${PORT} ./run-phoebus-alarm-config-logger.sh -bootstrap.servers ${KAFKA_SERVER} -topics ${CONFIG} -repo.location ${REPO_LOCATION}
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name alarm-config-logger --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm-config-logger.pid ${PORT} ./run-phoebus-alarm-config-logger.sh -bootstrap.servers ${KAFKA_SERVER} -topics ${CONFIG} -repo.location ${REPO_LOCATION}
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535

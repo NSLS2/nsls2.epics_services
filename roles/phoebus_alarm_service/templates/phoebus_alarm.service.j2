@@ -36,7 +36,7 @@ Environment=PORT={{ phoebus_alarm_server_procServ_port }}
 
 Environment=SETTINGS={{ phoebus_alarm_install_dir }}/phoebus_alarm_preferences.ini
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name alarm-server --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm.pid ${PORT} ./run-phoebus-alarm.sh -settings ${SETTINGS}
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name alarm-server --chdir ${SERVER} --logfile ${SERVER}/console.log --pidfile ${SERVER}/phoebus-alarm.pid ${PORT} ./run-phoebus-alarm.sh -settings ${SETTINGS}
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535

@@ -34,7 +34,7 @@ Environment=PATH={{ save_restore_java_home }}/bin:/usr/bin:/usr/local/bin
 Environment=SERVER={{ save_restore_install_dir }}
 Environment=PORT={{ save_restore_procServ_port }}
 
-ExecStart=/usr/bin/procServ --foreground --noautorestart --name save-restore --chdir ${SERVER} --pidfile ${SERVER}/save-restore.pid --logfile ${SERVER}/console.log ${PORT} ./run-save-restore.sh
+ExecStart={{ procserv_path | default('/usr/bin/procServ') }} --foreground --noautorestart --name save-restore --chdir ${SERVER} --pidfile ${SERVER}/save-restore.pid --logfile ${SERVER}/console.log ${PORT} ./run-save-restore.sh
 
 # Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65535
