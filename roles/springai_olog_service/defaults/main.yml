@@ -12,4 +12,4 @@ springai_olog_port: 8090
 springai_olog_procServ_port: 60052
 
 springai_ollama_model: "qwen3:8b"
-springai_vector_index: "olog_vectors"
+springai_vector_index: "operation_logs_vector"
