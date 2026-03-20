@@ -96,6 +96,12 @@
             group: tomcat
             creates: "{{ tomcat_source_install_dir }}/bin/bootstrap.jar"
 
+        - name: Ensure Tomcat files are world-readable
+          become: true
+          ansible.builtin.command:
+            cmd: "chmod -R o+rX {{ tomcat_source_install_dir }}"
+          changed_when: false
+
         - name: Set tomcat_home for tarball install
           ansible.builtin.set_fact:
             tomcat_home: "{{ tomcat_source_install_dir }}"

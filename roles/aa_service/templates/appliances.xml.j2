@@ -9,14 +9,23 @@
 -->
 <appliances>
 {% for appliance in aa_cluster_appliances %}
+{% set proto = aa_cluster_protocol | default('http') %}
   <appliance>
     <identity>{{ appliance.identity }}</identity>
     <cluster_inetport>{{ appliance.hostname }}:{{ appliance.cluster_inetport }}</cluster_inetport>
+{% if proto == 'http' %}
+    <mgmt_url>http://{{ appliance.hostname }}:{{ appliance.mgmt_port | default(mgmt_port) }}/mgmt/bpl</mgmt_url>
+    <engine_url>http://{{ appliance.hostname }}:{{ appliance.engine_port | default(engine_port) }}/engine/bpl</engine_url>
+    <etl_url>http://{{ appliance.hostname }}:{{ appliance.etl_port | default(etl_port) }}/etl/bpl</etl_url>
+    <retrieval_url>http://{{ appliance.hostname }}:{{ appliance.data_retrieval_port | default(data_retrieval_port) }}/retrieval/bpl</retrieval_url>
+    <data_retrieval_url>http://{{ appliance.hostname }}:{{ appliance.data_retrieval_port | default(data_retrieval_port) }}/retrieval</data_retrieval_url>
+{% else %}
     <mgmt_url>https://{{ appliance.hostname }}/mgmt/bpl</mgmt_url>
     <engine_url>https://{{ appliance.hostname }}/engine/bpl</engine_url>
     <etl_url>https://{{ appliance.hostname }}/etl/bpl</etl_url>
     <retrieval_url>https://{{ appliance.hostname }}/retrieval/bpl</retrieval_url>
     <data_retrieval_url>https://{{ appliance.hostname }}/retrieval</data_retrieval_url>
+{% endif %}
   </appliance>
 {% endfor %}
 </appliances>
