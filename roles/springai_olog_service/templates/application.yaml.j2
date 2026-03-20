@@ -1,0 +1,18 @@
+server:
+  port: {{ springai_olog_port }}
+
+spring:
+  ai:
+    ollama:
+      base-url: {{ ollama_base_url | default('http://' + ollama_host + ':' + (ollama_port | string)) }}
+      chat:
+        model: {{ springai_ollama_model }}
+      embedding:
+        model: {{ springai_ollama_model }}
+
+  elasticsearch:
+    uris: http://{{ es_host }}:{{ es_port }}
+
+springai:
+  vector:
+    index: {{ springai_vector_index }}

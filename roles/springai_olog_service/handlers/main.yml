@@ -1,0 +1,13 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart springai_olog
+  become: true
+  ansible.builtin.systemd:
+    name: "springai_olog"
+    state: restarted
+    enabled: true

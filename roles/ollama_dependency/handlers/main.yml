@@ -1,0 +1,13 @@
+---
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart ollama
+  become: true
+  ansible.builtin.systemd:
+    name: ollama
+    state: restarted
+    enabled: true

@@ -1,0 +1,64 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+# Dependencies
+
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+  when: not (skip_dependencies | default(false))
+
+- name: Install Ollama dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.ollama_dependency
+  when: not (skip_dependencies | default(false))
+
+# Build and Deploy SpringAI Olog service
+
+- name: Ensure services folder exists
+  ansible.builtin.file:
+    path: "{{ springai_olog_install_dir }}"
+    state: directory
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    mode: "0755"
+
+- name: Clone and/or update the SpringAI Olog repo
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.git:
+    repo: "{{ springai_olog_repo }}"
+    dest: "{{ springai_olog_install_dir }}/SpringAI"
+    force: true
+    version: "{{ springai_olog_version }}"
+    update: true
+  register: _springai_repo
+
+- name: Build SpringAI Olog binaries  # noqa: no-changed-when no-handler
+  become: true
+  become_user: "{{ epics_services_account }}"
+  ansible.builtin.command: ./mvnw clean package -DskipTests
+  args:
+    chdir: "{{ springai_olog_install_dir }}/SpringAI"
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+    PATH: "{{ java_home }}/bin:{{ ansible_env.PATH }}"
+  when: _springai_repo.changed
+
+- name: Copy SpringAI Olog service jar  # noqa: no-handler
+  become: true
+  ansible.builtin.copy:
+    src: "{{ springai_olog_install_dir }}/SpringAI/target/{{ springai_olog_jar }}"
+    dest: "{{ springai_olog_install_dir }}/{{ springai_olog_jar }}"
+    force: true
+    mode: "0755"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+    remote_src: true
+  when: _springai_repo.changed
+
+# Set up and configure the SpringAI Olog systemd service
+- name: Include tasks to configure SpringAI Olog services
+  ansible.builtin.include_tasks: configure_services.yml

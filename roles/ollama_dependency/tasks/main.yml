@@ -1,0 +1,66 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+- name: Install Ollama (run once per play)
+  when: not (_ollama_dependency_done | default(false))
+  block:
+    - name: Install Ollama via official install script
+      become: true
+      ansible.builtin.shell: curl -fsSL https://ollama.com/install.sh | sh
+      args:
+        creates: /usr/local/bin/ollama
+
+    - name: Create systemd override directory for Ollama
+      become: true
+      ansible.builtin.file:
+        path: /etc/systemd/system/ollama.service.d
+        state: directory
+        mode: "0755"
+
+    - name: Template Ollama systemd override
+      become: true
+      ansible.builtin.template:
+        src: ollama-override.conf.j2
+        dest: /etc/systemd/system/ollama.service.d/override.conf
+        mode: "0644"
+      notify:
+        - Reload systemd daemon
+        - Restart ollama
+
+    - name: Flush handlers to apply systemd override
+      ansible.builtin.meta: flush_handlers
+
+    - name: Enable and start Ollama service
+      become: true
+      ansible.builtin.systemd:
+        name: ollama
+        state: started
+        enabled: true
+
+    - name: Wait for Ollama API to be ready
+      ansible.builtin.uri:
+        url: "http://{{ ollama_host }}:{{ ollama_port }}/api/tags"
+        method: GET
+        status_code: 200
+      register: _ollama_api
+      until: _ollama_api.status == 200
+      retries: 30
+      delay: 5
+
+    - name: Pull Ollama models (skip if already present)
+      ansible.builtin.command: ollama pull {{ item }}
+      loop: "{{ ollama_models }}"
+      register: _ollama_pull
+      changed_when: "'pulling' in _ollama_pull.stderr"
+      timeout: "{{ ollama_model_pull_timeout }}"
+
+    - name: Export ollama_base_url fact
+      ansible.builtin.set_fact:
+        ollama_base_url: "http://{{ ollama_host }}:{{ ollama_port }}"
+      when: ollama_base_url is not defined
+
+    - name: Mark Ollama dependency done
+      ansible.builtin.set_fact:
+        _ollama_dependency_done: true

@@ -47,6 +47,8 @@ kafka_port: 9092
 zookeeper_port: 2181
 mongod_host: localhost
 mongod_port: 27017
+ollama_host: "127.0.0.1"
+ollama_port: 11434
 
 # === Elasticsearch ===
 elastic_heap_size: "4g"

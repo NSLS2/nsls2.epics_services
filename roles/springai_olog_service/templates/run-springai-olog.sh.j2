@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export JAVA_HOME={{ java_home }}
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# figure out the path to the product jar
+if [[ -z "${SPRINGAI_JAR}" ]]; then
+  SPRINGAI_JAR={{ springai_olog_install_dir }}/{{ springai_olog_jar }}
+fi
+
+java -Dspring.config.location={{ springai_olog_install_dir }}/application.yaml -jar ${SPRINGAI_JAR}

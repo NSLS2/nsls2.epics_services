@@ -1,0 +1,42 @@
+---
+# configure the systemd services for the SpringAI Olog service
+
+- name: Install procServ
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.procserv_dependency
+
+# SpringAI Olog Server
+
+- name: Create run-springai-olog.sh
+  become: true
+  ansible.builtin.template:
+    src: run-springai-olog.sh.j2
+    dest: "{{ springai_olog_install_dir }}/run-springai-olog.sh"
+    mode: "0755"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart springai_olog
+
+- name: Create application.yaml
+  become: true
+  ansible.builtin.template:
+    src: application.yaml.j2
+    dest: "{{ springai_olog_install_dir }}/application.yaml"
+    mode: "0644"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart springai_olog
+
+- name: Create systemd springai_olog service file
+  become: true
+  ansible.builtin.template:
+    src: springai_olog.service.j2
+    dest: /etc/systemd/system/springai_olog.service
+    mode: "0644"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Reload systemd daemon
+    - Restart springai_olog
