@@ -36,6 +36,12 @@
     update: true
   register: _springai_repo
 
+- name: Ensure mvnw is executable
+  become: true
+  ansible.builtin.file:
+    path: "{{ springai_olog_install_dir }}/SpringAI/mvnw"
+    mode: "0755"
+
 - name: Build SpringAI Olog binaries  # noqa: no-changed-when no-handler
   become: true
   become_user: "{{ epics_services_account }}"
