@@ -14,8 +14,19 @@
       register: _mariadb_rpm
       ignore_errors: true
 
+    - name: Fail when MariaDB JDBC RPM unavailable and rpm_only is set
+      ansible.builtin.fail:
+        msg: >-
+          mariadb-java-client RPM is not available and
+          epics_services_rpm_only is true — Maven Central fallback disabled.
+      when:
+        - _mariadb_rpm is failed
+        - epics_services_rpm_only | bool
+
     - name: Install MariaDB JDBC from Maven Central (fallback when RPM unavailable)
-      when: _mariadb_rpm is failed
+      when:
+        - _mariadb_rpm is failed
+        - not (epics_services_rpm_only | bool)
       block:
         - name: Ensure JAR directory exists
           become: true

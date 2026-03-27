@@ -49,8 +49,19 @@
         _tomcat_use_tarball: true
       when: _tomcat_rpm is failed
 
+    - name: Fail when Tomcat tarball needed and rpm_only is set
+      ansible.builtin.fail:
+        msg: >-
+          Tomcat RPM is unavailable or below version {{ tomcat_min_major_version }}
+          and epics_services_rpm_only is true — tarball fallback disabled.
+      when:
+        - _tomcat_use_tarball | default(false)
+        - epics_services_rpm_only | bool
+
     - name: Install Tomcat from tarball (RPM unavailable or too old)
-      when: _tomcat_use_tarball | default(false)
+      when:
+        - _tomcat_use_tarball | default(false)
+        - not (epics_services_rpm_only | bool)
       block:
         - name: Create tomcat group
           become: true
