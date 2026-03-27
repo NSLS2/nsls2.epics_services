@@ -3,6 +3,20 @@
 # used across multiple roles. Loaded via include_vars (precedence 18).
 # Orchestration set_fact (19) and extra_vars (20) can still override.
 
+# === Installation policy ===
+# When true, dependency roles use only RPM packages and will fail rather
+# than falling back to non-RPM methods (tarball downloads, source builds,
+# Maven JAR downloads).  Third-party RPM repos (e.g. Adoptium for JDK)
+# are still permitted because they use the system package manager.
+#
+# Default: auto-detected — true on RHEL/CentOS 10+ where all required
+# RPMs ship at the correct versions, false on older RHEL or non-RPM
+# distributions where fallbacks are needed.
+# Override in inventory/group_vars/extra_vars if your hosts differ.
+epics_services_rpm_only: >-
+  {{ ansible_os_family == 'RedHat'
+     and ansible_distribution_major_version | int >= 10 }}
+
 # === Shared account ===
 epics_services_account: csstudio
 
