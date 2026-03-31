@@ -1,8 +1,12 @@
+# ChannelFinder Configuration
+#
+# {{ ansible_managed }}
+#
+
 ################## ChannelFinder Server ####################
-# ChannelFinder https port
 server.port={{ cf_https_port }}
 
-# Options support for unsecure http
+# Options support for insecure http
 server.http.enable=true
 server.http.port={{ cf_http_port }}
 
@@ -13,31 +17,41 @@ server.ssl.key-alias=cf
 
 security.require-ssl=true
 
-logging.level.org.springframework.web=DEBUG
-spring.http.log-request-details=true
+server.compression.enabled=true
+server.compression.mime-types=application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
+server.compression.min-response-size=1024
+server.http2.enabled=true
+
+logging.level.org.springframework.web=INFO
 
 ############## Demo Auth ##############
 demo_auth.enabled = true
 
-############################## Elastic Network And HTTP ###############################
+############## Group-->Role Mapping ##############
+admin-groups=cf-admins,sys-admins,ADMIN
+channel-groups=cf-channels,USER
+property-groups=cf-properties,USER
+tag-groups=cf-tags,USER
 
-# Elasticsearch host
-elasticsearch.network.host: {{ es_host }}
-
-# Set a custom port for the node to node communication (9300 by default):
-#elasticsearch.transport.tcp.port: 9300
-# Set a custom port to listen for HTTP traffic:
-elasticsearch.http.port: {{ es_port }}
-
-# Elasticsearch index names and types used by channelfinder, ensure that any changes here should be replicated in the mapping_definitions.sh
+############################### Elastic Network And HTTP ################################
+elasticsearch.host_urls=http://{{ es_host }}:{{ es_port }}
 elasticsearch.tag.index = cf_tags
-elasticsearch.tag.type = cf_tag
-
 elasticsearch.property.index = cf_properties
-elasticsearch.property.type = cf_property
-
 elasticsearch.channel.index = channelfinder
-elasticsearch.channel.type = cf_channel
-
-# maximum query result size
 elasticsearch.query.size = 10000
+elasticsearch.create.indices=true
+
+############################## Repository ##################################
+repository.chunk.size = 10000
+
+############################## Service Info ################################
+channelfinder.version=@project.version@
+
+############################## REST Logging ################################
+logging.level.org.springframework.web.filter.CommonsRequestLoggingFilter=INFO
+
+################ Processor #################################################
+processors.chunking.size=10000
+
+############################## Metrics ##############################
+management.endpoints.web.exposure.include=prometheus, metrics, health, info

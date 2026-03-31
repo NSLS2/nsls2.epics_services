@@ -6,7 +6,7 @@ save_restore_java_home: "{{ java_home }}"
 
 save_restore_install_dir: /opt/epics-tools/services/save_restore
 
-save_restore_version: "4.7.4"
+save_restore_version: "5.0.2"
 save_restore_jar: "{{ save_restore_install_dir }}/service-save-and-restore-{{ save_restore_version }}.jar"
 
 save_restore_http_port: 8080
