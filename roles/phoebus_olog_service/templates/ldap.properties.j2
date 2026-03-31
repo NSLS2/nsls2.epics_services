@@ -1,0 +1,12 @@
+#
+# {{ ansible_managed }}
+#
+ldap.urls = {{ ldap_urls }}
+ldap.base.dn = {{ ldap_base_dn }}
+ldap.user.search.base=
+ldap.user.dn.pattern=
+ldap.user.search.filter=
+ldap.groups.search.base = ou=Group
+ldap.groups.search.pattern = (memberUid= {1})
+ldap.manager.dn=
+ldap.manager.password=

@@ -21,19 +21,8 @@
         - _procserv_rpm is succeeded
         - procserv_path is not defined
 
-    - name: Fail when procServ RPM unavailable and rpm_only is set
-      ansible.builtin.fail:
-        msg: >-
-          procServ RPM is not available and epics_services_rpm_only is true —
-          source build fallback disabled.
-      when:
-        - _procserv_rpm is failed
-        - epics_services_rpm_only | bool
-
     - name: Build procServ from source (fallback when RPM unavailable)
-      when:
-        - _procserv_rpm is failed
-        - not (epics_services_rpm_only | bool)
+      when: _procserv_rpm is failed
       block:
         - name: Install build dependencies for procServ
           become: true

@@ -26,6 +26,7 @@
   ansible.builtin.git:
     repo: 'https://github.com/Olog/phoebus-olog-web-client.git'
     dest: "{{ phoebus_olog_webclient_project_path }}"
+    force: true
     version: "{{ phoebus_olog_webclient_version }}"
     update: true
   register: _webclient_repo

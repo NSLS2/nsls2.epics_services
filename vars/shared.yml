@@ -27,7 +27,7 @@ epics_services_account: csstudio
 #     is unavailable or does not meet minimum requirements.
 #
 # Minimum requirements (enforced by dependency roles):
-#   JDK:           >= 21  (embedded in RPM name: java-21-openjdk)
+#   JDK:           >= 25  (embedded in RPM name: java-25-openjdk)
 #   Tomcat:        >= 10  (Jakarta EE — javax.servlet removed in Tomcat 10)
 #   Elasticsearch: pinned (external repo + versionlock)
 #   MongoDB:       pinned (external repo + versionlock)
@@ -35,8 +35,8 @@ epics_services_account: csstudio
 #   Maven:         pinned (tarball download)
 #   Node.js:       pinned (NodeSource repo)
 #   MariaDB JDBC:  any    (2.x and 3.x both compatible)
-jdk_version: 21
-elastic_version: "8.19.12"
+jdk_version: 25
+elastic_version: "9.0.0"
 kafka_version: "3.9.2"
 kafka_scala_version: "2.13"
 maven_version: "3.9.9"

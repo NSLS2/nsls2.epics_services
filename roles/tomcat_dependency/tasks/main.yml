@@ -119,6 +119,17 @@
             tomcat_home: "{{ tomcat_source_install_dir }}"
           when: tomcat_home is not defined
 
+    - name: Deploy server.xml with configured ports
+      become: true
+      ansible.builtin.template:
+        src: server.xml.j2
+        dest: "{{ tomcat_home | default('/usr/share/tomcat') }}/conf/server.xml"
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Restart tomcat
+
     - name: Mark tomcat dependency done
       ansible.builtin.set_fact:
         _tomcat_dependency_done: true

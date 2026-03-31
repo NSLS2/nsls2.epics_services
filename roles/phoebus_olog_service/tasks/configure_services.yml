@@ -25,9 +25,34 @@
   ansible.builtin.template:
     src: olog.properties.j2
     dest: "{{ phoebus_olog_install_dir }}/olog.properties"
-    mode: "0755"
+    mode: "0640"
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog
+
+# setup authentication provider property files (v6+)
+- name: Create active_directory.properties
+  become: true
+  ansible.builtin.template:
+    src: active_directory.properties.j2
+    dest: "{{ phoebus_olog_install_dir }}/active_directory.properties"
+    mode: "0640"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  when: ad_enabled | default(true) | bool
+  notify:
+    - Restart phoebus_olog
+
+- name: Create ldap.properties
+  become: true
+  ansible.builtin.template:
+    src: ldap.properties.j2
+    dest: "{{ phoebus_olog_install_dir }}/ldap.properties"
+    mode: "0640"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  when: ldap_enabled | default(false) | bool
   notify:
     - Restart phoebus_olog
 

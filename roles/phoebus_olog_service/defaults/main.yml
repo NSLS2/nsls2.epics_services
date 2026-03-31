@@ -3,19 +3,32 @@
 # phoebus_logback, es_host, es_port, mongod_host, mongod_port)
 # in vars/shared.yml
 
-phoebus_olog_version: "v5.0.4"
-phoebus_olog_jar: "service-olog-5.0.4.jar"
+phoebus_olog_version: "v6.0.1"
+phoebus_olog_jar: "service-olog-6.0.1.jar"
 
 phoebus_olog_install_dir: /opt/epics-tools/services/phoebus_olog
 
 # Olog REST service parameters
 olog_http_port: 8080
 olog_https_port: 8443
+olog_include_error_message: false
 
+# SSL keystore configuration
+olog_ssl_keystore_type: "PKCS12"
+olog_ssl_keystore: "classpath:keystore/newcf.p12"
+olog_ssl_keystore_password: "password"
+olog_ssl_key_alias: "cf"
+
+# CORS — comma-separated origins allowed for cross-origin requests
 cors_allowed_origins: "http://localhost:3000"
 
 ## procServ port
 olog_procServ_port: 60049
+
+# Authentication providers — comma-separated list of enabled providers.
+# Supported: activeDirectory, ldap, embeddedLdap, inMemory, demo
+olog_auth_providers: >-
+  {{ 'activeDirectory' if (ad_enabled | default(true) | bool) else '' }}{{ ',' if (ad_enabled | default(true) | bool) and (ldap_enabled | default(false) | bool) else '' }}{{ 'ldap' if (ldap_enabled | default(false) | bool) else '' }}
 
 # Active Directory configuration (organization-specific)
 ad_enabled: true
