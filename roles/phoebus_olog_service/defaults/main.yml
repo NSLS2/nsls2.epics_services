@@ -28,7 +28,12 @@ olog_procServ_port: 60049
 # Authentication providers — comma-separated list of enabled providers.
 # Supported: activeDirectory, ldap, embeddedLdap, inMemory, demo
 olog_auth_providers: >-
-  {{ 'activeDirectory' if (ad_enabled | default(true) | bool) else '' }}{{ ',' if (ad_enabled | default(true) | bool) and (ldap_enabled | default(false) | bool) else '' }}{{ 'ldap' if (ldap_enabled | default(false) | bool) else '' }}
+  {{
+    [
+      'activeDirectory' if (ad_enabled | default(true) | bool) else none,
+      'ldap' if (ldap_enabled | default(false) | bool) else none,
+    ] | select | join(',')
+  }}
 
 # Active Directory configuration (organization-specific)
 ad_enabled: true
