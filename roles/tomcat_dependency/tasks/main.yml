@@ -18,15 +18,17 @@
       register: _tomcat_rpm
       ignore_errors: true
 
-    - name: Check installed Tomcat version
-      become: true
-      ansible.builtin.shell:
-        cmd: >-
-          rpm -q --queryformat '%{VERSION}' tomcat
-          | cut -d. -f1
-      register: _tomcat_major
-      changed_when: false
+    - name: Gather Tomcat package facts
+      ansible.builtin.package_facts:
+        manager: rpm
       when: _tomcat_rpm is succeeded
+
+    - name: Parse Tomcat major version
+      ansible.builtin.set_fact:
+        _tomcat_major_version: "{{ ansible_facts.packages['tomcat'][0].version.split('.')[0] }}"
+      when:
+        - _tomcat_rpm is succeeded
+        - "'tomcat' in ansible_facts.packages"
 
     - name: Set tomcat_home for RPM install
       ansible.builtin.set_fact:
@@ -34,7 +36,7 @@
         _tomcat_use_tarball: false
       when:
         - _tomcat_rpm is succeeded
-        - _tomcat_major.stdout | int >= tomcat_min_major_version
+        - _tomcat_major_version | int >= tomcat_min_major_version
         - tomcat_home is not defined
 
     - name: RPM version too old — will use tarball instead
@@ -42,7 +44,7 @@
         _tomcat_use_tarball: true
       when:
         - _tomcat_rpm is succeeded
-        - _tomcat_major.stdout | int < tomcat_min_major_version
+        - _tomcat_major_version | int < tomcat_min_major_version
 
     - name: Mark tarball needed when RPM unavailable
       ansible.builtin.set_fact:
