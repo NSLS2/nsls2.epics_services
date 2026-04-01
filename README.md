@@ -11,7 +11,8 @@ paths, authentication) is provided via an orchestration role or
 - **RHEL 10** (or compatible) — baseline OS for all target hosts.
   Several services depend on system RPM packages that ship with
   RHEL 10, including Tomcat 10+ (required by Archiver Appliance 2.3.1
-  for Jakarta EE) and OpenJDK 21.
+  for Jakarta EE) and OpenJDK 25 (required by ChannelFinder 5.0.0 and
+  Phoebus Olog 6.0.1).
 - **Ansible** >= 2.15
 
 ## Installation
@@ -74,22 +75,22 @@ Centralizing these ensures consistent versions and single-point upgrades.
 
 | Role | Installs | Key variables |
 | --- | --- | --- |
-| `jdk_dependency` | OpenJDK (default: 21) | `jdk_version`, `java_home` |
+| `jdk_dependency` | OpenJDK (default: 25) | `jdk_version`, `java_home` |
 | `maven_dependency` | Apache Maven (default: 3.9.9) | `maven_version`, `mvn_home` |
-| `elasticsearch_dependency` | Elasticsearch 8.x (default: 8.19.12) | `elastic_version`, `elastic_port` |
+| `elasticsearch_dependency` | Elasticsearch 9.x (default: 9.0.0) | `elastic_version`, `elastic_port` |
 | `kafka_dependency` | Apache Kafka + Zookeeper (default: 3.9.2) | `kafka_version`, `kafka_port`, `zookeeper_port` |
 | `mongodb_dependency` | MongoDB 8.0 | `mongodb_version`, `mongod_port` |
-| `tomcat_dependency` | Apache Tomcat (RPM) | — |
+| `tomcat_dependency` | Apache Tomcat (RPM) + `server.xml` | `tomcat_http_port`, `tomcat_https_port`, `tomcat_shutdown_port` |
 | `mariadb_dependency` | MariaDB JDBC connector (RPM) | — |
 | `nodejs_dependency` | Node.js via NodeSource | `nodejs_version` |
-| `procserv_dependency` | procServ process manager | — |
+| `procserv_dependency` | procServ process manager (source build on RHEL 10) | — |
 
 ## Service dependency graph
 
 ```mermaid
 graph LR
     subgraph Dependencies
-        jdk[jdk_dependency<br/>OpenJDK 21]
+        jdk[jdk_dependency<br/>OpenJDK 25]
         mvn[maven_dependency]
         es[elasticsearch_dependency]
         kafka[kafka_dependency]
@@ -182,23 +183,23 @@ be running before the dependent service can function.
 
 ## Dependency version control
 
-RPM-based dependencies (Elasticsearch, MongoDB) are version-pinned in their
-`defaults/main.yml` and locked on the target host using `dnf versionlock`.
-This prevents `dnf-automatic` or manual `dnf update` from upgrading packages
-between Ansible runs, which can cause service failures (e.g. keystore format
-incompatibilities, data file version mismatches).
+All dependency and service versions are defined in a single file —
+`vars/shared.yml`. RPM-based dependencies (Elasticsearch, MongoDB) are
+additionally locked on the target host using `dnf versionlock` to prevent
+`dnf-automatic` or manual `dnf update` from upgrading packages between
+Ansible runs.
 
 **How it works:**
 
-1. The role installs the exact version specified in `elastic_version` /
-   `mongodb_version`.
-2. After install, `dnf versionlock add` locks the package so nothing else
-   can change it.
-3. When you update the version in `defaults/main.yml`, the role detects the
+1. The role installs the exact version specified in `vars/shared.yml`
+   (e.g. `elastic_version`, `mongodb_version`, `phoebus_olog_version`).
+2. For RPM packages, `dnf versionlock add` locks the package so nothing
+   else can change it.
+3. When you update the version in `vars/shared.yml`, the role detects the
    mismatch, clears the old lock, installs the new version, and re-locks.
 
-**To upgrade a dependency:** update the version variable in the role's
-`defaults/main.yml`, commit, and run the playbook. The role handles the rest.
+**To upgrade any version:** update `vars/shared.yml`, commit, and run the
+playbook. The role handles the rest.
 
 Source-installed dependencies (Kafka, Maven) are not affected — they are
 downloaded as tarballs at a specific version and don't interact with the
