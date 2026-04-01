@@ -4,7 +4,7 @@
 recsync_install_dir: /opt/epics-tools/services/recsync
 recsync_runtime_dir: /opt/RecSync
 recsync_repo: "https://github.com/ChannelFinder/RecSync-env.git"
-recsync_version: master
+# recsync_version in vars/shared.yml
 
 # RecSync broadcast addresses
 recsync_addr_list: ""

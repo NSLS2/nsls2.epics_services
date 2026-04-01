@@ -1,7 +1,5 @@
 ---
-# cs_studio_phoebus_products_dest in vars/shared.yml
-
-cs_studio_phoebus_version: "v5.0.2"
+# cs_studio_phoebus_version, cs_studio_phoebus_products_dest in vars/shared.yml
 
 # Site-specific products repository (must be overridden per deployment)
 cs_studio_phoebus_products_repo: ""
