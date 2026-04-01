@@ -9,12 +9,11 @@ tomcat_service_name: tomcat
 
 # PVWS (PV Web Socket) configuration
 pvws_repo: "https://github.com/ControlSystemStudio/pvws-springboot.git"
-pvws_version: master
+# pvws_version, dbwr_version in vars/shared.yml
 pvws_dest: /opt/css/pvws
 pvws_mvn_args: "clean install -P war -DskipTests"
 
 # DBWR (Display Builder Web Runtime) configuration
 dbwr_repo: "https://github.com/ornl-epics/dbwr.git"
-dbwr_version: main
 dbwr_dest: /opt/css/dbwr
 dbwr_mvn_args: "clean install -DskipTests"

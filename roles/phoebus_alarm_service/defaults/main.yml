@@ -13,15 +13,13 @@ alarm_mail_server: "localhost"
 alarm_mail_server_port: 25
 alarm_mail_server_from: "phoebus_alarm@localhost"
 
-phoebus_alarm_server_version: 5.0.2
+# phoebus_alarm_*_version in vars/shared.yml
 phoebus_alarm_server_jar: "service-alarm-server-{{ phoebus_alarm_server_version }}.jar"
 phoebus_alarm_server_procServ_port: 60046
 
-phoebus_alarm_logger_version: 5.0.2
 phoebus_alarm_logger_jar: "service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
 phoebus_alarm_logger_procServ_port: 60047
 
-phoebus_alarm_config_logger_version: 5.0.2
 phoebus_alarm_config_logger_jar: "service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
 phoebus_alarm_config_logger_procServ_port: 60048
 phoebus_alarm_config_local_repo: "{{ phoebus_alarm_install_dir }}/alarm_config_logger"

@@ -9,9 +9,8 @@ aa_site_name: "Archiver Appliance"
 # Tomcat home — auto-detected from tomcat_dependency (RPM or tarball)
 aa_tomcat_home: "{{ tomcat_home | default('/usr/share/tomcat') }}"
 
-# Build location and version
+# Build location and version (aa_version in vars/shared.yml)
 aa_build_loc: /tmp/aa_build
-aa_version: 2.3.1
 
 # MariaDB JDBC connector JAR — auto-detected from mariadb_dependency
 aa_mysql_connector_jar: "{{ mariadb_connector_jar | default('/usr/lib/java/mariadb-java-client.jar') }}"
