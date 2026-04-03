@@ -50,8 +50,16 @@
     path: "{{ recsync_runtime_dir }}/recceiver/processors.py"
     regexp: 'parser\.readfp\('
     replace: 'parser.read_file('
+  register: _recsync_patch
   notify:
     - Restart recsync
+
+- name: Clear Python bytecode cache after patch  # noqa: no-handler
+  become: true
+  ansible.builtin.file:
+    path: "{{ recsync_runtime_dir }}/recceiver/__pycache__"
+    state: absent
+  when: _recsync_patch.changed
 
 - name: Install recsync systemd service
   become: true
