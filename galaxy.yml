@@ -2,7 +2,7 @@
 
 namespace: nsls2
 name: epics_services
-version: 1.0.1
+version: 1.1.0
 readme: README.md
 authors:
   - Anthony Sligar <asligar@bnl.gov>
