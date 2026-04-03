@@ -42,6 +42,17 @@
     chdir: "{{ recsync_install_dir }}"
   when: _recsync_repo.changed
 
+# ConfigParser.readfp() was removed in Python 3.12 (RHEL 10).
+# Upstream fix pending: replace readfp(open(...)) with read_file(open(...)).
+- name: Patch readfp for Python 3.12+ compatibility
+  become: true
+  ansible.builtin.replace:
+    path: "{{ recsync_runtime_dir }}/recceiver/processors.py"
+    regexp: 'parser\.readfp\('
+    replace: 'parser.read_file('
+  notify:
+    - Restart recsync
+
 - name: Install recsync systemd service
   become: true
   ansible.builtin.template:
