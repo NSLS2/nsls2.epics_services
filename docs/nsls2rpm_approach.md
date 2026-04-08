@@ -78,6 +78,31 @@ dnf install nsls2-channelfinder -> template config -> start service
 | RecSync | Make | Python package | `nsls2-recsync` |
 | Shift | Pre-built | `Shift-1.1.war` | `nsls2-shift` |
 
+## Dependency RPMs
+
+Some runtime dependencies are not available as standard RHEL RPMs across
+all versions (8/9/10). These are also packaged in nsls2rpms to guarantee
+consistent versions regardless of RHEL version:
+
+| Dependency | Issue | RPM Name |
+|-----------|-------|----------|
+| JDK 25 | Not in RHEL 8/9 repos | `nsls2-jdk-25` |
+| Tomcat 10 | RHEL 8/9 only have Tomcat 9 (javax, not jakarta) | `nsls2-tomcat` |
+| Kafka | No upstream RPM anywhere | `nsls2-kafka` |
+| procServ | EPICS-specific, not in any distro repo | `nsls2-procserv` |
+
+Dependencies that are well-served by external vendor repos do NOT need
+nsls2rpms packaging:
+
+- **Elasticsearch** — Elastic's own yum repo, version-pinned
+- **MongoDB** — MongoDB's own yum repo, version-pinned
+- **Node.js** — NodeSource repo
+- **MariaDB** — standard RHEL repos
+
+With both service and dependency RPMs in nsls2rpms, the `epics_services_rpm_only`
+fallback logic in the collection's dependency roles becomes unnecessary —
+every required package is available as an RPM on all RHEL versions.
+
 ## RPM Packaging Conventions
 
 ### Naming
