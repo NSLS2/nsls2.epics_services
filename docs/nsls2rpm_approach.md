@@ -219,6 +219,19 @@ collection roles -- those roles just get simpler internally.
 
 Spec files: `nsls2rpms/channelfinder/` and `nsls2rpms/phoebus-olog/`.
 
+## Additional Specs
+
+**Phoebus Alarm** (`nsls2rpms/phoebus-alarm/`) packages all three alarm
+components (alarm-server, alarm-logger, alarm-config-logger) from a single
+Phoebus source build. Kafka topic creation and alarm preferences remain
+Ansible-managed since they are site-specific.
+
+**Archiver Appliance** (`nsls2rpms/archiver-appliance/`) packages the Gradle
+build output (tarball + deployment scripts). Unlike the simpler JAR services,
+the AA requires a multi-step deployment (4 Tomcat instances, MariaDB schema,
+per-instance configuration) that Ansible continues to orchestrate using the
+bundled install scripts. The RPM eliminates the Gradle build from target hosts.
+
 ## Migration Path
 
 1. **Phase 1 (pilot):** Package ChannelFinder and Phoebus Olog as RPMs.
@@ -226,7 +239,8 @@ Spec files: `nsls2rpms/channelfinder/` and `nsls2rpms/phoebus-olog/`.
    alongside the existing `source` path, controlled by a new flag (e.g.,
    `epics_services_use_rpms`). Note: the existing `epics_services_rpm_only`
    flag only controls dependency installation fallbacks, not service builds.
-2. **Phase 2:** Package remaining Maven services (alarm, web runtime, save-restore).
-3. **Phase 3:** Package Gradle (archiver appliance) and npm (olog webclient).
+2. **Phase 2:** Package Phoebus Alarm and Archiver Appliance (specs ready).
+   Package remaining Maven services (web runtime, save-restore).
+3. **Phase 3:** Package npm (olog webclient) and remaining services.
 4. **Phase 4:** Remove source-build task paths from collection roles.
    Remove `maven_dependency` / build tool roles from service role dependencies.
