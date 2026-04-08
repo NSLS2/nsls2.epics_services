@@ -3,25 +3,26 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# === Runtime dependencies (shared by both install methods) ===
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dependency
+  when: not (skip_dependencies | default(false))
+
+- name: Install Tomcat dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.tomcat_dependency
+  when: not (skip_dependencies | default(false))
+
+- name: Install MariaDB JDBC dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.mariadb_dependency
+  when: not (skip_dependencies | default(false))
+
 # === RPM install path ===
 - name: Install Archiver Appliance from RPM
   when: epics_services_use_rpms | bool
   block:
-    - name: Install JDK dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.jdk_dependency
-      when: not (skip_dependencies | default(false))
-
-    - name: Install Tomcat dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.tomcat_dependency
-      when: not (skip_dependencies | default(false))
-
-    - name: Install MariaDB JDBC dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.mariadb_dependency
-      when: not (skip_dependencies | default(false))
-
     - name: Install nsls2-archiver-appliance RPM (single or cluster)
       become: true
       ansible.builtin.package:
@@ -29,24 +30,9 @@
         state: present
 
 # === Source build path (existing behavior) ===
-- name: Build and deploy Archiver Appliance from source
+- name: Build Archiver Appliance from source
   when: not (epics_services_use_rpms | bool)
   block:
-    - name: Install JDK dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.jdk_dependency
-      when: not (skip_dependencies | default(false))
-
-    - name: Install Tomcat dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.tomcat_dependency
-      when: not (skip_dependencies | default(false))
-
-    - name: Install MariaDB JDBC dependency
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.mariadb_dependency
-      when: not (skip_dependencies | default(false))
-
     - name: Build Archiver Appliance
       ansible.builtin.include_tasks: build.yml
 

@@ -45,7 +45,7 @@
     - etl
     - retrieval
   register: aa_instance_services
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Stop AA instance services for re-deploy  # noqa: no-handler
   become: true
@@ -54,7 +54,7 @@
     state: stopped
     daemon_reload: true
   loop: "{{ aa_instance_services.results | default([]) }}"
-  when: _repo.changed and item.stat.exists
+  when: _repo.changed | default(false) and item.stat.exists
 
 # Prepare the Archiver binaries for installation
 - name: Find service package  # noqa: no-handler
@@ -64,7 +64,7 @@
     patterns: "archappl*tar.gz"
     recurse: true
   register: find_result
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Unpack service on remote host  # noqa: no-handler
   become: true
@@ -74,7 +74,7 @@
     remote_src: true
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Set owner and group on install location  # noqa: no-handler
   become: true
@@ -83,7 +83,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     recurse: true
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # Deploy installation and configuration scripts
 - name: Deploy single installation script  # noqa: no-handler
@@ -94,7 +94,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Deploy mysql config script  # noqa: no-handler
   become: true
@@ -104,7 +104,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Deploy tomcat installation script  # noqa: no-handler
   become: true
@@ -114,7 +114,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0755'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Copy MySQL schema file from source to install scripts  # noqa: no-handler
   become: true
@@ -125,7 +125,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Deploy policies configuration  # noqa: no-handler
   become: true
@@ -135,7 +135,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # Deploy appliances.xml for cluster configuration (only when cluster appliances are defined)
 - name: Deploy appliances.xml configuration
@@ -163,7 +163,7 @@
     SITE_SPECIFIC_POLICIES_FILE: "{{ aa_install_location }}/conf/policies.py"
     ARCHAPPL_MYIDENTITY: "{{ aa_identity }}"
     ARCHAPPL_APPLIANCES: "{{ aa_deploy_location ~ '/appliances.xml' if (aa_cluster_appliances is defined and aa_cluster_appliances | length > 0) else '' }}"
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 - name: Deploy facility template changes  # noqa: no-handler
   become: true
@@ -173,7 +173,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     mode: '0644'
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # Configure site specific content
 - name: Configure static AA content  # noqa: no-changed-when no-handler
@@ -187,7 +187,7 @@
   environment:
     DEPLOY_DIR: "{{ aa_deploy_location }}"
     PATH: "{{ aa_java_home }}/bin:${PATH}"
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # A temporary fix for the mysql connection host
 - name: Replace mysql host string  # noqa: no-handler
@@ -196,7 +196,7 @@
     path: "{{ aa_deploy_location }}/mgmt/conf/context.xml"
     regexp: 'jdbc:mariadb://localhost:3306'
     replace: "jdbc:mariadb://{{ aa_mysql_server }}:3306"
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # Deploy per-instance server.xml (adds optional SSL connector and health check valve)
 - name: Deploy server.xml for each instance
@@ -245,7 +245,7 @@
     owner: "{{ epics_services_account }}"
     group: "{{ epics_services_account }}"
     recurse: true
-  when: _repo.changed
+  when: _repo.changed | default(false)
 
 # Deploy per-instance systemd service files
 - name: Deploy systemd service file for each instance

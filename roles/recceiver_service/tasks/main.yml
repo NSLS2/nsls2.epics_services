@@ -3,15 +3,16 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# === Runtime dependencies (shared by both install methods) ===
+- name: Deploy ChannelFinder service
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.channelfinder_service
+  when: not (skip_dependencies | default(false))
+
 # === RPM install path ===
 - name: Install RecSync from RPM
   when: epics_services_use_rpms | bool
   block:
-    - name: Deploy ChannelFinder service
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.channelfinder_service
-      when: not (skip_dependencies | default(false))
-
     - name: Install nsls2-recsync RPM
       become: true
       ansible.builtin.package:
@@ -22,11 +23,6 @@
 - name: Build and deploy RecSync from source
   when: not (epics_services_use_rpms | bool)
   block:
-    - name: Deploy ChannelFinder service
-      ansible.builtin.include_role:
-        name: nsls2.epics_services.channelfinder_service
-      when: not (skip_dependencies | default(false))
-
     - name: Install Python dependencies
       become: true
       ansible.builtin.package:

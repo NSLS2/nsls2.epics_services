@@ -59,10 +59,6 @@
         group: "{{ epics_services_account }}"
         mode: "0644"
 
-    # Install JDBC connectors and third party libraries
-    - name: Install JDBC connectors and third party libraries
-      ansible.builtin.include_tasks: install_connectors.yml
-
     # Install shift war
     - name: Download shift war
       ansible.builtin.get_url:
@@ -73,6 +69,11 @@
         mode: "0644"
 
 # === Configuration (runs regardless of install method) ===
+
+# JDBC connectors must be in GlassFish's lib for both RPM and source paths
+- name: Install JDBC connectors and third party libraries
+  ansible.builtin.include_tasks: install_connectors.yml
+
 - name: Set AS_JAVA in GlassFish asenv.conf
   become: true
   ansible.builtin.lineinfile:
