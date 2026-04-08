@@ -60,6 +60,12 @@ recsync_version: master
 pvws_version: master
 dbwr_version: main
 
+# === Maven plugin versions (used in Phoebus product POM files) ===
+maven_jar_plugin_version: "3.1.0"
+maven_resources_plugin_version: "3.1.0"
+maven_exec_plugin_version: "1.6.0"
+maven_assembly_plugin_version: "3.2.0"
+
 # === Derived paths ===
 java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"
 mvn_home: "/opt/epics-tools/lib/apache-maven-{{ maven_version }}"
