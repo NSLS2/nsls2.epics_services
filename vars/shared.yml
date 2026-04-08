@@ -17,6 +17,16 @@ epics_services_rpm_only: >-
   {{ ansible_os_family == 'RedHat'
      and ansible_distribution_major_version | int >= 10 }}
 
+# === Service installation method ===
+# When true, service roles install pre-built RPMs (from nsls2rpms) instead
+# of building from source. Build tools (Maven, Gradle, npm) are not needed
+# on target hosts. Dependency roles (JDK, Elasticsearch, Kafka, etc.) still
+# run normally — only the service build/install step changes.
+#
+# Default: false (build from source, the existing behavior).
+# Set to true when the nsls2rpms packages are available in your RPM repo.
+epics_services_use_rpms: false
+
 # === Shared account ===
 epics_services_account: csstudio
 

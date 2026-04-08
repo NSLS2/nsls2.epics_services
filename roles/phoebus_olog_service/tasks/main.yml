@@ -3,76 +3,103 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# tasks file for phoebus_olog_service
+# === RPM install path ===
+- name: Install Phoebus Olog from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install JDK dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.jdk_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install JDK dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install Elasticsearch dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.elasticsearch_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install Maven dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install MongoDB dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.mongodb_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install Elasticsearch dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install nsls2-phoebus-olog RPM
+      become: true
+      ansible.builtin.package:
+        name: "nsls2-phoebus-olog-{{ phoebus_olog_version | regex_replace('^v', '') }}"
+        state: present
 
-- name: Install MongoDB dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.mongodb_dependency
-  when: not (skip_dependencies | default(false))
+# === Source build path (existing behavior) ===
+- name: Build and deploy Phoebus Olog from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install JDK dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.jdk_dependency
+      when: not (skip_dependencies | default(false))
 
-# create the installation location for the olog server
-- name: Ensure services folder exists
-  ansible.builtin.file:
-    path: "{{ phoebus_olog_install_dir }}"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0755"
+    - name: Install Maven dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.maven_dependency
+      when: not (skip_dependencies | default(false))
 
-# Olog
-- name: Clone and/or update the Olog service repo
-  become: true
-  become_user: "{{ epics_services_account }}"
-  ansible.builtin.git:
-    repo: 'https://github.com/Olog/phoebus-olog.git'
-    dest: "{{ phoebus_olog_install_dir }}/phoebus-olog"
-    force: true
-    version: "{{ phoebus_olog_version }}"
-    update: true
-  register: _olog_repo
+    - name: Install Elasticsearch dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.elasticsearch_dependency
+      when: not (skip_dependencies | default(false))
 
-# build the Olog library
-- name: Build the Olog binaries  # noqa: no-handler
-  become: true
-  become_user: "{{ epics_services_account }}"
-  ansible.builtin.command: mvn clean install -Pdeployable-jar -DskipTests
-  args:
-    chdir: "{{ phoebus_olog_install_dir }}/phoebus-olog"
-  environment:
-    JAVA_HOME: "{{ java_home }}"
-    MVN_HOME: "{{ mvn_home }}"
-    PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
-  when: _olog_repo.changed
-  changed_when: true
+    - name: Install MongoDB dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.mongodb_dependency
+      when: not (skip_dependencies | default(false))
 
-# copy binaries
-- name: Copy phoebus olog server jar  # noqa: no-handler
-  become: true
-  ansible.builtin.copy:
-    src: "{{ phoebus_olog_install_dir }}/phoebus-olog/target/{{ phoebus_olog_jar }}"
-    dest: "{{ phoebus_olog_install_dir }}/{{ phoebus_olog_jar }}"
-    force: true
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    remote_src: true
-  when: _olog_repo.changed
+    # create the installation location for the olog server
+    - name: Ensure services folder exists
+      ansible.builtin.file:
+        path: "{{ phoebus_olog_install_dir }}"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0755"
 
-# Setup and configure the Olog systemd services
+    # Olog
+    - name: Clone and/or update the Olog service repo
+      become: true
+      become_user: "{{ epics_services_account }}"
+      ansible.builtin.git:
+        repo: 'https://github.com/Olog/phoebus-olog.git'
+        dest: "{{ phoebus_olog_install_dir }}/phoebus-olog"
+        force: true
+        version: "{{ phoebus_olog_version }}"
+        update: true
+      register: _olog_repo
+
+    # build the Olog library
+    - name: Build the Olog binaries  # noqa: no-handler
+      become: true
+      become_user: "{{ epics_services_account }}"
+      ansible.builtin.command: mvn clean install -Pdeployable-jar -DskipTests
+      args:
+        chdir: "{{ phoebus_olog_install_dir }}/phoebus-olog"
+      environment:
+        JAVA_HOME: "{{ java_home }}"
+        MVN_HOME: "{{ mvn_home }}"
+        PATH: "{{ java_home }}/bin:{{ mvn_home }}/bin:{{ ansible_env.PATH }}"
+      when: _olog_repo.changed
+      changed_when: true
+
+    # copy binaries
+    - name: Copy phoebus olog server jar  # noqa: no-handler
+      become: true
+      ansible.builtin.copy:
+        src: "{{ phoebus_olog_install_dir }}/phoebus-olog/target/{{ phoebus_olog_jar }}"
+        dest: "{{ phoebus_olog_install_dir }}/{{ phoebus_olog_jar }}"
+        force: true
+        mode: "0755"
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        remote_src: true
+      when: _olog_repo.changed
+
+# === Configuration (runs regardless of install method) ===
 - name: Include tasks to configure Olog systemd services
   ansible.builtin.include_tasks: configure_services.yml

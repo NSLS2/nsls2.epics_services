@@ -3,42 +3,55 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# tasks file for save_restore_service
+# === RPM install path ===
+- name: Install Save & Restore from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install nsls2-save-restore RPM
+      become: true
+      ansible.builtin.package:
+        name: "nsls2-save-restore-{{ save_restore_version }}"
+        state: present
 
-- name: Ensure services folder for save restore exists
-  become: true
-  ansible.builtin.file:
-    path: "{{ save_restore_install_dir }}"
-    state: directory
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
+# === Source build path (existing behavior) ===
+- name: Deploy Save & Restore from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Ensure services folder for save restore exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ save_restore_install_dir }}"
+        state: directory
+        mode: "0755"
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
 
-# copy binaries from /opt/css/lib/phoebus/services/save-and-restore/target/service-save-and-restore-*.jar
-- name: Find the save/restore JAR file
-  ansible.builtin.find:
-    paths: /opt/css/lib/phoebus/services/save-and-restore/target
-    patterns: "service-save-and-restore-{{ save_restore_version }}*.jar"
-    recurse: false
-  register: save_restore_jars
+    # copy binaries from /opt/css/lib/phoebus/services/save-and-restore/target/service-save-and-restore-*.jar
+    - name: Find the save/restore JAR file
+      ansible.builtin.find:
+        paths: /opt/css/lib/phoebus/services/save-and-restore/target
+        patterns: "service-save-and-restore-{{ save_restore_version }}*.jar"
+        recurse: false
+      register: save_restore_jars
 
-- name: Fail if no matching save/restore JAR found
-  ansible.builtin.fail:
-    msg: "No JAR file matching version {{ save_restore_version }} found."
-  when: save_restore_jars.matched == 0
+    - name: Fail if no matching save/restore JAR found
+      ansible.builtin.fail:
+        msg: "No JAR file matching version {{ save_restore_version }} found."
+      when: save_restore_jars.matched == 0
 
-- name: Set the JAR file path (use the first match)
-  ansible.builtin.set_fact:
-    save_restore_jar_path: "{{ save_restore_jars.files[0].path }}"
+    - name: Set the JAR file path (use the first match)
+      ansible.builtin.set_fact:
+        save_restore_jar_path: "{{ save_restore_jars.files[0].path }}"
 
-- name: Copy the save/restore JAR to destination
-  become: true
-  ansible.builtin.copy:
-    src: "{{ save_restore_jar_path }}"
-    dest: "{{ save_restore_jar }}"
-    mode: "0755"
-    remote_src: true
+    - name: Copy the save/restore JAR to destination
+      become: true
+      ansible.builtin.copy:
+        src: "{{ save_restore_jar_path }}"
+        dest: "{{ save_restore_jar }}"
+        mode: "0755"
+        remote_src: true
 
+# === Configuration (runs regardless of install method) ===
 - name: Install procServ
   ansible.builtin.include_role:
     name: nsls2.epics_services.procserv_dependency

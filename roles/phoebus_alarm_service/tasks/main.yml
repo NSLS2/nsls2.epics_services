@@ -3,94 +3,117 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# tasks file for phoebus_alarm_service
+# === RPM install path ===
+- name: Install Phoebus Alarm services from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install JDK dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.jdk_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install JDK dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install Elasticsearch dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.elasticsearch_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install Maven dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install Kafka dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.kafka_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install Elasticsearch dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install nsls2-phoebus-alarm RPM
+      become: true
+      ansible.builtin.package:
+        name: "nsls2-phoebus-alarm-{{ phoebus_alarm_server_version }}"
+        state: present
 
-- name: Install Kafka dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.kafka_dependency
-  when: not (skip_dependencies | default(false))
+# === Source build path (existing behavior) ===
+- name: Build and deploy Phoebus Alarm services from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install JDK dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.jdk_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Build CS-Studio Phoebus products
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.cs_studio_phoebus
-  when: not (skip_dependencies | default(false))
+    - name: Install Maven dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.maven_dependency
+      when: not (skip_dependencies | default(false))
 
-# Alarm Server
+    - name: Install Elasticsearch dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.elasticsearch_dependency
+      when: not (skip_dependencies | default(false))
 
-# create the installation location for the alarm server
-- name: Ensure alarm server directory exists
-  ansible.builtin.file:
-    path: "{{ phoebus_alarm_install_dir }}/alarm_server"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0755"
+    - name: Install Kafka dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.kafka_dependency
+      when: not (skip_dependencies | default(false))
 
-# Copy binaries from /opt/css/lib/phoebus/services/alarm-server/target/service-alarm-server-{{ phoebus_alarm_server_version }}-bin.tar.gz
-- name: Copy alarm server jar
-  ansible.builtin.unarchive:
-    src: "/opt/css/lib/phoebus/services/alarm-server/target/service-alarm-server-{{ phoebus_alarm_server_version }}-bin.tar.gz"
-    dest: "{{ phoebus_alarm_install_dir }}/alarm_server"
-    remote_src: true
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    extra_opts:
-      - --strip-components=1
+    - name: Build CS-Studio Phoebus products
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.cs_studio_phoebus
+      when: not (skip_dependencies | default(false))
 
-# create the installation location for the alarm logging server
-- name: Ensure alarm logger directory exists
-  ansible.builtin.file:
-    path: "{{ phoebus_alarm_install_dir }}/alarm_logger"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0755"
+    # Alarm Server
+    - name: Ensure alarm server directory exists
+      ansible.builtin.file:
+        path: "{{ phoebus_alarm_install_dir }}/alarm_server"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0755"
 
-# Copy binaries from /opt/css/lib/phoebus/services/alarm-server/target/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar
-- name: Copy alarm logger server jar
-  ansible.builtin.copy:
-    src: "/opt/css/lib/phoebus/services/alarm-logger/target/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
-    dest: "{{ phoebus_alarm_install_dir }}/alarm_logger/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
-    remote_src: true
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
+    - name: Copy alarm server jar
+      ansible.builtin.unarchive:
+        src: "/opt/css/lib/phoebus/services/alarm-server/target/service-alarm-server-{{ phoebus_alarm_server_version }}-bin.tar.gz"
+        dest: "{{ phoebus_alarm_install_dir }}/alarm_server"
+        remote_src: true
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        extra_opts:
+          - --strip-components=1
 
-# create the installation location for the alarm config logger server
-- name: Ensure alarm config logger directory exists
-  ansible.builtin.file:
-    path: "{{ phoebus_alarm_install_dir }}/alarm_config_logger"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0755"
+    # Alarm Logger
+    - name: Ensure alarm logger directory exists
+      ansible.builtin.file:
+        path: "{{ phoebus_alarm_install_dir }}/alarm_logger"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0755"
 
-# Copy binaries from /opt/css/lib/phoebus/services/alarm-config-logger/target/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}jar
-- name: Copy alarm config logger server jar
-  ansible.builtin.copy:
-    src: "/opt/css/lib/phoebus/services/alarm-config-logger/target/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
-    dest: "{{ phoebus_alarm_install_dir }}/alarm_config_logger/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
-    remote_src: true
-    mode: "0755"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
+    - name: Copy alarm logger server jar
+      ansible.builtin.copy:
+        src: "/opt/css/lib/phoebus/services/alarm-logger/target/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
+        dest: "{{ phoebus_alarm_install_dir }}/alarm_logger/service-alarm-logger-{{ phoebus_alarm_logger_version }}.jar"
+        remote_src: true
+        mode: "0755"
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
 
-# Create the alarm preferences
+    # Alarm Config Logger
+    - name: Ensure alarm config logger directory exists
+      ansible.builtin.file:
+        path: "{{ phoebus_alarm_install_dir }}/alarm_config_logger"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0755"
+
+    - name: Copy alarm config logger server jar
+      ansible.builtin.copy:
+        src: "/opt/css/lib/phoebus/services/alarm-config-logger/target/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
+        dest: "{{ phoebus_alarm_install_dir }}/alarm_config_logger/service-alarm-config-logger-{{ phoebus_alarm_config_logger_version }}.jar"
+        remote_src: true
+        mode: "0755"
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+
+# === Configuration (runs regardless of install method) ===
+
 - name: Create the alarm server preferences file
   become: true
   ansible.builtin.template:

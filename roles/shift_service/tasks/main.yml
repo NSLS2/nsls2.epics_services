@@ -3,45 +3,76 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# tasks file for shift_service
+# === RPM install path ===
+- name: Install Shift service from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install MariaDB JDBC dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.mariadb_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install JDK 8 dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk8_dependency
-  when: not (skip_dependencies | default(false))
+    - name: Install nsls2-shift RPM
+      become: true
+      ansible.builtin.package:
+        name: nsls2-shift
+        state: present
 
-- name: Install MariaDB JDBC dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.mariadb_dependency
-  when: not (skip_dependencies | default(false))
+# === Source/download path (existing behavior) ===
+- name: Deploy Shift service from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install JDK 8 dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.jdk8_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Ensure services directory exists
-  become: true
-  ansible.builtin.file:
-    path: "{{ shift_install_dir }}"
-    state: directory
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0755"
+    - name: Install MariaDB JDBC dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.mariadb_dependency
+      when: not (skip_dependencies | default(false))
 
-- name: Install GlassFish 5.0.1
-  ansible.builtin.unarchive:
-    src: http://download.oracle.com/glassfish/5.0.1/release/glassfish-5.0.1.zip
-    dest: "{{ shift_install_dir }}/"
-    remote_src: true
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    creates: "{{ shift_install_dir }}/glassfish5/bin/asadmin"
+    - name: Ensure services directory exists
+      become: true
+      ansible.builtin.file:
+        path: "{{ shift_install_dir }}"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0755"
 
-- name: Install the fixed bootstrap file
-  ansible.builtin.copy:
-    src: grizzly-npn-bootstrap.jar
-    dest: "{{ shift_install_dir }}/glassfish5/glassfish/modules/endorsed/grizzly-npn-bootstrap.jar"
-    force: true
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0644"
+    - name: Install GlassFish 5.0.1
+      ansible.builtin.unarchive:
+        src: http://download.oracle.com/glassfish/5.0.1/release/glassfish-5.0.1.zip
+        dest: "{{ shift_install_dir }}/"
+        remote_src: true
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        creates: "{{ shift_install_dir }}/glassfish5/bin/asadmin"
 
+    - name: Install the fixed bootstrap file
+      ansible.builtin.copy:
+        src: grizzly-npn-bootstrap.jar
+        dest: "{{ shift_install_dir }}/glassfish5/glassfish/modules/endorsed/grizzly-npn-bootstrap.jar"
+        force: true
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0644"
+
+    # Install JDBC connectors and third party libraries
+    - name: Install JDBC connectors and third party libraries
+      ansible.builtin.include_tasks: install_connectors.yml
+
+    # Install shift war
+    - name: Download shift war
+      ansible.builtin.get_url:
+        url: https://sourceforge.net/projects/olog/files/shift/Shift-1.1.war/download
+        dest: "{{ shift_install_dir }}/glassfish5/glassfish/domains/domain1/autodeploy/Shift-1.1.war"
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        mode: "0644"
+
+# === Configuration (runs regardless of install method) ===
 - name: Set AS_JAVA in GlassFish asenv.conf
   become: true
   ansible.builtin.lineinfile:
@@ -49,10 +80,6 @@
     regexp: '^AS_JAVA='
     line: 'AS_JAVA="{{ shift_java_home }}"'
   notify: Restart shift_glassfish
-
-# Install JDBC connectors and third party libraries
-- name: Install JDBC connectors and third party libraries
-  ansible.builtin.include_tasks: install_connectors.yml
 
 # Setup and configure the MySQL server
 - name: Setup and configure the MySQL server
@@ -67,15 +94,6 @@
     dest: "{{ shift_install_dir }}/glassfish5/glassfish/domains/domain1/config/domain.xml"
     mode: "0644"
   notify: Restart shift_glassfish
-
-# Install shift war
-- name: Download shift war
-  ansible.builtin.get_url:
-    url: https://sourceforge.net/projects/olog/files/shift/Shift-1.1.war/download
-    dest: "{{ shift_install_dir }}/glassfish5/glassfish/domains/domain1/autodeploy/Shift-1.1.war"
-    owner: "{{ epics_services_account }}"
-    group: "{{ epics_services_account }}"
-    mode: "0644"
 
 # Setup systemd service file
 - name: Create systemd service file
