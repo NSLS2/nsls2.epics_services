@@ -3,92 +3,106 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# tasks file for cs_studio_phoebus
-
+# === Runtime dependencies (shared by both install methods) ===
 - name: Install JDK dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk_dependency
 
-- name: Install Maven dependency
-  ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+# === RPM install path ===
+- name: Install Phoebus product from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install nsls2-phoebus product RPM
+      become: true
+      ansible.builtin.package:
+        name: "{{ cs_studio_phoebus_rpm_name | default('nsls2-phoebus-beamlines') }}-{{ cs_studio_phoebus_version | regex_replace('^v', '') }}"
+        state: present
 
-- name: Ensure correct ownership and permissions for directories
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    owner: "{{ cs_studio_phoebus_owner }}"
-    group: "{{ cs_studio_phoebus_owner }}"
-    mode: "u=rwX,g=rX,o=rX"
-    state: directory
-    recurse: "{{ item.recurse | default(false) }}"
-  loop:
-    - { path: "/opt/css", recurse: false }
-    - { path: "{{ cs_studio_phoebus_products_dest }}", recurse: true }
+# === Source build path (existing behavior) ===
+- name: Build and deploy Phoebus from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install Maven dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.maven_dependency
 
-- name: Clone and/or update the phoebus repo
-  ansible.builtin.git:
-    repo: 'https://github.com/ControlSystemStudio/phoebus.git'
-    dest: /opt/css/lib/phoebus
-    version: "{{ cs_studio_phoebus_version }}"
-    update: true
-  register: _phoebus_repo
+    - name: Ensure correct ownership and permissions for directories
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        owner: "{{ cs_studio_phoebus_owner }}"
+        group: "{{ cs_studio_phoebus_owner }}"
+        mode: "u=rwX,g=rX,o=rX"
+        state: directory
+        recurse: "{{ item.recurse | default(false) }}"
+      loop:
+        - { path: "/opt/css", recurse: false }
+        - { path: "{{ cs_studio_phoebus_products_dest }}", recurse: true }
 
-- name: Clone and/or update the site-specific products repo
-  become: true
-  become_user: "{{ cs_studio_phoebus_owner }}"
-  ansible.builtin.git:
-    repo: "{{ cs_studio_phoebus_products_repo }}"
-    dest: "{{ cs_studio_phoebus_products_dest }}"
-    version: "{{ cs_studio_phoebus_products_version }}"
-    update: true
-  register: _products_repo
-  when: cs_studio_phoebus_products_repo | length > 0
+    - name: Clone and/or update the phoebus repo
+      ansible.builtin.git:
+        repo: 'https://github.com/ControlSystemStudio/phoebus.git'
+        dest: /opt/css/lib/phoebus
+        version: "{{ cs_studio_phoebus_version }}"
+        update: true
+      register: _phoebus_repo
 
-# Override the default settings.xml maven file if `cs_studio_phoebus_override_mvn_settings` is set.
-- name: Override the default maven settings.xml
-  ansible.builtin.template:
-    src: settings.xml.j2
-    dest: "{{ cs_studio_phoebus_products_dest }}/settings.xml"
-    owner: "{{ cs_studio_phoebus_owner }}"
-    group: "{{ cs_studio_phoebus_owner }}"
-    mode: "u=rw,g=r,o=r"
-  when: cs_studio_phoebus_override_mvn_settings
+    - name: Clone and/or update the site-specific products repo
+      become: true
+      become_user: "{{ cs_studio_phoebus_owner }}"
+      ansible.builtin.git:
+        repo: "{{ cs_studio_phoebus_products_repo }}"
+        dest: "{{ cs_studio_phoebus_products_dest }}"
+        version: "{{ cs_studio_phoebus_products_version }}"
+        update: true
+      register: _products_repo
+      when: cs_studio_phoebus_products_repo | length > 0
 
-- name: Build the documentation and help  # noqa: no-changed-when no-handler
-  ansible.builtin.shell: >-
-    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
-    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
-    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
-    mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
-  args:
-    chdir: /opt/css/lib/phoebus/
-  when: _phoebus_repo.changed
+    # Override the default settings.xml maven file if `cs_studio_phoebus_override_mvn_settings` is set.
+    - name: Override the default maven settings.xml
+      ansible.builtin.template:
+        src: settings.xml.j2
+        dest: "{{ cs_studio_phoebus_products_dest }}/settings.xml"
+        owner: "{{ cs_studio_phoebus_owner }}"
+        group: "{{ cs_studio_phoebus_owner }}"
+        mode: "u=rw,g=r,o=r"
+      when: cs_studio_phoebus_override_mvn_settings
 
-- name: Build the common phoebus binaries
-  ansible.builtin.shell: >-
-    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
-    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
-    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
-    mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true
-  args:
-    chdir: /opt/css/lib/phoebus/
-  when: _phoebus_repo.changed or (_products_repo.changed | default(false))
-  changed_when: true
+    - name: Build the documentation and help  # noqa: no-changed-when no-handler
+      ansible.builtin.shell: >-
+        JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+        MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+        PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+        mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
+      args:
+        chdir: /opt/css/lib/phoebus/
+      when: _phoebus_repo.changed
 
-- name: Build site-specific Phoebus products
-  ansible.builtin.shell: >-
-    JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
-    MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
-    PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
-    mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Ddocs=/opt/css/lib/phoebus/docs
-  args:
-    chdir: "{{ cs_studio_phoebus_products_dest }}/products"
-  when: >-
-    (cs_studio_phoebus_products_repo | length > 0 or cs_studio_phoebus_build_products) and
-    (_phoebus_repo.changed or (_products_repo.changed | default(false)) or
-     (cs_studio_phoebus_products_changed | default(false)))
-  changed_when: true
+    - name: Build the common phoebus binaries
+      ansible.builtin.shell: >-
+        JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+        MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+        PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+        mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true
+      args:
+        chdir: /opt/css/lib/phoebus/
+      when: _phoebus_repo.changed or (_products_repo.changed | default(false))
+      changed_when: true
 
+    - name: Build site-specific Phoebus products
+      ansible.builtin.shell: >-
+        JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
+        MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
+        PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
+        mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Ddocs=/opt/css/lib/phoebus/docs
+      args:
+        chdir: "{{ cs_studio_phoebus_products_dest }}/products"
+      when: >-
+        (cs_studio_phoebus_products_repo | length > 0 or cs_studio_phoebus_build_products) and
+        (_phoebus_repo.changed or (_products_repo.changed | default(false)) or
+         (cs_studio_phoebus_products_changed | default(false)))
+      changed_when: true
+
+# === Configuration (runs regardless of install method) ===
 - name: Create run-phoebus
   ansible.builtin.template:
     src: run-phoebus.sh.j2

@@ -70,8 +70,8 @@ dnf install nsls2-channelfinder -> template config -> start service
 | Phoebus Alarm (all 3) | Maven | 3 JARs from Phoebus tree | `nsls2-phoebus-alarm` |
 | Save & Restore | Maven | `service-save-and-restore-5.0.2.jar` | `nsls2-save-restore` |
 | PVWS + DBWR | Maven | `pvws.war` + `dbwr.war` | `nsls2-phoebus-web-runtime` |
-| Phoebus Products (beamlines) | Maven | Product JARs | `nsls2-phoebus-beamlines` |
-| Phoebus Products (accl) | Maven | Product JARs | `nsls2-phoebus-accl` |
+| Phoebus Products (beamlines) | Maven | Product JAR + launcher | `nsls2-phoebus-beamlines` |
+| Phoebus Products (accl) | Maven | Product JAR + launcher | `nsls2-phoebus-accl` |
 | Archiver Appliance (beamline) | Gradle | Pre-deployed 4 Tomcat instances | `nsls2-archiver-appliance-single` |
 | Archiver Appliance (accelerator) | Gradle | Pre-deployed 4 Tomcat instances | `nsls2-archiver-appliance-cluster` |
 | Olog Web Client | npm | Built frontend | `nsls2-olog-webclient` |
@@ -223,9 +223,9 @@ replaced by a `package` task:
   notify: Restart channelfinder
 ```
 
-The `maven_dependency` role is no longer needed as a runtime dependency for
-these services (it may still be needed for Phoebus product builds until those
-are also packaged).
+The `maven_dependency` role is no longer needed on any target host.
+All services AND Phoebus desktop products are now available as RPMs.
+Maven, Gradle, and npm are only needed on the Jenkins build host.
 
 ### `deploy_epics_services` role (ansible repo)
 
