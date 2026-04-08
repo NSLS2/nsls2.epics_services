@@ -67,11 +67,9 @@ dnf install nsls2-channelfinder -> template config -> start service
 |---------|-----------|----------|----------|
 | ChannelFinder | Maven | `ChannelFinder-5.0.0.jar` | `nsls2-channelfinder` |
 | Phoebus Olog | Maven | `service-olog-6.0.1.jar` | `nsls2-phoebus-olog` |
-| Phoebus Alarm Server | Maven | `service-alarm-server-5.0.2-bin.tar.gz` | `nsls2-phoebus-alarm-server` |
-| Phoebus Alarm Logger | Maven | `service-alarm-logger-5.0.2.jar` | `nsls2-phoebus-alarm-logger` |
-| Phoebus Alarm Config Logger | Maven | `service-alarm-config-logger-5.0.2.jar` | `nsls2-phoebus-alarm-config-logger` |
-| PVWS | Maven | `pvws.war` | `nsls2-pvws` |
-| DBWR | Maven | `dbwr.war` | `nsls2-dbwr` |
+| Phoebus Alarm (all 3) | Maven | 3 JARs from Phoebus tree | `nsls2-phoebus-alarm` |
+| Save & Restore | Maven | `service-save-and-restore-5.0.2.jar` | `nsls2-save-restore` |
+| PVWS + DBWR | Maven | `pvws.war` + `dbwr.war` | `nsls2-phoebus-web-runtime` |
 | Phoebus Products (beamlines) | Maven | Product JARs | `nsls2-phoebus-beamlines` |
 | Phoebus Products (accl) | Maven | Product JARs | `nsls2-phoebus-accl` |
 | Archiver Appliance (beamline) | Gradle | Pre-deployed 4 Tomcat instances | `nsls2-archiver-appliance-single` |
@@ -244,13 +242,17 @@ installed per host. Both eliminate the Gradle build from target hosts.
 
 ## Migration Path
 
-1. **Phase 1 (pilot):** Package ChannelFinder and Phoebus Olog as RPMs.
-   Test on `epics-services-tst`. Collection roles gain an `rpm` task path
+All service RPM specs are now available in `nsls2rpms/`. The migration
+proceeds in phases by validation, not by packaging:
+
+1. **Phase 1 (pilot):** Build and test ChannelFinder and Phoebus Olog RPMs
+   on `epics-services-tst`. Collection roles gain an `rpm` task path
    alongside the existing `source` path, controlled by a new flag (e.g.,
    `epics_services_use_rpms`). Note: the existing `epics_services_rpm_only`
    flag only controls dependency installation fallbacks, not service builds.
-2. **Phase 2:** Package Phoebus Alarm and Archiver Appliance (specs ready).
-   Package remaining Maven services (web runtime, save-restore).
-3. **Phase 3:** Package npm (olog webclient) and remaining services.
+2. **Phase 2:** Validate Phoebus Alarm, Save & Restore, Web Runtime, and
+   Olog Web Client RPMs. Add RPM task paths to their collection roles.
+3. **Phase 3:** Validate Archiver Appliance (single + cluster) and RecSync
+   RPMs. Validate Shift RPM (legacy JDK 8 service).
 4. **Phase 4:** Remove source-build task paths from collection roles.
    Remove `maven_dependency` / build tool roles from service role dependencies.
