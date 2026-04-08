@@ -74,7 +74,8 @@ dnf install nsls2-channelfinder -> template config -> start service
 | DBWR | Maven | `dbwr.war` | `nsls2-dbwr` |
 | Phoebus Products (beamlines) | Maven | Product JARs | `nsls2-phoebus-beamlines` |
 | Phoebus Products (accl) | Maven | Product JARs | `nsls2-phoebus-accl` |
-| Archiver Appliance | Gradle | `archappl*.tar.gz` | `nsls2-archiver-appliance` |
+| Archiver Appliance (beamline) | Gradle | Pre-deployed 4 Tomcat instances | `nsls2-archiver-appliance-single` |
+| Archiver Appliance (accelerator) | Gradle | Pre-deployed 4 Tomcat instances | `nsls2-archiver-appliance-cluster` |
 | Olog Web Client | npm | Built frontend | `nsls2-olog-webclient` |
 | RecSync | Make | Python package | `nsls2-recsync` |
 | Shift | Pre-built | `Shift-1.1.war` | `nsls2-shift` |
@@ -226,11 +227,20 @@ components (alarm-server, alarm-logger, alarm-config-logger) from a single
 Phoebus source build. Kafka topic creation and alarm preferences remain
 Ansible-managed since they are site-specific.
 
-**Archiver Appliance** (`nsls2rpms/archiver-appliance/`) packages the Gradle
-build output (tarball + deployment scripts). Unlike the simpler JAR services,
-the AA requires a multi-step deployment (4 Tomcat instances, MariaDB schema,
-per-instance configuration) that Ansible continues to orchestrate using the
-bundled install scripts. The RPM eliminates the Gradle build from target hosts.
+**Archiver Appliance** is split into two RPMs:
+
+- `nsls2-archiver-appliance-single` (`nsls2rpms/archiver-appliance-single/`)
+  — for beamline hosts. Ships 4 pre-deployed Tomcat instances with fixed
+  identity (`appliance0`) and standard ports. Ansible configures storage
+  paths, MariaDB, and EPICS CA per beamline.
+
+- `nsls2-archiver-appliance-cluster` (`nsls2rpms/archiver-appliance-cluster/`)
+  — for accelerator nodes. Same 4 pre-deployed instances, but with a
+  placeholder identity. Ansible configures per-node identity, the shared
+  `appliances.xml` cluster membership, and per-node storage paths.
+
+The two packages conflict (`Conflicts:` in the spec) so only one can be
+installed per host. Both eliminate the Gradle build from target hosts.
 
 ## Migration Path
 
