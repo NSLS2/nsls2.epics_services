@@ -1,0 +1,110 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+# === Runtime dependencies (shared by both install methods) ===
+- name: Deploy ChannelFinder service
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.channelfinder_api
+  when: not (skip_dependencies | default(false))
+
+# === RPM install path ===
+- name: Install RecSync from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install nsls2-recsync RPM
+      become: true
+      ansible.builtin.package:
+        name: nsls2-recsync
+        state: present
+
+# === Source build path (existing behavior) ===
+- name: Build and deploy RecSync from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install Python dependencies
+      become: true
+      ansible.builtin.package:
+        name:
+          - python3-twisted
+          - python3-requests
+          - python3-simplejson
+          - python3-urllib3
+        state: present
+
+    - name: Clone the RecSync-env repository
+      become: true
+      ansible.builtin.git:
+        repo: "{{ recsync_repo }}"
+        dest: "{{ recsync_install_dir }}"
+        version: "{{ recsync_version }}"
+      register: _recsync_repo
+
+    - name: Run make init  # noqa: no-changed-when no-handler
+      become: true
+      ansible.builtin.command:
+        cmd: make init
+        chdir: "{{ recsync_install_dir }}"
+      when: _recsync_repo.changed
+
+    - name: Run make install  # noqa: no-changed-when no-handler
+      become: true
+      ansible.builtin.command:
+        cmd: make install
+        chdir: "{{ recsync_install_dir }}"
+      when: _recsync_repo.changed
+
+    # ConfigParser.readfp() was removed in Python 3.12 (RHEL 10).
+    # Upstream fix pending: replace readfp(open(...)) with read_file(open(...)).
+    - name: Patch readfp for Python 3.12+ compatibility
+      become: true
+      ansible.builtin.replace:
+        path: "{{ recsync_runtime_dir }}/recceiver/processors.py"
+        regexp: 'parser\.readfp\('
+        replace: 'parser.read_file('
+      register: _recsync_patch
+      notify:
+        - Restart recsync
+
+    - name: Clear Python bytecode cache after patch  # noqa: no-handler
+      become: true
+      ansible.builtin.file:
+        path: "{{ recsync_runtime_dir }}/recceiver/__pycache__"
+        state: absent
+      when: _recsync_patch.changed
+
+# === Configuration (runs regardless of install method) ===
+- name: Install recsync systemd service
+  become: true
+  ansible.builtin.template:
+    src: recsync.service.j2
+    dest: /etc/systemd/system/recsync.service
+    mode: '0644'
+    owner: root
+    group: root
+  notify:
+    - Reload systemd daemon
+    - Restart recsync
+
+- name: Install recsync configuration
+  become: true
+  ansible.builtin.template:
+    src: recsync.conf
+    dest: "{{ recsync_runtime_dir }}/recsync.conf"
+    mode: '0644'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart recsync
+
+- name: Install ChannelFinder client configuration
+  become: true
+  ansible.builtin.template:
+    src: channelfinderapi.conf
+    dest: "{{ recsync_runtime_dir }}/channelfinderapi.conf"
+    mode: '0644'
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart recsync

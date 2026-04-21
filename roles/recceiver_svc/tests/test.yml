@@ -1,0 +1,6 @@
+---
+- name: Test recceiver_svc role
+  hosts: localhost
+  remote_user: root
+  roles:
+    - nsls2.epics_services.recceiver_svc

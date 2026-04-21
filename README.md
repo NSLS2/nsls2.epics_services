@@ -48,15 +48,15 @@ orchestration is needed.
 
 | Role | Description |
 | --- | --- |
-| `aa_service` | Archiver Appliance — single-node or clustered. Requires JDK, Tomcat, MariaDB JDBC connector. |
-| `channelfinder_service` | ChannelFinder directory service. Requires JDK, Maven, Elasticsearch. |
-| `phoebus_alarm_service` | Phoebus alarm server, logger, and config logger. Requires JDK, Maven, Elasticsearch, Kafka, CS-Studio Phoebus. |
-| `phoebus_olog_service` | Phoebus Olog electronic logbook service. Requires JDK, Maven, Elasticsearch, MongoDB. |
-| `phoebus_olog_webclient_service` | Phoebus Olog web client (React/Node.js). Includes `nodejs_dependency`. |
-| `phoebus_web_runtime_service` | Phoebus web runtime (PVWS + DBWR WARs on Tomcat). Requires JDK, Maven, Tomcat. |
-| `recceiver_service` | RecCeiver (RecSync) — IOC channel registration. Requires JDK, Maven, Elasticsearch, ChannelFinder. |
-| `save_restore_service` | Save/restore service for machine snapshots. Requires procServ. |
-| `shift_service` | Shift logbook service on GlassFish 5. Requires JDK 8, MariaDB JDBC connector. |
+| `aa_api` | Archiver Appliance — single-node or clustered. Requires JDK, Tomcat, MariaDB JDBC connector. |
+| `channelfinder_api` | ChannelFinder directory service. Requires JDK, Maven, Elasticsearch. |
+| `phoebus_alarm_svc` | Phoebus alarm server, logger, and config logger. Requires JDK, Maven, Elasticsearch, Kafka, CS-Studio Phoebus. |
+| `phoebus_olog_api` | Phoebus Olog electronic logbook service. Requires JDK, Maven, Elasticsearch, MongoDB. |
+| `phoebus_olog_ui` | Phoebus Olog web client (React/Node.js). Includes `nodejs_dep`. |
+| `phoebus_web_runtime_ui` | Phoebus web runtime (PVWS + DBWR WARs on Tomcat). Requires JDK, Maven, Tomcat. |
+| `recceiver_svc` | RecCeiver (RecSync) — IOC channel registration. Requires JDK, Maven, Elasticsearch, ChannelFinder. |
+| `save_restore_api` | Save/restore service for machine snapshots. Requires procServ. |
+| `shift_api` | Shift logbook service on GlassFish 5. Requires JDK 8, MariaDB JDBC connector. |
 
 ### Build / configuration roles
 
@@ -65,8 +65,8 @@ orchestration is needed.
 | `cs_studio_phoebus` | Clone and build the Phoebus product from source. |
 | `cs_studio_preferences` | Deploy CS-Studio preference files. |
 | `cs_studio_bobs` | Deploy CS-Studio BOB display files. |
-| `cs_studio_bobs_web` | Build BOB web displays for the display builder web runtime. |
-| `cs_studio_bobs_web_cache` | Flush the DBWR display cache. |
+| `cs_studio_bobs_ui` | Build BOB web displays for the display builder web runtime. |
+| `cs_studio_bobs_ui_cache` | Flush the DBWR display cache. |
 
 ### Dependency roles
 
@@ -75,30 +75,30 @@ Centralizing these ensures consistent versions and single-point upgrades.
 
 | Role | Installs | Key variables |
 | --- | --- | --- |
-| `jdk_dependency` | OpenJDK (default: 25) | `jdk_version`, `java_home` |
-| `maven_dependency` | Apache Maven (default: 3.9.9) | `maven_version`, `mvn_home` |
-| `elasticsearch_dependency` | Elasticsearch 9.x (default: 9.0.0) | `elastic_version`, `elastic_port` |
-| `kafka_dependency` | Apache Kafka + Zookeeper (default: 3.9.2) | `kafka_version`, `kafka_port`, `zookeeper_port` |
-| `mongodb_dependency` | MongoDB 8.0 | `mongodb_version`, `mongod_port` |
-| `tomcat_dependency` | Apache Tomcat (RPM) + `server.xml` | `tomcat_http_port`, `tomcat_https_port`, `tomcat_shutdown_port` |
-| `mariadb_dependency` | MariaDB JDBC connector (RPM) | — |
-| `nodejs_dependency` | Node.js via NodeSource | `nodejs_version` |
-| `procserv_dependency` | procServ process manager (source build on RHEL 10) | — |
+| `jdk_dep` | OpenJDK (default: 25) | `jdk_version`, `java_home` |
+| `maven_dep` | Apache Maven (default: 3.9.9) | `maven_version`, `mvn_home` |
+| `elasticsearch_dep` | Elasticsearch 9.x (default: 9.0.0) | `elastic_version`, `elastic_port` |
+| `kafka_dep` | Apache Kafka + Zookeeper (default: 3.9.2) | `kafka_version`, `kafka_port`, `zookeeper_port` |
+| `mongodb_dep` | MongoDB 8.0 | `mongodb_version`, `mongod_port` |
+| `tomcat_dep` | Apache Tomcat (RPM) + `server.xml` | `tomcat_http_port`, `tomcat_https_port`, `tomcat_shutdown_port` |
+| `mariadb_dep` | MariaDB JDBC connector (RPM) | — |
+| `nodejs_dep` | Node.js via NodeSource | `nodejs_version` |
+| `procserv_dep` | procServ process manager (source build on RHEL 10) | — |
 
 ## Service dependency graph
 
 ```mermaid
 graph LR
     subgraph Dependencies
-        jdk[jdk_dependency<br/>OpenJDK 25]
-        mvn[maven_dependency]
-        es[elasticsearch_dependency]
-        kafka[kafka_dependency]
-        mongo[mongodb_dependency]
-        tomcat[tomcat_dependency]
-        mariadb[mariadb_dependency]
-        nodejs[nodejs_dependency]
-        procserv[procserv_dependency]
+        jdk[jdk_dep<br/>OpenJDK 25]
+        mvn[maven_dep]
+        es[elasticsearch_dep]
+        kafka[kafka_dep]
+        mongo[mongodb_dep]
+        tomcat[tomcat_dep]
+        mariadb[mariadb_dep]
+        nodejs[nodejs_dep]
+        procserv[procserv_dep]
         jdk8[JDK 8<br/>direct install]
     end
 
@@ -107,15 +107,15 @@ graph LR
     end
 
     subgraph Services
-        aa[aa_service]
-        cf[channelfinder_service]
-        alarm[phoebus_alarm_service]
-        olog[phoebus_olog_service]
-        olog_web[phoebus_olog_webclient_service]
-        webrt[phoebus_web_runtime_service]
-        rec[recceiver_service]
-        savres[save_restore_service]
-        shift[shift_service]
+        aa[aa_api]
+        cf[channelfinder_api]
+        alarm[phoebus_alarm_svc]
+        olog[phoebus_olog_api]
+        olog_web[phoebus_olog_ui]
+        webrt[phoebus_web_runtime_ui]
+        rec[recceiver_svc]
+        savres[save_restore_api]
+        shift[shift_api]
     end
 
     jdk --> aa
@@ -217,8 +217,10 @@ Orchestration role (site-specific)
 └── tasks/cs_studio.yml      # Complex multi-step deploys stay in task files
 
 nsls2.epics_services (this collection)
-├── roles/*_service/         # Self-contained: includes own dependencies
-└── roles/*_dependency/      # Shared infrastructure (JDK, Maven, ES, ...)
+├── roles/*_api/             # REST API backends
+├── roles/*_svc/             # Backend daemons (no REST API)
+├── roles/*_ui/              # Presentation layer
+└── roles/*_dep/             # Shared infrastructure (JDK, Maven, ES, ...)
 ```
 
 Each service role includes its own dependency roles via `include_role`.

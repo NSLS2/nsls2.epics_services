@@ -6,7 +6,7 @@
 # === Runtime dependencies (shared by both install methods) ===
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 # === RPM install path ===
 - name: Install Phoebus product from RPM
@@ -24,7 +24,7 @@
   block:
     - name: Install Maven dependency
       ansible.builtin.include_role:
-        name: nsls2.epics_services.maven_dependency
+        name: nsls2.epics_services.maven_dep
 
     - name: Ensure correct ownership and permissions for directories
       ansible.builtin.file:

@@ -223,7 +223,7 @@ replaced by a `package` task:
   notify: Restart channelfinder
 ```
 
-The `maven_dependency` role is no longer needed on any target host.
+The `maven_dep` role is no longer needed on any target host.
 All services AND Phoebus desktop products are now available as RPMs.
 Maven, Gradle, and npm are only needed on the Jenkins build host.
 
@@ -280,4 +280,4 @@ proceeds in phases by validation, not by packaging:
 3. **Phase 3:** Validate Archiver Appliance (single + cluster) and RecSync
    RPMs. Validate Shift RPM (legacy JDK 8 service).
 4. **Phase 4:** Remove source-build task paths from collection roles.
-   Remove `maven_dependency` / build tool roles from service role dependencies.
+   Remove `maven_dep` / build tool roles from service role dependencies.

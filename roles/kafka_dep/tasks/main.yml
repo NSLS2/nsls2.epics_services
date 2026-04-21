@@ -1,0 +1,103 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+# tasks file for kafka_dep
+
+- name: Install Kafka (run once per play)
+  when: not (_kafka_dependency_done | default(false))
+  block:
+    - name: Ensure kafka services directory exists
+      ansible.builtin.file:
+        path: "{{ kafka_install_dir }}"
+        state: directory
+        mode: '0775'
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+
+    - name: Check if Kafka is already installed
+      ansible.builtin.stat:
+        path: "{{ kafka_install_dir }}/bin/kafka-server-start.sh"
+      register: _kafka_bin
+
+    - name: Download Kafka tarball
+      ansible.builtin.get_url:
+        url: "{{ kafka_download_url }}"
+        dest: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        mode: '0644'
+      when: not _kafka_bin.stat.exists
+
+    - name: Install Kafka
+      ansible.builtin.unarchive:
+        src: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        dest: "{{ kafka_install_dir }}"
+        remote_src: true
+        mode: '0775'
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        extra_opts:
+          - --strip-components=1
+      when: not _kafka_bin.stat.exists
+      notify:
+        - Restart zookeeper
+        - Restart kafka
+
+    - name: Ensure kafka logs directory has correct ownership
+      become: true
+      ansible.builtin.file:
+        path: "{{ kafka_install_dir }}/logs"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        recurse: true
+
+    - name: Install the zookeeper configuration
+      become: true
+      ansible.builtin.template:
+        src: zookeeper.properties
+        dest: "{{ kafka_install_dir }}/config/zookeeper.properties"
+        mode: '0644'
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+      notify:
+        - Restart zookeeper
+
+    - name: Install the kafka configuration
+      become: true
+      ansible.builtin.template:
+        src: server.properties
+        dest: "{{ kafka_install_dir }}/config/server.properties"
+        mode: '0644'
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+      notify:
+        - Restart kafka
+
+    - name: Install the zookeeper systemd service
+      become: true
+      ansible.builtin.template:
+        src: zookeeper.service
+        dest: /etc/systemd/system/zookeeper.service
+        mode: '0644'
+        owner: root
+        group: root
+      notify:
+        - Reload systemd daemon
+        - Restart zookeeper
+
+    - name: Install the kafka systemd service
+      become: true
+      ansible.builtin.template:
+        src: kafka.service
+        dest: /etc/systemd/system/kafka.service
+        mode: '0644'
+        owner: root
+        group: root
+      notify:
+        - Reload systemd daemon
+        - Restart kafka
+
+    - name: Mark kafka dependency done
+      ansible.builtin.set_fact:
+        _kafka_dependency_done: true

@@ -1,0 +1,14 @@
+---
+# handlers file for recceiver_svc
+
+- name: Reload systemd daemon
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart recsync
+  become: true
+  ansible.builtin.systemd:
+    name: recsync
+    state: restarted
+    enabled: true

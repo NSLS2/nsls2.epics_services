@@ -165,19 +165,19 @@ dependency, it runs once and skips on subsequent calls.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+    name: nsls2.epics_services.maven_dep
 
 - name: Install Elasticsearch dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
+    name: nsls2.epics_services.elasticsearch_dep
 
 - name: Install Kafka dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.kafka_dependency
+    name: nsls2.epics_services.kafka_dep
 
 - name: Build CS-Studio Phoebus products
   ansible.builtin.include_role:
@@ -185,7 +185,7 @@ dependency, it runs once and skips on subsequent calls.
 
 - name: Deploy Phoebus Alarm service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.phoebus_alarm_service
+    name: nsls2.epics_services.phoebus_alarm_svc
 ```
 
 ### tasks/phoebus_olog.yml
@@ -196,27 +196,27 @@ dependency, it runs once and skips on subsequent calls.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+    name: nsls2.epics_services.maven_dep
 
 - name: Install Elasticsearch dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
+    name: nsls2.epics_services.elasticsearch_dep
 
 - name: Install MongoDB dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.mongodb_dependency
+    name: nsls2.epics_services.mongodb_dep
 
 - name: Deploy Phoebus Olog service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.phoebus_olog_service
+    name: nsls2.epics_services.phoebus_olog_api
 
 - name: Deploy Phoebus Olog web client
   ansible.builtin.include_role:
-    name: nsls2.epics_services.phoebus_olog_webclient_service
+    name: nsls2.epics_services.phoebus_olog_ui
 ```
 
 ### tasks/channelfinder.yml
@@ -227,19 +227,19 @@ dependency, it runs once and skips on subsequent calls.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+    name: nsls2.epics_services.maven_dep
 
 - name: Install Elasticsearch dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
+    name: nsls2.epics_services.elasticsearch_dep
 
 - name: Deploy ChannelFinder service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.channelfinder_service
+    name: nsls2.epics_services.channelfinder_api
 ```
 
 ### tasks/recceiver.yml
@@ -253,23 +253,23 @@ the same host, include ChannelFinder's dependencies and service first.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+    name: nsls2.epics_services.maven_dep
 
 - name: Install Elasticsearch dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.elasticsearch_dependency
+    name: nsls2.epics_services.elasticsearch_dep
 
 - name: Deploy ChannelFinder service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.channelfinder_service
+    name: nsls2.epics_services.channelfinder_api
 
 - name: Deploy RecCeiver service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.recceiver_service
+    name: nsls2.epics_services.recceiver_svc
 ```
 
 ### tasks/aa.yml
@@ -280,19 +280,19 @@ the same host, include ChannelFinder's dependencies and service first.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Tomcat dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.tomcat_dependency
+    name: nsls2.epics_services.tomcat_dep
 
 - name: Install MariaDB JDBC dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.mariadb_dependency
+    name: nsls2.epics_services.mariadb_dep
 
 - name: Deploy Archiver Appliance service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.aa_service
+    name: nsls2.epics_services.aa_api
 ```
 
 ### tasks/phoebus_web_runtime.yml
@@ -303,24 +303,24 @@ the same host, include ChannelFinder's dependencies and service first.
 
 - name: Install JDK dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.jdk_dependency
+    name: nsls2.epics_services.jdk_dep
 
 - name: Install Maven dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.maven_dependency
+    name: nsls2.epics_services.maven_dep
 
 - name: Install Tomcat dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.tomcat_dependency
+    name: nsls2.epics_services.tomcat_dep
 
 - name: Deploy Phoebus Web Runtime service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.phoebus_web_runtime_service
+    name: nsls2.epics_services.phoebus_web_runtime_ui
 ```
 
 ### tasks/shift.yml
 
-Shift uses JDK 8 (not the shared `jdk_dependency`) because GlassFish 5
+Shift uses JDK 8 (not the shared `jdk_dep`) because GlassFish 5
 requires the `javax.*` API.
 
 ```yaml
@@ -335,11 +335,11 @@ requires the `javax.*` API.
 
 - name: Install MariaDB JDBC dependency
   ansible.builtin.include_role:
-    name: nsls2.epics_services.mariadb_dependency
+    name: nsls2.epics_services.mariadb_dep
 
 - name: Deploy Shift service
   ansible.builtin.include_role:
-    name: nsls2.epics_services.shift_service
+    name: nsls2.epics_services.shift_api
 ```
 
 ## host_vars example

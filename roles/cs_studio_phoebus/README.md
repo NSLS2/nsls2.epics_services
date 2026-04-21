@@ -19,11 +19,11 @@ What it does
 
 Dependencies
 ------------
-- `jdk_dependency` and `maven_dependency` (OpenJDK 21 and Maven)
+- `jdk_dep` and `maven_dep` (OpenJDK 21 and Maven)
 
 Depended on by
 --------------
-- `phoebus_alarm_service` (alarm server, logger, and config logger JARs
+- `phoebus_alarm_svc` (alarm server, logger, and config logger JARs
   are produced by the Phoebus build)
 
 Role Variables
@@ -57,7 +57,7 @@ Example Playbook
     cs_studio_phoebus_products_repo: "https://github.com/myorg/my-phoebus-products.git"
     cs_studio_phoebus_products_version: "main"
   roles:
-    - nsls2.epics_services.jdk_dependency
-    - nsls2.epics_services.maven_dependency
+    - nsls2.epics_services.jdk_dep
+    - nsls2.epics_services.maven_dep
     - nsls2.epics_services.cs_studio_phoebus
 ```

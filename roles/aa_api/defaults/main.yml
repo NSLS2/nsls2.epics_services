@@ -1,0 +1,96 @@
+---
+# epics_services_account in vars/shared.yml
+
+# Service prefix - used in systemd unit names and startup scripts
+aa_service_prefix: aa
+# Site name - displayed in the facility template header
+aa_site_name: "Archiver Appliance"
+
+# Tomcat home — auto-detected from tomcat_dep (RPM or tarball)
+aa_tomcat_home: "{{ tomcat_home | default('/usr/share/tomcat') }}"
+
+# Build location and version (aa_version in vars/shared.yml)
+aa_build_loc: /tmp/aa_build
+
+# MariaDB JDBC connector JAR — auto-detected from mariadb_dep
+aa_mysql_connector_jar: "{{ mariadb_connector_jar | default('/usr/lib/java/mariadb-java-client.jar') }}"
+
+# Installation and deployment locations
+aa_install_dir: /opt/epics-tools/services/archiver_appliance
+aa_install_location: "{{ aa_install_dir }}/install"
+aa_deploy_location: "{{ aa_install_dir }}/deploy"
+
+# Archiver Appliance MySQL info
+aa_mysql_server: "localhost"
+aa_mysql_database: archappl
+aa_mysql_user: archappl
+aa_mysql_password: archappl
+# Archiver Identity and Ports
+aa_identity: appliance0
+cluster_inetport: 16070
+mgmt_port: 16065
+engine_port: 16066
+etl_port: 16067
+data_retrieval_port: 16068
+
+# Archiver channel access options
+aa_epics_ca_addr_list: localhost
+
+# Archiver Java Options
+aa_java_home: "{{ java_home }}"
+aa_java_opts_engine: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_retrieval: "-XX:+UseG1GC -Xmx10G -Xms4G -ea"
+aa_java_opts_etl: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+aa_java_opts_mgmt: "-XX:+UseG1GC -Xmx5G -Xms1G -ea"
+
+# Archiver Data Locations
+aa_sts: "{{ aa_deploy_location }}/data/sts/ArchiverStore"
+aa_mts: "{{ aa_deploy_location }}/data/mts/ArchiverStore"
+aa_lts: "{{ aa_deploy_location }}/data/lts/ArchiverStore"
+
+# Storage partition granularity and retention
+aa_sts_partition_granularity: "PARTITION_HOUR"
+aa_sts_consolidate_on_shutdown: true
+aa_mts_partition_granularity: "PARTITION_DAY"
+aa_mts_hold: 2
+aa_mts_gather: 1
+aa_lts_partition_granularity: "PARTITION_YEAR"
+
+# Archiver Log Locations
+aa_logs_base_dir: "/var/log/archiver-appliance"
+aa_configure_custom_logs: false
+
+# Systemd mount dependency
+aa_data_mount_name: ""
+
+# SSL/TLS configuration
+aa_ssl_enabled: false
+aa_ssl_keystore_file: ""
+aa_ssl_keystore_password: "changeit"
+aa_ssl_port_mgmt: 16075
+aa_ssl_port_engine: 16076
+aa_ssl_port_etl: 16077
+aa_ssl_port_retrieval: 16078
+
+# Reverse proxy support
+aa_remote_ip_valve_enabled: false
+aa_remote_ip_internal_proxies: "127\\.0\\.0\\.1"
+
+# Health check valve
+aa_health_check_enabled: true
+
+# Pre-upgrade data consolidation (opt-in)
+aa_pre_upgrade_consolidate: false
+aa_consolidate_storage: "LTS"
+aa_consolidate_timeout: 300
+aa_post_upgrade_retries: 30
+aa_post_upgrade_delay: 10
+
+# Legacy cleanup (opt-in removal of old monolithic AA service)
+aa_cleanup_legacy_service: false
+
+# Cluster appliances configuration
+aa_cluster_appliances: []
+# Protocol for cluster inter-node URLs in appliances.xml
+# "http" for direct access (include ports), "https" for reverse proxy
+aa_cluster_protocol: "http"

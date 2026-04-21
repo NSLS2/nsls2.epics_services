@@ -1,0 +1,70 @@
+---
+# configure the systemd services for the Olog services
+
+- name: Install procServ
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.procserv_dep
+
+# Olog Server
+
+# setup run-phoebus-olog.sh
+- name: Create run-phoebus-olog service files
+  become: true
+  ansible.builtin.template:
+    src: run-phoebus-olog.sh.j2
+    dest: "{{ phoebus_olog_install_dir }}/run-phoebus-olog.sh"
+    mode: "0755"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog
+
+# setup olog properties
+- name: Create olog.properties
+  become: true
+  ansible.builtin.template:
+    src: olog.properties.j2
+    dest: "{{ phoebus_olog_install_dir }}/olog.properties"
+    mode: "0640"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Restart phoebus_olog
+
+# setup authentication provider property files (v6+)
+- name: Create active_directory.properties
+  become: true
+  ansible.builtin.template:
+    src: active_directory.properties.j2
+    dest: "{{ phoebus_olog_install_dir }}/active_directory.properties"
+    mode: "0640"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  when: ad_enabled | default(true) | bool
+  notify:
+    - Restart phoebus_olog
+
+- name: Create ldap.properties
+  become: true
+  ansible.builtin.template:
+    src: ldap.properties.j2
+    dest: "{{ phoebus_olog_install_dir }}/ldap.properties"
+    mode: "0640"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  when: ldap_enabled | default(false) | bool
+  notify:
+    - Restart phoebus_olog
+
+# setup systemd service file
+- name: Create systemd olog server service files
+  become: true
+  ansible.builtin.template:
+    src: phoebus_olog.service.j2
+    dest: "/etc/systemd/system/phoebus_olog.service"
+    mode: "0755"
+    owner: "{{ epics_services_account }}"
+    group: "{{ epics_services_account }}"
+  notify:
+    - Reload systemd daemon
+    - Restart phoebus_olog

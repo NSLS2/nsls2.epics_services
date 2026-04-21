@@ -1,0 +1,102 @@
+phoebus_alarm_svc
+=================
+
+The [Phoebus Alarm System](https://control-system-studio.readthedocs.io/en/latest/services/alarm-server/doc/index.html)
+monitors EPICS process variables and generates alarms when values go out of range or
+become disconnected. It consists of three services:
+
+- **Alarm Server** -- connects to EPICS PVs via Channel Access/PVAccess, evaluates
+  alarm conditions, and publishes state changes to Kafka topics.
+- **Alarm Logger** -- reads alarm state changes from Kafka and indexes them into
+  Elasticsearch for historical queries.
+- **Alarm Config Logger** -- monitors alarm configuration changes in Kafka and
+  records them (optionally to a Git repository) for auditing.
+
+Each service runs under [procServ](https://github.com/ralphlange/procServ) for
+console access and is managed via systemd.
+
+**Installation location:**
+`/opt/epics-tools/services/phoebus_alarm/`
+
+**Service names:**
+- `phoebus_alarm` (alarm server, procServ port 60046)
+- `phoebus_alarm_logger` (alarm logger, procServ port 60047)
+- `phoebus_alarm_config_logger` (alarm config logger, procServ port 60048)
+
+What it does
+------------
+- Copies alarm server, alarm logger, and alarm config logger JARs from the Phoebus build
+- Deploys a shared preferences file configuring Kafka, Elasticsearch, and alarm settings
+- Creates Kafka topics for the alarm system (config, command, talk)
+- Installs procServ and creates run scripts for each service
+- Installs systemd service units for each service
+
+Dependencies
+------------
+- `jdk_dep` (OpenJDK 21)
+- `elasticsearch_dep` (Elasticsearch -- stores alarm history)
+- `kafka_dep` (Kafka and Zookeeper -- alarm message bus)
+- `cs_studio_phoebus` (builds the alarm service JARs)
+
+Depended on by
+--------------
+None (this is the top-level alarm service role).
+
+Role Variables
+--------------
+
+**Required** (no sensible default -- must be set per deployment):
+
+| Variable | Type | Description |
+| --- | --- | --- |
+| `alarm_config` | string | Alarm configuration name (e.g. `Accelerator`). Must match the client preferences `config_name`. |
+
+**Optional** (have defaults that work for standard single-host deployments):
+
+| Variable | Type | Default | Description |
+| --- | --- | --- | --- |
+| `java_home` | string | `/usr/lib/jvm/java-21-openjdk` | JAVA_HOME for alarm services. |
+| `phoebus_logback` | string | `/opt/css/nsls2-phoebus/config/logback.xml` | Path to logback configuration file. |
+| `alarm_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
+| `epics_services_account` | string | `csstudio` | OS user that owns service files. |
+| `phoebus_alarm_install_dir` | string | `/opt/epics-tools/services/phoebus_alarm` | Installation directory for alarm services. |
+| `kafka_install_dir` | string | `/opt/epics-tools/services/kafka` | Path to the Kafka installation (for topic scripts). |
+| `kafka_server` | string | `localhost` | Kafka broker hostname. |
+| `kafka_port` | int | `9092` | Kafka broker port. |
+| `zookeeper_port` | int | `2181` | Zookeeper client port. |
+| `es_host` | string | `localhost` | Elasticsearch hostname. |
+| `es_port` | int | `9200` | Elasticsearch HTTP port. |
+| `alarm_mail_server` | string | `localhost` | SMTP server for alarm email notifications. |
+| `alarm_mail_server_port` | int | `25` | SMTP port. |
+| `alarm_mail_server_from` | string | `phoebus_alarm@localhost` | From address for alarm emails. |
+| `phoebus_alarm_server_version` | string | `5.0.0` | Alarm server JAR version. |
+| `phoebus_alarm_logger_version` | string | `5.0.0` | Alarm logger JAR version. |
+| `phoebus_alarm_config_logger_version` | string | `5.0.0` | Alarm config logger JAR version. |
+| `phoebus_alarm_server_procServ_port` | string | `60046` | procServ port for alarm server. |
+| `phoebus_alarm_logger_procServ_port` | string | `60047` | procServ port for alarm logger. |
+| `phoebus_alarm_config_logger_procServ_port` | string | `60048` | procServ port for alarm config logger. |
+
+Example Playbook
+----------------
+
+```yaml
+- hosts: all
+  vars:
+    alarm_config: TST_OPR
+    alarm_mail_server: smtpgw.example.com
+    alarm_mail_server_from: tst_phoebus@example.com
+  roles:
+    - nsls2.epics_services.jdk_dep
+    - nsls2.epics_services.maven_dep
+    - nsls2.epics_services.elasticsearch_dep
+    - nsls2.epics_services.kafka_dep
+    - nsls2.epics_services.cs_studio_phoebus
+    - nsls2.epics_services.phoebus_alarm_svc
+```
+
+Or via command line:
+
+```bash
+ansible-playbook deploy_alarm.yml -l myhost.example.com \
+  -e "alarm_config=TST_OPR"
+```

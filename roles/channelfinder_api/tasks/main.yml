@@ -1,0 +1,83 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+# === Runtime dependencies (shared by both install methods) ===
+- name: Install JDK dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk_dep
+  when: not (skip_dependencies | default(false))
+
+- name: Install Elasticsearch dependency
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.elasticsearch_dep
+  when: not (skip_dependencies | default(false))
+
+# === RPM install path ===
+- name: Install ChannelFinder from RPM
+  when: epics_services_use_rpms | bool
+  block:
+    - name: Install nsls2-channelfinder RPM
+      become: true
+      ansible.builtin.package:
+        name: "nsls2-channelfinder-{{ cf_version | regex_replace('^ChannelFinder-', '') }}"
+        state: present
+
+# === Source build path (existing behavior) ===
+- name: Build and deploy ChannelFinder from source
+  when: not (epics_services_use_rpms | bool)
+  block:
+    - name: Install Maven dependency
+      ansible.builtin.include_role:
+        name: nsls2.epics_services.maven_dep
+      when: not (skip_dependencies | default(false))
+
+    # Create the installation location for the cf server
+    - name: Ensure services folder exists
+      ansible.builtin.file:
+        path: "{{ channelfinder_install_dir }}"
+        state: directory
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        recurse: true
+
+    # ChannelFinder
+    - name: Clone and/or update the ChannelFinder service repo
+      become: true
+      become_user: "{{ epics_services_account }}"
+      ansible.builtin.git:
+        repo: 'https://github.com/ChannelFinder/ChannelFinderService.git'
+        dest: "{{ channelfinder_install_dir }}/ChannelFinderService"
+        force: true
+        version: "{{ cf_version }}"
+      register: _cf_repo
+
+    # Build the ChannelFinder library
+    - name: Build the ChannelFinder binaries  # noqa: no-changed-when no-handler
+      become: true
+      become_user: "{{ epics_services_account }}"
+      ansible.builtin.command: mvn clean install
+      args:
+        chdir: "{{ channelfinder_install_dir }}/ChannelFinderService"
+      environment:
+        JAVA_HOME: "{{ cf_java_home }}"
+        MVN_HOME: "{{ cf_mvn_home }}"
+        PATH: "{{ cf_java_home }}/bin:{{ cf_mvn_home }}/bin:{{ ansible_env.PATH }}"
+      when: _cf_repo.changed
+
+    - name: Copy ChannelFinder service jar  # noqa: no-handler
+      become: true
+      ansible.builtin.copy:
+        src: "{{ channelfinder_install_dir }}/ChannelFinderService/target/{{ cf_version }}.jar"
+        dest: "{{ channelfinder_install_dir }}/{{ cf_version }}.jar"
+        force: true
+        owner: "{{ epics_services_account }}"
+        group: "{{ epics_services_account }}"
+        remote_src: true
+        mode: "0755"
+      when: _cf_repo.changed
+
+# === Configuration (runs regardless of install method) ===
+- name: Include tasks to configure ChannelFinder services
+  ansible.builtin.include_tasks: configure_services.yml
