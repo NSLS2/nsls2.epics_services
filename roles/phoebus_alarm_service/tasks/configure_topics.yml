@@ -13,7 +13,7 @@
 
 - name: Create alarm topics  # noqa: no-handler
   become: true
-  ansible.builtin.shell: >
+  ansible.builtin.shell: >-
     {{ phoebus_alarm_install_dir }}/create_alarm_topics.sh
     {{ alarm_config }}
     > /tmp/phoebus-create-topics.log 2>&1
