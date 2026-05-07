@@ -13,7 +13,7 @@ save_restore_http_port: 8080
 save_restore_https_port: 8443
 
 ## procServ port
-save_restore_procServ_port: 60050
+save_restore_procServ_port: 60052
 
 # Active Directory configuration (organization-specific)
 ad_enabled: true

@@ -16,7 +16,7 @@
     state: present
     login_host: "{{ shift_jdbc_server }}"
     login_user: root
-    login_password: "{{ jdbc_root_user }}"
+    login_password: "{{ jdbc_root_password }}"
 
 # Create the shift user and grant privileges
 - name: Create shift MySQL user
@@ -28,7 +28,7 @@
     host: "%"
     login_host: "{{ shift_jdbc_server }}"
     login_user: root
-    login_password: "{{ jdbc_root_user }}"
+    login_password: "{{ jdbc_root_password }}"
 
 # Create the shift schema
 - name: Copy shift template to remote machine

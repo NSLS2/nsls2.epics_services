@@ -85,6 +85,7 @@ Role Variables
 | `aa_mysql_user` | string | `archappl` | Database user. |
 | `aa_mysql_password` | string | `archappl` | Database password. |
 | `aa_epics_ca_addr_list` | string | `localhost` | EPICS Channel Access address list. |
+| `aa_epics_ca_max_array_bytes` | integer | `1100000` | EPICS CA max array bytes for AA instances. |
 | `aa_java_opts_engine` | string | `-XX:+UseG1GC -Xmx10G -Xms4G -ea` | JVM options for engine. |
 | `aa_java_opts_retrieval` | string | `-XX:+UseG1GC -Xmx10G -Xms4G -ea` | JVM options for retrieval. |
 | `aa_java_opts_etl` | string | `-XX:+UseG1GC -Xmx5G -Xms1G -ea` | JVM options for ETL. |

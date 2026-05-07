@@ -35,6 +35,7 @@ data_retrieval_port: 16068
 
 # Archiver channel access options
 aa_epics_ca_addr_list: localhost
+aa_epics_ca_max_array_bytes: 1100000
 
 # Archiver Java Options
 aa_java_home: "{{ java_home }}"

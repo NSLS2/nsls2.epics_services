@@ -27,7 +27,7 @@ Role Variables
 | `save_restore_version` | string | Service JAR version (default: `4.7.4`). |
 | `save_restore_http_port` | int | HTTP port (default: `8080`). |
 | `save_restore_https_port` | int | HTTPS port (default: `8443`). |
-| `save_restore_procServ_port` | int | procServ port (default: `60050`). |
+| `save_restore_procServ_port` | int | procServ port (default: `60052`). |
 | `es_host` | string | Elasticsearch host (default: `localhost`). |
 | `es_port` | int | Elasticsearch port (default: `9200`). |
 | `ad_enabled` | bool | Enable Active Directory authentication (default: `true`). |

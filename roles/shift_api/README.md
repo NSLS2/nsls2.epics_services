@@ -41,5 +41,5 @@ source code from `javax.*` to `jakarta.*` (Jakarta EE namespace migration).
 | `shift_jdbc_dbname` | string | Database name for shift (default: `shift`). |
 | `shift_jdbc_user` | string | MySQL username for shift (default: `shift`). |
 | `shift_jdbc_password` | string | MySQL password for shift (default: `shift`). |
-| `jdbc_root_user` | string | MySQL root password (required when `configure_mysql` is true). |
+| `jdbc_root_password` | string | MySQL root password (required when `configure_mysql` is true). |
 | `configure_mysql` | bool | Whether to create the MySQL database and user (default: `true`). |
