@@ -6,23 +6,30 @@
 - name: Install procServ (run once per play)
   when: not (_procserv_dependency_done | default(false))
   block:
+    - name: Probe whether procServ RPM is available
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf -q list available procServ"
+      register: _procserv_probe
+      changed_when: false
+      failed_when: _procserv_probe.rc not in [0, 1]
+
     - name: Install procServ via RPM
       become: true
       ansible.builtin.package:
         name: procServ
         state: present
-      register: _procserv_rpm
-      ignore_errors: true
+      when: _procserv_probe.rc == 0
 
     - name: Set procserv_path for RPM install
       ansible.builtin.set_fact:
         procserv_path: "/usr/bin/procServ"
       when:
-        - _procserv_rpm is succeeded
+        - _procserv_probe.rc == 0
         - procserv_path is not defined
 
     - name: Build procServ from source (fallback when RPM unavailable)
-      when: _procserv_rpm is failed
+      when: _procserv_probe.rc == 1
       block:
         - name: Install build dependencies for procServ
           become: true

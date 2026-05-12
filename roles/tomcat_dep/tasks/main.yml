@@ -5,29 +5,37 @@
 
 # Tomcat 10.1+ is required for Jakarta EE (jakarta.servlet).
 # RHEL 9 ships Tomcat 9 (javax.servlet) which is incompatible.
-# Strategy: try RPM, check version >= 10, fall back to tarball.
+# Strategy: probe RPM availability, install + check version when present,
+# fall back to Apache tarball when missing or too old.
 
 - name: Install Tomcat (run once per play)
   when: not (_tomcat_dependency_done | default(false))
   block:
+    - name: Probe whether tomcat RPM is available
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf -q list available tomcat"
+      register: _tomcat_probe
+      changed_when: false
+      failed_when: _tomcat_probe.rc not in [0, 1]
+
     - name: Install Tomcat via RPM
       become: true
       ansible.builtin.package:
         name: tomcat
         state: present
-      register: _tomcat_rpm
-      ignore_errors: true
+      when: _tomcat_probe.rc == 0
 
     - name: Gather Tomcat package facts
       ansible.builtin.package_facts:
         manager: rpm
-      when: _tomcat_rpm is succeeded
+      when: _tomcat_probe.rc == 0
 
     - name: Parse Tomcat major version
       ansible.builtin.set_fact:
         _tomcat_major_version: "{{ ansible_facts.packages['tomcat'][0].version.split('.')[0] }}"
       when:
-        - _tomcat_rpm is succeeded
+        - _tomcat_probe.rc == 0
         - "'tomcat' in ansible_facts.packages"
 
     - name: Set tomcat_home for RPM install
@@ -35,7 +43,7 @@
         tomcat_home: "/usr/share/tomcat"
         _tomcat_use_tarball: false
       when:
-        - _tomcat_rpm is succeeded
+        - _tomcat_probe.rc == 0
         - _tomcat_major_version | int >= tomcat_min_major_version
         - tomcat_home is not defined
 
@@ -43,13 +51,13 @@
       ansible.builtin.set_fact:
         _tomcat_use_tarball: true
       when:
-        - _tomcat_rpm is succeeded
+        - _tomcat_probe.rc == 0
         - _tomcat_major_version | int < tomcat_min_major_version
 
     - name: Mark tarball needed when RPM unavailable
       ansible.builtin.set_fact:
         _tomcat_use_tarball: true
-      when: _tomcat_rpm is failed
+      when: _tomcat_probe.rc == 1
 
     - name: Fail when Tomcat tarball needed and rpm_only is set
       ansible.builtin.fail:

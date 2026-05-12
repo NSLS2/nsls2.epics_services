@@ -6,13 +6,20 @@
 - name: Install MariaDB JDBC (run once per play)
   when: not (_mariadb_dependency_done | default(false))
   block:
+    - name: Probe whether mariadb-java-client RPM is available
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf -q list available mariadb-java-client"
+      register: _mariadb_probe
+      changed_when: false
+      failed_when: _mariadb_probe.rc not in [0, 1]
+
     - name: Install MariaDB JDBC connector via RPM
       become: true
       ansible.builtin.package:
         name: mariadb-java-client
         state: present
-      register: _mariadb_rpm
-      ignore_errors: true
+      when: _mariadb_probe.rc == 0
 
     - name: Fail when MariaDB JDBC RPM unavailable and rpm_only is set
       ansible.builtin.fail:
@@ -20,12 +27,12 @@
           mariadb-java-client RPM is not available and
           epics_services_rpm_only is true — Maven Central fallback disabled.
       when:
-        - _mariadb_rpm is failed
+        - _mariadb_probe.rc == 1
         - epics_services_rpm_only | bool
 
     - name: Install MariaDB JDBC from Maven Central (fallback when RPM unavailable)
       when:
-        - _mariadb_rpm is failed
+        - _mariadb_probe.rc == 1
         - not (epics_services_rpm_only | bool)
       block:
         - name: Ensure JAR directory exists

@@ -3,12 +3,20 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
-# Install JDK — system OpenJDK when available, Adoptium Temurin as fallback
-# (RHEL 8/9 may not have java-21-openjdk in base repos)
+# Install JDK — system OpenJDK when available in repos, otherwise Adoptium Temurin.
+# Decision is made by an explicit availability probe; any install failure fails hard.
 
 - name: Install JDK (run once per play)
   when: not (_jdk_dependency_done | default(false))
   block:
+    - name: Probe whether OpenJDK {{ jdk_version }} RPM is available
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf -q list available java-{{ jdk_version }}-openjdk"
+      register: _openjdk_probe
+      changed_when: false
+      failed_when: _openjdk_probe.rc not in [0, 1]
+
     - name: Install OpenJDK {{ jdk_version }} via RPM
       become: true
       ansible.builtin.package:
@@ -16,26 +24,17 @@
           - "java-{{ jdk_version }}-openjdk"
           - "java-{{ jdk_version }}-openjdk-devel"
         state: present
-      register: _jdk_rpm
-      ignore_errors: true
+      when: _openjdk_probe.rc == 0
 
     - name: Set java_home for OpenJDK install
       ansible.builtin.set_fact:
         java_home: "/usr/lib/jvm/java-{{ jdk_version }}-openjdk"
-      when: _jdk_rpm is succeeded
+      when: _openjdk_probe.rc == 0
 
     - name: Install Adoptium Temurin JDK (fallback when OpenJDK RPM unavailable)
-      when: _jdk_rpm is failed
+      when: _openjdk_probe.rc == 1
       block:
-        - name: Import Adoptium GPG key
-          become: true
-          ansible.builtin.rpm_key:
-            key: https://packages.adoptium.net/artifactory/api/gpg/key/public
-            state: present
-          register: _adoptium_gpg_key
-          ignore_errors: true
-
-        - name: Check if Adoptium GPG key is already imported
+        - name: Check whether Adoptium GPG key is already imported
           ansible.builtin.shell:
             cmd: >-
               rpm -q gpg-pubkey --qf '%{SUMMARY}\n'
@@ -43,17 +42,14 @@
           register: _adoptium_gpg_check
           changed_when: false
           failed_when: false
-          when: _adoptium_gpg_key is failed
 
-        - name: Import Adoptium GPG key — fallback for OpenPGP v6
+        - name: Import Adoptium GPG key
           become: true
           ansible.builtin.command:
             cmd: >-
               rpm --import
               https://packages.adoptium.net/artifactory/api/gpg/key/public
-          when:
-            - _adoptium_gpg_key is failed
-            - _adoptium_gpg_check.rc != 0
+          when: _adoptium_gpg_check.rc != 0
           changed_when: true
 
         - name: Add Adoptium Temurin repository
