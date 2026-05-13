@@ -11,7 +11,7 @@ Installs Tomcat 10.1+ for services using Jakarta EE (`jakarta.servlet`).
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `tomcat_version` | `10.1.34` (shared.yml) | Tomcat version for tarball fallback |
+| `tomcat_version` | `10.1.55` (shared.yml) | Tomcat version for tarball fallback |
 | `tomcat_source_install_dir` | `/opt/tomcat` | Install path for tarball fallback |
 
 ## Exported fact

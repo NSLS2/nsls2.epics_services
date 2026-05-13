@@ -7,7 +7,7 @@ Installs Apache Maven from a tarball into
 
 | Variable | Default |
 | --- | --- |
-| `maven_version` | `3.9.9` |
+| `maven_version` | `3.9.15` |
 | `maven_url` | Apache archive URL for the configured version |
 | `maven_dependency_owner` | `csstudio` |
 

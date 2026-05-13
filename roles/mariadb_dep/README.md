@@ -12,7 +12,7 @@ Installs the MariaDB JDBC connector JAR.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `mariadb_connector_jar` | `/usr/lib/java/mariadb-java-client.jar` | Path to the installed JAR |
-| `mariadb_connector_version` | `3.3.3` | Version for Maven Central fallback |
+| `mariadb_connector_version` | `3.5.8` | Version for Maven Central fallback |
 
 ## JAR path
 

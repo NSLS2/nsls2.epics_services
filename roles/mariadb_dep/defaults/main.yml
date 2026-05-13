@@ -3,4 +3,4 @@
 mariadb_connector_jar: "/usr/lib/java/mariadb-java-client.jar"
 
 # Version to download from Maven Central (used only when RPM unavailable)
-mariadb_connector_version: "3.3.3"
+mariadb_connector_version: "3.5.8"

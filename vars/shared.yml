@@ -46,25 +46,25 @@ epics_services_account: csstudio
 #   Node.js:       pinned (NodeSource repo)
 #   MariaDB JDBC:  any    (2.x and 3.x both compatible)
 jdk_version: 25
-elastic_version: "9.0.0"
+elastic_version: "9.4.1"
 kafka_version: "3.9.2"
 kafka_scala_version: "2.13"
-maven_version: "3.9.9"
+maven_version: "3.9.15"
 mongodb_version: "8.0"
 nodejs_version: 21
-tomcat_version: "10.1.34"
+tomcat_version: "10.1.55"
 tomcat_min_major_version: 10
 
 # === Service versions ===
 # Pinned to release tags. Built from source on the target host.
-cs_studio_phoebus_version: "v5.0.2"
+cs_studio_phoebus_version: "v5.0.5"
 phoebus_olog_version: "v6.0.1"
 phoebus_olog_webclient_version: "v2.7.0"
 cf_version: "ChannelFinder-5.0.0"
-phoebus_alarm_server_version: "5.0.2"
-phoebus_alarm_logger_version: "5.0.2"
-phoebus_alarm_config_logger_version: "5.0.2"
-save_restore_version: "5.0.2"
+phoebus_alarm_server_version: "5.0.5"
+phoebus_alarm_logger_version: "5.0.5"
+phoebus_alarm_config_logger_version: "5.0.5"
+save_restore_version: "5.0.5"
 aa_version: "2.3.1"
 recsync_version: master
 pvws_version: master
