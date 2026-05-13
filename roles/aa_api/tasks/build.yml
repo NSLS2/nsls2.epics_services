@@ -17,11 +17,30 @@
     version: "{{ aa_version }}"
   register: _repo
 
+# Detect state so the role is a no-op when nothing has changed
+# (services_dad.yml runs this 4x/day across many hosts).
+- name: Check whether AA build artifacts exist
+  ansible.builtin.find:
+    paths: "{{ aa_build_loc }}"
+    patterns: "archappl*tar.gz"
+    recurse: true
+  register: _aa_build_artifacts
+
+- name: Check whether AA deployment is complete
+  ansible.builtin.stat:
+    path: "{{ aa_deploy_location }}/mgmt/webapps/mgmt/ui/index.html"
+  register: _aa_deployment_marker
+
+- name: Set AA build/install state facts
+  ansible.builtin.set_fact:
+    _aa_build_needed: "{{ _repo.changed | default(false) or (_aa_build_artifacts.files | length == 0) }}"
+    _aa_install_needed: "{{ _repo.changed | default(false) or not _aa_deployment_marker.stat.exists }}"
+
 - name: Cleanup build directory  # noqa: no-handler
   ansible.builtin.file:
     path: "{{ aa_build_loc }}/epicsarchiverap/build"
     state: absent
-  when: _repo.changed
+  when: _aa_build_needed
 
 - name: Build  # noqa: no-changed-when no-handler
   ansible.builtin.command:
@@ -30,4 +49,4 @@
   environment:
     JAVA_HOME: "{{ aa_java_home }}"
     TOMCAT_HOME: "{{ aa_tomcat_home }}"
-  when: _repo.changed
+  when: _aa_build_needed
