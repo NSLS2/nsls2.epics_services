@@ -1,0 +1,5 @@
+---
+# Path used when JDK 21 is installed via Adoptium Temurin (RHEL where
+# java-21-openjdk is unavailable). On hosts where the OpenJDK RPM is
+# available, the role uses /usr/lib/jvm/java-21-openjdk instead.
+jdk21_temurin_java_home: "/usr/lib/jvm/temurin-21-jdk"

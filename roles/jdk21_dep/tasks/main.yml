@@ -1,0 +1,82 @@
+---
+- name: Load shared collection defaults
+  ansible.builtin.include_vars:
+    file: "{{ role_path }}/../../vars/shared.yml"
+
+# Install JDK 21 in parallel with the main JDK (jdk_dep, version 25).
+# Required by services whose build toolchain pins to languageVersion=21
+# (e.g. Archiver Appliance 2.x Gradle build). The runtime JDK from jdk_dep
+# stays as the default; this role makes a Java 21 install available on disk
+# so Gradle's toolchain auto-detection can find it.
+
+- name: Install JDK 21 (run once per play)
+  when: not (_jdk21_dependency_done | default(false))
+  block:
+    - name: Probe whether OpenJDK 21 RPM is available
+      become: true
+      ansible.builtin.command:
+        cmd: "dnf -q list available java-21-openjdk"
+      register: _openjdk21_probe
+      changed_when: false
+      failed_when: _openjdk21_probe.rc not in [0, 1]
+
+    - name: Install OpenJDK 21 via RPM
+      become: true
+      ansible.builtin.package:
+        name:
+          - java-21-openjdk
+          - java-21-openjdk-devel
+        state: present
+      when: _openjdk21_probe.rc == 0
+
+    - name: Set java_home_21 for OpenJDK install
+      ansible.builtin.set_fact:
+        java_home_21: "/usr/lib/jvm/java-21-openjdk"
+      when: _openjdk21_probe.rc == 0
+
+    - name: Install Adoptium Temurin 21 (fallback when OpenJDK RPM unavailable)
+      when: _openjdk21_probe.rc == 1
+      block:
+        - name: Check whether Adoptium GPG key is already imported
+          ansible.builtin.shell:
+            cmd: >-
+              rpm -q gpg-pubkey --qf '%{SUMMARY}\n'
+              | grep -qi 'Adoptium'
+          register: _adoptium_gpg_check
+          changed_when: false
+          failed_when: false
+
+        - name: Import Adoptium GPG key
+          become: true
+          ansible.builtin.command:
+            cmd: >-
+              rpm --import
+              https://packages.adoptium.net/artifactory/api/gpg/key/public
+          when: _adoptium_gpg_check.rc != 0
+          changed_when: true
+
+        - name: Add Adoptium Temurin repository
+          become: true
+          ansible.builtin.yum_repository:
+            name: Adoptium
+            description: Adoptium Temurin
+            baseurl: >-
+              https://packages.adoptium.net/artifactory/rpm/rhel/$releasever/$basearch
+            gpgcheck: true
+            gpgkey: >-
+              https://packages.adoptium.net/artifactory/api/gpg/key/public
+            enabled: true
+
+        - name: Install Temurin JDK 21
+          become: true
+          ansible.builtin.package:
+            name: temurin-21-jdk
+            state: present
+
+        - name: Set java_home_21 for Temurin install
+          ansible.builtin.set_fact:
+            java_home_21: "{{ jdk21_temurin_java_home }}"
+
+    - name: Mark JDK 21 dependency done
+      ansible.builtin.set_fact:
+        _jdk21_dependency_done: true

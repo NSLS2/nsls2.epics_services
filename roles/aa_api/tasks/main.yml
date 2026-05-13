@@ -9,6 +9,13 @@
     name: nsls2.epics_services.jdk_dep
   when: not (skip_dependencies | default(false))
 
+# AA's Gradle build pins toolchain to languageVersion=21; install JDK 21
+# alongside the runtime JDK so Gradle auto-detection finds a match.
+- name: Install JDK 21 dependency (for Gradle toolchain)
+  ansible.builtin.include_role:
+    name: nsls2.epics_services.jdk21_dep
+  when: not (skip_dependencies | default(false))
+
 - name: Install Tomcat dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.tomcat_dep
