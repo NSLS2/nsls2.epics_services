@@ -13,3 +13,14 @@ cf_mvn_home: "{{ mvn_home }}"
 
 # procServ port
 cf_procServ_port: 60051
+
+# Authentication backend selection (set by the orchestration role's set_fact
+# block at precedence 19, which overrides these defaults). All false here so
+# the role still renders a working cf.properties when included standalone --
+# it falls back to upstream demo_auth defaults (admin/adminPass, user/userPass).
+ad_enabled: false
+ad_url: ""
+ad_domain: ""
+ldap_enabled: false
+ldap_urls: ""
+ldap_base_dn: ""

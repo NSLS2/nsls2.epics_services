@@ -24,10 +24,56 @@ server.http2.enabled=true
 
 logging.level.org.springframework.web=INFO
 
-############## Demo Auth ##############
+############## Authentication ##############
+# CF upstream exposes three providers (ldap, embedded_ldap, demo_auth). It does
+# NOT have a Spring ActiveDirectoryLdapAuthenticationProvider like Phoebus Olog
+# does, so AD support is implemented here by pointing the generic ldap provider
+# at AD with an AD-aware UPN bind pattern. ad_enabled wins when both ad_enabled
+# and ldap_enabled are true; demo_auth is the fallback for environments without
+# AD/LDAP reach (e.g. CI, isolated test rigs).
+{% if ad_enabled | default(false) | bool -%}
+# Active Directory (lab-wide AD, e.g. dc2.bnl.gov). Credentials are forwarded
+# from the HTTP Basic Auth header to AD via an LDAP bind. The service account's
+# password in the vault must be the AD password for that account.
+ldap.enabled = true
+ldap.urls = {{ ad_url }}
+ldap.user.dn.pattern = {0}@{{ ad_domain }}
+# Group lookup: AD uses (member={0}) where {0} is the bound user's DN. Search
+# base derived from ad_domain. Adjust ad_domain or override these keys if your
+# AD layout differs.
+ldap.groups.search.base = {% for _p in ad_domain.split('.') %}dc={{ _p }}{% if not loop.last %},{% endif %}{% endfor %}{{ '' }}
+ldap.groups.search.pattern = (member={0})
+embedded_ldap.enabled = false
+demo_auth.enabled = false
+{% elif ldap_enabled | default(false) | bool -%}
+# Generic LDAP (e.g. NSLS-II controlns02 with RFC 2307 schema).
+ldap.enabled = true
+ldap.urls = {{ ldap_urls }}
+ldap.user.dn.pattern = uid={0},ou=People,{{ ldap_base_dn }}
+ldap.groups.search.base = ou=Group,{{ ldap_base_dn }}
+ldap.groups.search.pattern = (memberUid= {1})
+embedded_ldap.enabled = false
+demo_auth.enabled = false
+{% else -%}
+# Fallback: in-memory demo auth. Service accounts (e.g. recsync's cf_user) must
+# be listed here or CF returns 401. Upstream defaults bundle admin/adminPass
+# and user/userPass; we restate them so the three lists stay the same length
+# when we append the per-host service account.
+{% set _cf_svc_acct = (cf_user is defined and cf_user | length > 0
+                       and cf_password is defined and cf_password | length > 0) -%}
+ldap.enabled = false
+embedded_ldap.enabled = false
 demo_auth.enabled = true
-
+demo_auth.delimiter.roles = :
+demo_auth.users = admin,user{% if _cf_svc_acct %},{{ cf_user }}{% endif %}
+demo_auth.pwds = adminPass,userPass{% if _cf_svc_acct %},{{ cf_password }}{% endif %}
+demo_auth.roles = ADMIN,USER{% if _cf_svc_acct %},ADMIN{% endif %}
+{% endif %}
 ############## Group-->Role Mapping ##############
+# CF maps LDAP/AD group membership (or demo_auth role names) to capability roles.
+# For AD auth to grant write access, the service account needs membership in an
+# AD group whose CN matches one of these (cf-admins, cf-channels, cf-properties,
+# cf-tags, sys-admins) -- or override these keys to match existing AD groups.
 admin-groups=cf-admins,sys-admins,ADMIN
 channel-groups=cf-channels,USER
 property-groups=cf-properties,USER
