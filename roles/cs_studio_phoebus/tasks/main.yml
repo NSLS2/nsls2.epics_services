@@ -77,8 +77,7 @@
         mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
       args:
         chdir: "{{ cs_studio_phoebus_src_dest }}/"
-      when: _phoebus_repo.changed
-
+      when: _phoebus_repo.changed and (cs_studio_phoebus_build_docs | bool)
     - name: Build the common phoebus binaries
       ansible.builtin.shell: >-
         JAVA_HOME="{{ cs_studio_phoebus_java_home }}"

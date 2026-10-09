@@ -48,6 +48,7 @@ Role Variables
 | `cs_studio_phoebus_src_dest` | string | `<base_dir>/lib/phoebus` | Where the upstream Phoebus repo is cloned and built. |
 | `cs_studio_phoebus_launcher` | string | `/usr/local/bin/run-phoebus` | Path of the launcher script. |
 | `cs_studio_phoebus_install_deps` | bool | `true` | Install `jdk_dep` and `maven_dep`. Set `false` to use a JDK and Maven already on the host. |
+| `cs_studio_phoebus_build_docs` | bool | `true` | Build the Sphinx documentation and help (needs Sphinx on the host). |
 | `cs_studio_phoebus_folder_name` | string | `""` | If set, the launcher uses `~/<folder_name>` for user settings instead of `~/.phoebus`. |
 | `cs_studio_phoebus_server_port_prefix` | string | `""` | If set, the launcher's single-instance port is `<prefix>` followed by the last four digits of the uid. |
 
