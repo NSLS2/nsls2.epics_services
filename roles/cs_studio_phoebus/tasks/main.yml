@@ -3,10 +3,18 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# The port is <prefix> followed by four digits, so only 1-5 keep it below 65536.
+- name: Check the launcher's single-instance port prefix
+  ansible.builtin.assert:
+    that: cs_studio_phoebus_server_port_prefix | string is match('^[1-5]?$')
+    fail_msg: "cs_studio_phoebus_server_port_prefix must be empty or one digit from 1 to 5."
+    quiet: true
+
 # === Runtime dependencies (shared by both install methods) ===
 - name: Install JDK dependency
   ansible.builtin.include_role:
     name: nsls2.epics_services.jdk_dep
+  when: cs_studio_phoebus_install_deps | bool
 
 # === RPM install path ===
 - name: Install Phoebus product from RPM
@@ -25,6 +33,7 @@
     - name: Install Maven dependency
       ansible.builtin.include_role:
         name: nsls2.epics_services.maven_dep
+      when: cs_studio_phoebus_install_deps | bool
 
     - name: Ensure correct ownership and permissions for directories
       ansible.builtin.file:
@@ -35,13 +44,13 @@
         state: directory
         recurse: "{{ item.recurse | default(false) }}"
       loop:
-        - { path: "/opt/css", recurse: false }
+        - { path: "{{ cs_studio_phoebus_base_dir }}", recurse: false }
         - { path: "{{ cs_studio_phoebus_products_dest }}", recurse: true }
 
     - name: Clone and/or update the phoebus repo
       ansible.builtin.git:
         repo: 'https://github.com/ControlSystemStudio/phoebus.git'
-        dest: /opt/css/lib/phoebus
+        dest: "{{ cs_studio_phoebus_src_dest }}"
         version: "{{ cs_studio_phoebus_version }}"
         update: true
       register: _phoebus_repo
@@ -67,6 +76,12 @@
         mode: "u=rw,g=r,o=r"
       when: cs_studio_phoebus_override_mvn_settings
 
+    - name: Check whether the documentation was built for this checkout
+      ansible.builtin.stat:
+        path: "{{ cs_studio_phoebus_base_dir }}/.phoebus-docs-built"
+      register: _phoebus_docs_marker
+      when: cs_studio_phoebus_build_docs | bool
+
     - name: Build the documentation and help  # noqa: no-changed-when no-handler
       ansible.builtin.shell: >-
         JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
@@ -74,8 +89,20 @@
         PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
         mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
       args:
-        chdir: /opt/css/lib/phoebus/
-      when: _phoebus_repo.changed
+        chdir: "{{ cs_studio_phoebus_src_dest }}/"
+      when: >-
+        (cs_studio_phoebus_build_docs | bool) and
+        (_phoebus_repo.changed or not _phoebus_docs_marker.stat.exists)
+
+    # Lets turning build_docs on later trigger a build without a new checkout.
+    - name: Record the checkout the documentation was built from
+      ansible.builtin.copy:
+        content: "{{ _phoebus_repo.after }}\n"
+        dest: "{{ cs_studio_phoebus_base_dir }}/.phoebus-docs-built"
+        owner: "{{ cs_studio_phoebus_owner }}"
+        group: "{{ cs_studio_phoebus_owner }}"
+        mode: "u=rw,g=r,o=r"
+      when: cs_studio_phoebus_build_docs | bool
 
     - name: Build the common phoebus binaries
       ansible.builtin.shell: >-
@@ -84,7 +111,7 @@
         PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
         mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Dmaven.javadoc.skip=true
       args:
-        chdir: /opt/css/lib/phoebus/
+        chdir: "{{ cs_studio_phoebus_src_dest }}/"
       when: _phoebus_repo.changed or (_products_repo.changed | default(false))
       changed_when: true
 
@@ -93,7 +120,7 @@
         JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
         MVN_HOME="{{ cs_studio_phoebus_mvn_home }}"
         PATH="{{ cs_studio_phoebus_java_home }}/bin:{{ cs_studio_phoebus_mvn_home }}/bin:$PATH"
-        mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Ddocs=/opt/css/lib/phoebus/docs
+        mvn clean install --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -DskipTests=true -Ddocs={{ cs_studio_phoebus_src_dest }}/docs
       args:
         chdir: "{{ cs_studio_phoebus_products_dest }}/products"
       when: >-
@@ -106,7 +133,7 @@
 - name: Create run-phoebus
   ansible.builtin.template:
     src: run-phoebus.sh.j2
-    dest: /usr/local/bin/run-phoebus
+    dest: "{{ cs_studio_phoebus_launcher }}"
     owner: "{{ cs_studio_phoebus_owner }}"
     group: "{{ cs_studio_phoebus_owner }}"
     mode: "u=rwx,g=rx,o=rx"

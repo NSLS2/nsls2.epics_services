@@ -7,6 +7,9 @@ alarm_epics_ca_addr_list: localhost
 
 phoebus_alarm_install_dir: /opt/epics-tools/services/phoebus_alarm
 
+# Where cs_studio_phoebus builds the service JARs; follows its src_dest/base_dir.
+phoebus_alarm_src_dest: "{{ cs_studio_phoebus_src_dest | default((cs_studio_phoebus_base_dir | default('/opt/css')) ~ '/lib/phoebus') }}"
+
 alarm_config: "Alarms"
 
 alarm_mail_server: "localhost"

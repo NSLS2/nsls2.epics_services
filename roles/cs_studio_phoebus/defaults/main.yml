@@ -20,3 +20,23 @@ cs_studio_phoebus_force_gpu: false
 # When true, build products from pre-deployed files (no git clone needed).
 # Sites that set cs_studio_phoebus_products_repo get clone+build automatically.
 cs_studio_phoebus_build_products: false
+
+# Install locations. Change these (and cs_studio_phoebus_products_dest) to
+# install a second Phoebus beside an existing one without touching it.
+cs_studio_phoebus_base_dir: "/opt/css"
+cs_studio_phoebus_src_dest: "{{ cs_studio_phoebus_base_dir }}/lib/phoebus"
+cs_studio_phoebus_launcher: "/usr/local/bin/run-phoebus"
+
+# Set false to use a JDK and Maven already on the host
+# (point cs_studio_phoebus_java_home and cs_studio_phoebus_mvn_home at them).
+cs_studio_phoebus_install_deps: true
+
+# Build the Sphinx documentation and help (needs Sphinx on the host).
+cs_studio_phoebus_build_docs: true
+
+# Launcher isolation for a second Phoebus on the same host:
+# folder_name gives it its own ~/<folder> user settings (default ~/.phoebus);
+# server_port_prefix gives it its own single-instance port,
+# "<prefix><last four digits of the uid>" (e.g. "5" -> 5xxxx).
+cs_studio_phoebus_folder_name: ""
+cs_studio_phoebus_server_port_prefix: ""

@@ -26,10 +26,9 @@
         owner: "{{ epics_services_account }}"
         group: "{{ epics_services_account }}"
 
-    # copy binaries from /opt/css/lib/phoebus/services/save-and-restore/target/service-save-and-restore-*.jar
     - name: Find the save/restore JAR file
       ansible.builtin.find:
-        paths: /opt/css/lib/phoebus/services/save-and-restore/target
+        paths: "{{ save_restore_phoebus_src_dest }}/services/save-and-restore/target"
         patterns: "service-save-and-restore-{{ save_restore_version }}*.jar"
         recurse: false
       register: save_restore_jars

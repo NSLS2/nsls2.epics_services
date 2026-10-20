@@ -44,6 +44,17 @@ Role Variables
 | `cs_studio_phoebus_owner` | string | `csstudio` | OS user that owns the Phoebus installation. |
 | `cs_studio_phoebus_override_mvn_settings` | bool | `false` | Whether to deploy a custom Maven `settings.xml`. |
 | `cs_studio_phoebus_force_gpu` | bool | `false` | Force GPU rendering in the `run-phoebus` script. |
+| `cs_studio_phoebus_base_dir` | string | `/opt/css` | Top directory whose ownership the role sets. |
+| `cs_studio_phoebus_src_dest` | string | `<base_dir>/lib/phoebus` | Where the upstream Phoebus repo is cloned and built. |
+| `cs_studio_phoebus_launcher` | string | `/usr/local/bin/run-phoebus` | Path of the launcher script. |
+| `cs_studio_phoebus_install_deps` | bool | `true` | Install `jdk_dep` and `maven_dep`. Set `false` to use a JDK and Maven already on the host. |
+| `cs_studio_phoebus_build_docs` | bool | `true` | Build the Sphinx documentation and help (needs Sphinx on the host). |
+| `cs_studio_phoebus_folder_name` | string | `""` | If set, the launcher uses `~/<folder_name>` for user settings instead of `~/.phoebus`. |
+| `cs_studio_phoebus_server_port_prefix` | string | `""` | If set (a single digit, `1`–`5`), the launcher's single-instance port is `<prefix>` followed by the last four digits of the uid, moved by one when that would equal the default launcher's port. |
+
+To install a second Phoebus beside an existing one, give it its own `cs_studio_phoebus_base_dir`,
+`cs_studio_phoebus_products_dest`, `cs_studio_phoebus_launcher`, `cs_studio_phoebus_folder_name` and
+`cs_studio_phoebus_server_port_prefix`. The defaults are unchanged, so existing deployments are unaffected.
 
 The `run-phoebus` script is only created when `cs_studio_phoebus_jar` is set to a
 non-empty value.

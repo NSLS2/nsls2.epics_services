@@ -39,12 +39,22 @@ fi
 
 if [ "$STANDALONE" = "no" ]; then
   ID=$(id -u)
+{% if cs_studio_phoebus_server_port_prefix %}
+  if [[ $ID -ge 10000 ]]; then DEFAULT_PORT=${ID:0:5}; else DEFAULT_PORT=4$ID; fi
+  PORT=$(( {{ cs_studio_phoebus_server_port_prefix }}0000 + ID % 10000 ))
+  # Never share the default launcher's single-instance port
+  if [[ $PORT -eq $DEFAULT_PORT ]]; then
+    PORT=$(( {{ cs_studio_phoebus_server_port_prefix }}0000 + (ID + 1) % 10000 ))
+  fi
+  OPT="-server $PORT"
+{% else %}
   if [[ $ID -ge 10000 ]]
   then
     OPT="-server ${ID:0:5}"
   else
     OPT="-server 4$ID"
   fi
+{% endif %}
 fi
 
 JDK_JAVA_OPTIONS=" -DCA_DISABLE_REPEATER=true"
@@ -52,6 +62,9 @@ JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dnashorn.args=--no-deprecation-warning"
 JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Djdk.gtk.verbose=false -Djdk.gtk.version=2 -Dprism.forceGPU={{ cs_studio_phoebus_force_gpu }}"
 JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dlogback.configurationFile={{ cs_studio_phoebus_logback }}"
 JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dorg.csstudio.javafx.rtplot.update_counter=false"
+{% if cs_studio_phoebus_folder_name %}
+JDK_JAVA_OPTIONS="$JDK_JAVA_OPTIONS -Dphoebus.folder.name.preference={{ cs_studio_phoebus_folder_name }}"
+{% endif %}
 export JDK_JAVA_OPTIONS
 
 echo $JDK_JAVA_OPTIONS
