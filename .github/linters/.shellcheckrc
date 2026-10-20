@@ -1,3 +1,8 @@
+# Read by super-linter (shellcheck --rcfile), replacing its default rules file.
+# Super-linter's defaults:
+source-path=SCRIPTDIR
+external-sources=true
+
 # Ignore jinja-related "errors" in Jinja2 templated shell scripts
 # (same as NSLS2/ansible's .shellcheckrc)
 disable=SC1009:*.sh.j2
