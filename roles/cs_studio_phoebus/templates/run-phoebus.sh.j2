@@ -40,7 +40,13 @@ fi
 if [ "$STANDALONE" = "no" ]; then
   ID=$(id -u)
 {% if cs_studio_phoebus_server_port_prefix %}
-  OPT="-server {{ cs_studio_phoebus_server_port_prefix }}$(printf '%04d' $((ID % 10000)))"
+  if [[ $ID -ge 10000 ]]; then DEFAULT_PORT=${ID:0:5}; else DEFAULT_PORT=4$ID; fi
+  PORT=$(( {{ cs_studio_phoebus_server_port_prefix }}0000 + ID % 10000 ))
+  # Never share the default launcher's single-instance port
+  if [[ $PORT -eq $DEFAULT_PORT ]]; then
+    PORT=$(( {{ cs_studio_phoebus_server_port_prefix }}0000 + (ID + 1) % 10000 ))
+  fi
+  OPT="-server $PORT"
 {% else %}
   if [[ $ID -ge 10000 ]]
   then

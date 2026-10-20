@@ -50,7 +50,7 @@ Role Variables
 | `cs_studio_phoebus_install_deps` | bool | `true` | Install `jdk_dep` and `maven_dep`. Set `false` to use a JDK and Maven already on the host. |
 | `cs_studio_phoebus_build_docs` | bool | `true` | Build the Sphinx documentation and help (needs Sphinx on the host). |
 | `cs_studio_phoebus_folder_name` | string | `""` | If set, the launcher uses `~/<folder_name>` for user settings instead of `~/.phoebus`. |
-| `cs_studio_phoebus_server_port_prefix` | string | `""` | If set, the launcher's single-instance port is `<prefix>` followed by the last four digits of the uid. |
+| `cs_studio_phoebus_server_port_prefix` | string | `""` | If set (a single digit, `1`–`5`), the launcher's single-instance port is `<prefix>` followed by the last four digits of the uid, moved by one when that would equal the default launcher's port. |
 
 To install a second Phoebus beside an existing one, give it its own `cs_studio_phoebus_base_dir`,
 `cs_studio_phoebus_products_dest`, `cs_studio_phoebus_launcher`, `cs_studio_phoebus_folder_name` and

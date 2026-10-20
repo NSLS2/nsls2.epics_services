@@ -3,6 +3,13 @@
   ansible.builtin.include_vars:
     file: "{{ role_path }}/../../vars/shared.yml"
 
+# The port is <prefix> followed by four digits, so only 1-5 keep it below 65536.
+- name: Check the launcher's single-instance port prefix
+  ansible.builtin.assert:
+    that: cs_studio_phoebus_server_port_prefix | string is match('^[1-5]?$')
+    fail_msg: "cs_studio_phoebus_server_port_prefix must be empty or one digit from 1 to 5."
+    quiet: true
+
 # === Runtime dependencies (shared by both install methods) ===
 - name: Install JDK dependency
   ansible.builtin.include_role:
@@ -69,6 +76,12 @@
         mode: "u=rw,g=r,o=r"
       when: cs_studio_phoebus_override_mvn_settings
 
+    - name: Check whether the documentation was built for this checkout
+      ansible.builtin.stat:
+        path: "{{ cs_studio_phoebus_base_dir }}/.phoebus-docs-built"
+      register: _phoebus_docs_marker
+      when: cs_studio_phoebus_build_docs | bool
+
     - name: Build the documentation and help  # noqa: no-changed-when no-handler
       ansible.builtin.shell: >-
         JAVA_HOME="{{ cs_studio_phoebus_java_home }}"
@@ -77,7 +90,20 @@
         mvn clean verify --settings={{ cs_studio_phoebus_products_dest }}/settings.xml -P sphinx -N
       args:
         chdir: "{{ cs_studio_phoebus_src_dest }}/"
-      when: _phoebus_repo.changed and (cs_studio_phoebus_build_docs | bool)
+      when: >-
+        (cs_studio_phoebus_build_docs | bool) and
+        (_phoebus_repo.changed or not _phoebus_docs_marker.stat.exists)
+
+    # Lets turning build_docs on later trigger a build without a new checkout.
+    - name: Record the checkout the documentation was built from
+      ansible.builtin.copy:
+        content: "{{ _phoebus_repo.after }}\n"
+        dest: "{{ cs_studio_phoebus_base_dir }}/.phoebus-docs-built"
+        owner: "{{ cs_studio_phoebus_owner }}"
+        group: "{{ cs_studio_phoebus_owner }}"
+        mode: "u=rw,g=r,o=r"
+      when: cs_studio_phoebus_build_docs | bool
+
     - name: Build the common phoebus binaries
       ansible.builtin.shell: >-
         JAVA_HOME="{{ cs_studio_phoebus_java_home }}"

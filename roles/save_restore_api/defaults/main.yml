@@ -6,6 +6,9 @@ save_restore_java_home: "{{ java_home }}"
 
 save_restore_install_dir: /opt/epics-tools/services/save_restore
 
+# Where cs_studio_phoebus builds the service JARs; follows its src_dest/base_dir.
+save_restore_phoebus_src_dest: "{{ cs_studio_phoebus_src_dest | default((cs_studio_phoebus_base_dir | default('/opt/css')) ~ '/lib/phoebus') }}"
+
 # save_restore_version in vars/shared.yml
 save_restore_jar: "{{ save_restore_install_dir }}/service-save-and-restore-{{ save_restore_version }}.jar"
 
