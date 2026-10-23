@@ -51,7 +51,7 @@ kafka_version: "3.9.2"
 kafka_scala_version: "2.13"
 maven_version: "3.9.15"
 mongodb_version: "8.0"
-nodejs_version: 21
+nodejs_version: 22
 tomcat_version: "10.1.55"
 tomcat_min_major_version: 10
 
